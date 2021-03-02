@@ -10,8 +10,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-	<module>request-pseudonym</module>
-	<module>transfer-data</module>
+		<module>transfer-data</module>
 	</modules>
 	
 	<properties>
