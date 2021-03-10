@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <code value="REMOTE" />
+    </tag>
+  </meta>
+  <url value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger" />
+  <version value="${version}" />
+  <name value="TaskStartDataTrigger" />
+  <status value="unknown" />
+  <experimental value="false" />
+  <date value="2021-03-10" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/${version}" />
+    </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <max value="2" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="startDataTrigger" />
+    </element>
+    <element id="Task.input:business-key">
+      <path value="Task.input" />
+      <sliceName value="business-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:export-from">
+      <path value="Task.input" />
+      <sliceName value="export-from" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:export-from.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
+    </element>
+    <element id="Task.input:export-from.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:export-from.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.input:export-from.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="export-from" />
+    </element>
+    <element id="Task.input:export-from.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="dateTime" />
+      </type>
+    </element>
+    <element id="Task.output:business-key">
+      <path value="Task.output" />
+      <sliceName value="business-key" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:business-key.type">
+      <path value="Task.output.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+      </binding>
+    </element>
+    <element id="Task.output:business-key.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:business-key.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+    </element>
+    <element id="Task.output:business-key.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="business-key" />
+    </element>
+    <element id="Task.output:business-key.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+    <element id="Task.output:export-to">
+      <path value="Task.output" />
+      <sliceName value="export-to" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:export-to.type">
+      <path value="Task.output.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
+    </element>
+    <element id="Task.output:export-to.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:export-to.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.output:export-to.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="export-to" />
+    </element>
+    <element id="Task.output:export-to.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="instant" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

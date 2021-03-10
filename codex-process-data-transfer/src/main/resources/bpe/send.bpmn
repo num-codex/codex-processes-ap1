@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_008keuw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="dataSend" isExecutable="true" camunda:versionTag="0.1.0">
+    <bpmn:startEvent id="DataSendMessageStartEvent" name="start data send process">
+      <bpmn:outgoing>Flow_1km61ly</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_07sumgd" messageRef="Message_0mcjkpi" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1km61ly" sourceRef="DataSendMessageStartEvent" targetRef="CheckConsent" />
+    <bpmn:sequenceFlow id="Flow_01j9mgm" sourceRef="CheckConsent" targetRef="Gateway_0h3dkik" />
+    <bpmn:serviceTask id="CheckConsent" name="check consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.CheckConsent">
+      <bpmn:incoming>Flow_1km61ly</bpmn:incoming>
+      <bpmn:outgoing>Flow_01j9mgm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ReadData" name="read data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ReadData">
+      <bpmn:incoming>Flow_0wpfzi1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yamo5r</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0yamo5r" sourceRef="ReadData" targetRef="ValidateData" />
+    <bpmn:sequenceFlow id="Flow_0zrvqk8" sourceRef="ValidateData" targetRef="EncryptData" />
+    <bpmn:sequenceFlow id="Flow_109e2pt" sourceRef="StoreDataForTransferHub" targetRef="StartDataTranslateProcess" />
+    <bpmn:endEvent id="StartDataTranslateProcess" name="start data translate process">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="processDefinitionKey">numCodexDataTranslate</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">startDataTranslate</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_109e2pt</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_06ro4fv" messageRef="Message_1jn7i5w" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.message.StartTranslateProcess" />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ValidateData" name="validate data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ValidateData">
+      <bpmn:incoming>Flow_0yamo5r</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zrvqk8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="EncryptData" name="encrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.EncryptData">
+      <bpmn:incoming>Flow_0zrvqk8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0smf5sr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0smf5sr" sourceRef="EncryptData" targetRef="StoreDataForTransferHub" />
+    <bpmn:serviceTask id="StoreDataForTransferHub" name="store data for transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.StoreDataForTransferHub">
+      <bpmn:incoming>Flow_0smf5sr</bpmn:incoming>
+      <bpmn:outgoing>Flow_109e2pt</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_0h3dkik">
+      <bpmn:incoming>Flow_01j9mgm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wpfzi1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0tsm3rc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0wpfzi1" sourceRef="Gateway_0h3dkik" targetRef="ReadData">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${usageAndTransferGranted}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0ntc53r">
+      <bpmn:incoming>Flow_00kpx7f</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0tsm3rc" sourceRef="Gateway_0h3dkik" targetRef="HandleNoConsent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!usageAndTransferGranted}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_00kpx7f" sourceRef="HandleNoConsent" targetRef="Event_0ntc53r" />
+    <bpmn:serviceTask id="HandleNoConsent" name="handle no consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.HandleNoConsent">
+      <bpmn:incoming>Flow_0tsm3rc</bpmn:incoming>
+      <bpmn:outgoing>Flow_00kpx7f</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_1c7e014" name="stopTimer" />
+  <bpmn:message id="Message_1u007k0" name="startTimer" />
+  <bpmn:message id="Message_0mcjkpi" name="startDataSend" />
+  <bpmn:message id="Message_1jn7i5w" name="startDataTranslate" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataSend">
+      <bpmndi:BPMNEdge id="Flow_0smf5sr_di" bpmnElement="Flow_0smf5sr">
+        <di:waypoint x="980" y="100" />
+        <di:waypoint x="1040" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_109e2pt_di" bpmnElement="Flow_109e2pt">
+        <di:waypoint x="1140" y="100" />
+        <di:waypoint x="1192" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zrvqk8_di" bpmnElement="Flow_0zrvqk8">
+        <di:waypoint x="820" y="100" />
+        <di:waypoint x="880" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yamo5r_di" bpmnElement="Flow_0yamo5r">
+        <di:waypoint x="660" y="100" />
+        <di:waypoint x="720" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01j9mgm_di" bpmnElement="Flow_01j9mgm">
+        <di:waypoint x="340" y="100" />
+        <di:waypoint x="425" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1km61ly_di" bpmnElement="Flow_1km61ly">
+        <di:waypoint x="188" y="100" />
+        <di:waypoint x="240" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wpfzi1_di" bpmnElement="Flow_0wpfzi1">
+        <di:waypoint x="475" y="100" />
+        <di:waypoint x="560" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tsm3rc_di" bpmnElement="Flow_0tsm3rc">
+        <di:waypoint x="450" y="125" />
+        <di:waypoint x="450" y="210" />
+        <di:waypoint x="560" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00kpx7f_di" bpmnElement="Flow_00kpx7f">
+        <di:waypoint x="660" y="210" />
+        <di:waypoint x="752" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0kggab9_di" bpmnElement="DataSendMessageStartEvent">
+        <dc:Bounds x="152" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="133" y="125" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1e4ychv_di" bpmnElement="CheckConsent">
+        <dc:Bounds x="240" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0p0ebgq_di" bpmnElement="ReadData">
+        <dc:Bounds x="560" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xc17m0_di" bpmnElement="StartDataTranslateProcess">
+        <dc:Bounds x="1192" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1169" y="125" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0d1am14_di" bpmnElement="ValidateData">
+        <dc:Bounds x="720" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mi94m2_di" bpmnElement="EncryptData">
+        <dc:Bounds x="880" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0d04yf5_di" bpmnElement="StoreDataForTransferHub">
+        <dc:Bounds x="1040" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0h3dkik_di" bpmnElement="Gateway_0h3dkik" isMarkerVisible="true">
+        <dc:Bounds x="425" y="75" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ntc53r_di" bpmnElement="Event_0ntc53r">
+        <dc:Bounds x="752" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1uvryxy_di" bpmnElement="HandleNoConsent">
+        <dc:Bounds x="560" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

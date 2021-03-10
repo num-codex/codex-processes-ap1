@@ -1,0 +1,20 @@
+<NamingSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<name value="NUM-CODEX_DIC_Pseudonym_Identifier"/>
+	<status value="active" />
+	<kind value="identifier"/>
+	<date value="2021-03-10"/>
+	<publisher value="NUM-Codex"/>
+	<responsible value="THS Greifswald"/>
+	<description value="DIZ specific pseudonym"/>
+	<usage value="Used withing the NUM-CODEX project for data integration center pseudonyms"/>
+	<uniqueId>
+		<type value="other"/>
+		<value value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"/>
+	</uniqueId>
+</NamingSystem>

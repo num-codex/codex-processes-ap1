@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1bd6yss" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="dataTrigger" isExecutable="true" camunda:versionTag="0.1.0">
+    <bpmn:serviceTask id="FindNewData" name="find new data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.FindNewData">
+      <bpmn:incoming>Flow_1it56bn</bpmn:incoming>
+      <bpmn:outgoing>Flow_015mo33</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="StartSendProcess" name="start send process" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.message.StartSendProcess">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="processDefinitionKey">dataSend</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">startDataSend</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send</camunda:inputParameter>
+        </camunda:inputOutput>
+        <camunda:properties>
+          <camunda:property name="dsf.end.listener" value="false" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_015mo33</bpmn:incoming>
+      <bpmn:outgoing>Flow_06ocpyh</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${pseudonyms}" camunda:elementVariable="pseudonym" />
+    </bpmn:sendTask>
+    <bpmn:endEvent id="Event_1ukqals">
+      <bpmn:incoming>Flow_0stek1z</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_1xqxerc">
+      <bpmn:incoming>Flow_1ltiore</bpmn:incoming>
+      <bpmn:incoming>Flow_05mfu8d</bpmn:incoming>
+      <bpmn:outgoing>Flow_0g1txh0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0jy9ipp</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:startEvent id="DataTriggerStartMessageStartEvent" name="start data trigger process">
+      <bpmn:outgoing>Flow_09o8bb5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1ot9xdv" messageRef="Message_13deqwn" />
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="Gateway_00tj0cp">
+      <bpmn:incoming>Flow_183st6n</bpmn:incoming>
+      <bpmn:outgoing>Flow_05mfu8d</bpmn:outgoing>
+      <bpmn:outgoing>Flow_06toths</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:intermediateCatchEvent id="Event_0eqigaq" name="wait 24h">
+      <bpmn:incoming>Flow_1asxc2j</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ltiore</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0f3gxu4">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="Gateway_0oa1bkj">
+      <bpmn:incoming>Flow_0g1txh0</bpmn:incoming>
+      <bpmn:incoming>Flow_1h835ja</bpmn:incoming>
+      <bpmn:incoming>Flow_0y9pdwn</bpmn:incoming>
+      <bpmn:outgoing>Flow_0stek1z</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0stek1z" sourceRef="Gateway_0oa1bkj" targetRef="Event_1ukqals" />
+    <bpmn:sequenceFlow id="Flow_09o8bb5" sourceRef="DataTriggerStartMessageStartEvent" targetRef="StartTimer" />
+    <bpmn:sequenceFlow id="Flow_1ltiore" sourceRef="Event_0eqigaq" targetRef="Gateway_1xqxerc" />
+    <bpmn:sequenceFlow id="Flow_05mfu8d" sourceRef="Gateway_00tj0cp" targetRef="Gateway_1xqxerc" />
+    <bpmn:sequenceFlow id="Flow_0g1txh0" name="stop timer set" sourceRef="Gateway_1xqxerc" targetRef="Gateway_0oa1bkj">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${stopTimer}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_015mo33" sourceRef="FindNewData" targetRef="StartSendProcess" />
+    <bpmn:sequenceFlow id="Flow_06ocpyh" sourceRef="StartSendProcess" targetRef="SaveLastExecutionTime" />
+    <bpmn:exclusiveGateway id="Gateway_0sx5e0s">
+      <bpmn:incoming>Flow_0y5mk5b</bpmn:incoming>
+      <bpmn:outgoing>Flow_1asxc2j</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1h835ja</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1asxc2j" sourceRef="Gateway_0sx5e0s" targetRef="Event_0eqigaq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!stopTimer}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1h835ja" name="stop timer set" sourceRef="Gateway_0sx5e0s" targetRef="Gateway_0oa1bkj">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${stopTimer}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:subProcess id="StopSubProcess">
+      <bpmn:incoming>Flow_06toths</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y9pdwn</bpmn:outgoing>
+      <bpmn:startEvent id="Event_02xmnq6">
+        <bpmn:outgoing>Flow_1x5v76c</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="StopTimer" name="stop timer" camunda:expression="true" camunda:resultVariable="stopTimer">
+        <bpmn:incoming>Flow_0m0cias</bpmn:incoming>
+        <bpmn:outgoing>Flow_1vxlaau</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:intermediateCatchEvent id="DataTriggerStopMessageStartEvent" name="stop data trigger process">
+        <bpmn:incoming>Flow_1x5v76c</bpmn:incoming>
+        <bpmn:outgoing>Flow_0m0cias</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_1d7e8jd" messageRef="Message_1ws42uv" />
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="Flow_0m0cias" sourceRef="DataTriggerStopMessageStartEvent" targetRef="StopTimer" />
+      <bpmn:sequenceFlow id="Flow_1x5v76c" sourceRef="Event_02xmnq6" targetRef="DataTriggerStopMessageStartEvent" />
+      <bpmn:endEvent id="Event_1ckek3z">
+        <bpmn:incoming>Flow_1vxlaau</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_1vxlaau" sourceRef="StopTimer" targetRef="Event_1ckek3z" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_06toths" sourceRef="Gateway_00tj0cp" targetRef="StopSubProcess" />
+    <bpmn:sequenceFlow id="Flow_0y9pdwn" sourceRef="StopSubProcess" targetRef="Gateway_0oa1bkj" />
+    <bpmn:sequenceFlow id="Flow_0y5mk5b" sourceRef="SaveLastExecutionTime" targetRef="Gateway_0sx5e0s" />
+    <bpmn:serviceTask id="SaveLastExecutionTime" name="save last execution time" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.SaveLastExecutionTime">
+      <bpmn:incoming>Flow_06ocpyh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y5mk5b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0ywqap3" name="read last execution time" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ReadLastExecutionTime">
+      <bpmn:incoming>Flow_0jy9ipp</bpmn:incoming>
+      <bpmn:outgoing>Flow_1it56bn</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1it56bn" sourceRef="Activity_0ywqap3" targetRef="FindNewData" />
+    <bpmn:sequenceFlow id="Flow_0jy9ipp" sourceRef="Gateway_1xqxerc" targetRef="Activity_0ywqap3">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!stopTimer}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1bbw6lm" sourceRef="StartTimer" targetRef="SaveBusinessKey" />
+    <bpmn:serviceTask id="StartTimer" name="start timer" camunda:expression="false" camunda:resultVariable="stopTimer">
+      <bpmn:incoming>Flow_09o8bb5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1bbw6lm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_183st6n" sourceRef="SaveBusinessKey" targetRef="Gateway_00tj0cp" />
+    <bpmn:serviceTask id="SaveBusinessKey" name="save businessKey" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.SaveBusinessKey">
+      <bpmn:incoming>Flow_1bbw6lm</bpmn:incoming>
+      <bpmn:outgoing>Flow_183st6n</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_13deqwn" name="startDataTrigger" />
+  <bpmn:message id="Message_1ws42uv" name="stopDataTrigger" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataTrigger">
+      <bpmndi:BPMNEdge id="Flow_0y9pdwn_di" bpmnElement="Flow_0y9pdwn">
+        <di:waypoint x="1020" y="360" />
+        <di:waypoint x="1670" y="360" />
+        <di:waypoint x="1670" y="192" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06toths_di" bpmnElement="Flow_06toths">
+        <di:waypoint x="640" y="192" />
+        <di:waypoint x="640" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05mfu8d_di" bpmnElement="Flow_05mfu8d">
+        <di:waypoint x="665" y="167" />
+        <di:waypoint x="725" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_015mo33_di" bpmnElement="Flow_015mo33">
+        <di:waypoint x="1100" y="167" />
+        <di:waypoint x="1170" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06ocpyh_di" bpmnElement="Flow_06ocpyh">
+        <di:waypoint x="1270" y="167" />
+        <di:waypoint x="1340" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0stek1z_di" bpmnElement="Flow_0stek1z">
+        <di:waypoint x="1695" y="167" />
+        <di:waypoint x="1752" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ltiore_di" bpmnElement="Flow_1ltiore">
+        <di:waypoint x="1512" y="250" />
+        <di:waypoint x="750" y="250" />
+        <di:waypoint x="750" y="192" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0g1txh0_di" bpmnElement="Flow_0g1txh0">
+        <di:waypoint x="750" y="142" />
+        <di:waypoint x="750" y="90" />
+        <di:waypoint x="1670" y="90" />
+        <di:waypoint x="1670" y="142" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="763" y="72" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1asxc2j_di" bpmnElement="Flow_1asxc2j">
+        <di:waypoint x="1530" y="192" />
+        <di:waypoint x="1530" y="232" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1h835ja_di" bpmnElement="Flow_1h835ja">
+        <di:waypoint x="1555" y="167" />
+        <di:waypoint x="1645" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1554" y="143" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y5mk5b_di" bpmnElement="Flow_0y5mk5b">
+        <di:waypoint x="1440" y="167" />
+        <di:waypoint x="1505" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1it56bn_di" bpmnElement="Flow_1it56bn">
+        <di:waypoint x="930" y="167" />
+        <di:waypoint x="1000" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jy9ipp_di" bpmnElement="Flow_0jy9ipp">
+        <di:waypoint x="775" y="167" />
+        <di:waypoint x="830" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bbw6lm_di" bpmnElement="Flow_1bbw6lm">
+        <di:waypoint x="380" y="167" />
+        <di:waypoint x="440" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09o8bb5_di" bpmnElement="Flow_09o8bb5">
+        <di:waypoint x="218" y="167" />
+        <di:waypoint x="280" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_183st6n_di" bpmnElement="Flow_183st6n">
+        <di:waypoint x="540" y="167" />
+        <di:waypoint x="615" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Gateway_00tj0cp_di" bpmnElement="Gateway_00tj0cp">
+        <dc:Bounds x="615" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wgc8ql_di" bpmnElement="FindNewData">
+        <dc:Bounds x="1000" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yhxgi9_di" bpmnElement="StartSendProcess">
+        <dc:Bounds x="1170" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ukqals_di" bpmnElement="Event_1ukqals">
+        <dc:Bounds x="1752" y="149" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0eqigaq_di" bpmnElement="Event_0eqigaq">
+        <dc:Bounds x="1512" y="232" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1559" y="243" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0oa1bkj_di" bpmnElement="Gateway_0oa1bkj">
+        <dc:Bounds x="1645" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0sx5e0s_di" bpmnElement="Gateway_0sx5e0s" isMarkerVisible="true">
+        <dc:Bounds x="1505" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0afkqm6_di" bpmnElement="SaveLastExecutionTime">
+        <dc:Bounds x="1340" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ywqap3_di" bpmnElement="Activity_0ywqap3">
+        <dc:Bounds x="830" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1xqxerc_di" bpmnElement="Gateway_1xqxerc" isMarkerVisible="true">
+        <dc:Bounds x="725" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0g2pqnk_di" bpmnElement="DataTriggerStartMessageStartEvent">
+        <dc:Bounds x="182" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="161" y="192" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0laouxt_di" bpmnElement="StartTimer">
+        <dc:Bounds x="280" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0onzfyc_di" bpmnElement="SaveBusinessKey">
+        <dc:Bounds x="440" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1kspnah_di" bpmnElement="StopSubProcess" isExpanded="true">
+        <dc:Bounds x="580" y="300" width="440" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1vxlaau_di" bpmnElement="Flow_1vxlaau">
+        <di:waypoint x="910" y="360" />
+        <di:waypoint x="962" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x5v76c_di" bpmnElement="Flow_1x5v76c">
+        <di:waypoint x="656" y="360" />
+        <di:waypoint x="722" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0m0cias_di" bpmnElement="Flow_0m0cias">
+        <di:waypoint x="758" y="360" />
+        <di:waypoint x="810" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_02xmnq6_di" bpmnElement="Event_02xmnq6">
+        <dc:Bounds x="620" y="342" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1cin90r_di" bpmnElement="StopTimer">
+        <dc:Bounds x="810" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1maglns_di" bpmnElement="DataTriggerStopMessageStartEvent">
+        <dc:Bounds x="722" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="700" y="385" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ckek3z_di" bpmnElement="Event_1ckek3z">
+        <dc:Bounds x="962" y="342" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

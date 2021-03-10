@@ -1,0 +1,50 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system
+				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<url
+		value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+	<!-- version managed by bpe -->
+	<version value="${version}" />
+	<name value="NumCodexDataTransfer" />
+	<title value="NUM-CODEX data-transfer" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<date value="2021-03-10" />
+	<publisher value="NUM-CODEX" />
+	<description
+		value="CodeSystem with standard values for the NUM-CODEX data-transfer processes" />
+	<caseSensitive value="true" />
+	<hierarchyMeaning value="grouped-by" />
+	<versionNeeded value="false" />
+	<content value="complete" />
+	<concept>
+		<code value="pseudonym" />
+		<display value="Pseudonym" />
+		<definition
+			value="Pseudonym used in the data export process" />
+	</concept>
+	<concept>
+		<code value="data-reference" />
+		<display value="Data Reference" />
+		<definition
+			value="Reference to an encrypted GECCO Data-Set" />
+	</concept>
+	<concept>
+		<code value="export-from" />
+		<display value="Export From" />
+		<definition
+			value="Date parameter to filter resources last modified starting (inclusiv) at the specified date" />
+	</concept>
+	<concept>
+		<code value="export-to" />
+		<display value="Export To" />
+		<definition
+			value="Date parameter to filter resources last modified until (exclusive) the specified date" />
+	</concept>
+</CodeSystem> 

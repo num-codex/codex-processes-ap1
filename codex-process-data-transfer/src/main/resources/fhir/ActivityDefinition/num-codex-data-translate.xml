@@ -1,0 +1,68 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system
+				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<extension
+		url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="startDataTranslate" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="REMOTE" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical
+				value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate" />
+		</extension>
+	</extension>
+	<url
+		value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate" />
+	<!-- version managed by bpe -->
+	<version value="${version}" />
+	<name value="dataTranslate" />
+	<title value="Data Translate Process" />
+	<subtitle value="GECCO Transfer Hub Data Translate Process" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<date value="2021-03-10" />
+	<publisher value="NUM-CODEX" />
+	<contact>
+		<name value="NUM-CODEX" />
+		<telecom>
+			<system value="email" />
+			<value value="forschungsnetzwerk-unimedizin@charite.de " />
+		</telecom>
+	</contact>
+	<description
+		value="Process to translate DIC to CRR pseudonys at the GECCO Transfer Hub using the TTP." />
+	<kind value="Task" />
+</ActivityDefinition>

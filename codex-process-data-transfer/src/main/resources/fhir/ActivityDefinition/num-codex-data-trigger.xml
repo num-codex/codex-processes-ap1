@@ -1,0 +1,105 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system
+				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<extension
+		url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="startDataTrigger" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="LOCAL" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical
+				value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger" />
+		</extension>
+	</extension>
+	<extension
+		url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="stopDataTrigger" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="LOCAL" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical
+				value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger" />
+		</extension>
+	</extension>
+	<url
+		value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger" />
+	<!-- version managed by bpe -->
+	<version value="${version}" />
+	<name value="dataTrigger" />
+	<title value="Data Trigger Process" />
+	<subtitle value="Start/Stop Data Trigger Process" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<date value="2021-03-10" />
+	<publisher value="NUM-CODEX" />
+	<contact>
+		<name value="NUM-CODEX" />
+		<telecom>
+			<system value="email" />
+			<value value="forschungsnetzwerk-unimedizin@charite.de " />
+		</telecom>
+	</contact>
+	<description
+		value="Process to search for new data send trigger events every 24 hours, process can be started and stoped." />
+	<kind value="Task" />
+</ActivityDefinition>

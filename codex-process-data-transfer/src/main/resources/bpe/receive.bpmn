@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_18azqkl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="dataReceive" isExecutable="true" camunda:versionTag="0.1.0">
+    <bpmn:startEvent id="DataReceiveMessageStartEvent" name="start data receive process">
+      <bpmn:outgoing>Flow_1gyqorb</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1qwi1k6" messageRef="Message_157qpi8" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1gyqorb" sourceRef="DataReceiveMessageStartEvent" targetRef="DownloadDataFromTransferHub" />
+    <bpmn:serviceTask id="DownloadDataFromTransferHub" name="download data from transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DownloadDataFromTransferHub">
+      <bpmn:incoming>Flow_1gyqorb</bpmn:incoming>
+      <bpmn:outgoing>Flow_064nbas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_064nbas" sourceRef="DownloadDataFromTransferHub" targetRef="DecryptData" />
+    <bpmn:serviceTask id="DecryptData" name="decrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DecryptData">
+      <bpmn:incoming>Flow_064nbas</bpmn:incoming>
+      <bpmn:outgoing>Flow_0si3bwl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0si3bwl" sourceRef="DecryptData" targetRef="InsertDataIntoCodex" />
+    <bpmn:endEvent id="Event_059mi3g">
+      <bpmn:incoming>Flow_1w6vljw</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1w6vljw" sourceRef="InsertDataIntoCodex" targetRef="Event_059mi3g" />
+    <bpmn:serviceTask id="InsertDataIntoCodex" name="insert data into codex" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.InsertDataIntoCodex">
+      <bpmn:incoming>Flow_0si3bwl</bpmn:incoming>
+      <bpmn:outgoing>Flow_1w6vljw</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_157qpi8" name="startDataReceive" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataReceive">
+      <bpmndi:BPMNEdge id="Flow_1w6vljw_di" bpmnElement="Flow_1w6vljw">
+        <di:waypoint x="690" y="97" />
+        <di:waypoint x="752" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0si3bwl_di" bpmnElement="Flow_0si3bwl">
+        <di:waypoint x="530" y="97" />
+        <di:waypoint x="590" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_064nbas_di" bpmnElement="Flow_064nbas">
+        <di:waypoint x="370" y="97" />
+        <di:waypoint x="430" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1gyqorb_di" bpmnElement="Flow_1gyqorb">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="270" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0kx3ho7_di" bpmnElement="DataReceiveMessageStartEvent">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="156" y="122" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1l9pati_di" bpmnElement="DownloadDataFromTransferHub">
+        <dc:Bounds x="270" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_09bdctd_di" bpmnElement="DecryptData">
+        <dc:Bounds x="430" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_059mi3g_di" bpmnElement="Event_059mi3g">
+        <dc:Bounds x="752" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pau3xo_di" bpmnElement="InsertDataIntoCodex">
+        <dc:Bounds x="590" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

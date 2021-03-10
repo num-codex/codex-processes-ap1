@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1davgtw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="dataTranslate" isExecutable="true" camunda:versionTag="0.1.0">
+    <bpmn:startEvent id="DataTranslateMessageStartEvent" name="start data translate process">
+      <bpmn:outgoing>Flow_185r1m5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0nqjzhp" messageRef="Message_1nly3ld" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_185r1m5" sourceRef="DataTranslateMessageStartEvent" targetRef="DownloadDataFromDic" />
+    <bpmn:serviceTask id="DownloadDataFromDic" name="download data from dic" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DownloadDataFromDic">
+      <bpmn:incoming>Flow_185r1m5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e9g35h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1e9g35h" sourceRef="DownloadDataFromDic" targetRef="ReplacePseudonym" />
+    <bpmn:sequenceFlow id="Flow_0onpu3n" sourceRef="ReplacePseudonym" targetRef="StoreDataForCrr" />
+    <bpmn:sequenceFlow id="Flow_1c2ibtj" sourceRef="StoreDataForCrr" targetRef="StartReceiveProcess" />
+    <bpmn:serviceTask id="ReplacePseudonym" name="replace pseudonym" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ReplacePseudonym">
+      <bpmn:incoming>Flow_1e9g35h</bpmn:incoming>
+      <bpmn:outgoing>Flow_0onpu3n</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="StoreDataForCrr" name="store data for crr" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.StoreDataForCrr">
+      <bpmn:incoming>Flow_0onpu3n</bpmn:incoming>
+      <bpmn:outgoing>Flow_1c2ibtj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="StartReceiveProcess" name="start receive process">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="processDefinitionKey">numCodexDataReceive</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">startDataReceive</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1c2ibtj</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1m3u2im" messageRef="Message_1uea12x" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.message.StartReceiveProcess" />
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:message id="Message_1nly3ld" name="startDataTranslate" />
+  <bpmn:message id="Message_1uea12x" name="startDataReceive" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataTranslate">
+      <bpmndi:BPMNEdge id="Flow_1c2ibtj_di" bpmnElement="Flow_1c2ibtj">
+        <di:waypoint x="690" y="97" />
+        <di:waypoint x="752" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0onpu3n_di" bpmnElement="Flow_0onpu3n">
+        <di:waypoint x="530" y="97" />
+        <di:waypoint x="590" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e9g35h_di" bpmnElement="Flow_1e9g35h">
+        <di:waypoint x="370" y="97" />
+        <di:waypoint x="430" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_185r1m5_di" bpmnElement="Flow_185r1m5">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="270" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1rtmd0i_di" bpmnElement="DataTranslateMessageStartEvent">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="157" y="122" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_164jwnd_di" bpmnElement="DownloadDataFromDic">
+        <dc:Bounds x="270" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1f8emrv_di" bpmnElement="ReplacePseudonym">
+        <dc:Bounds x="430" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tntlm8_di" bpmnElement="StoreDataForCrr">
+        <dc:Bounds x="590" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mcxtxo_di" bpmnElement="StartReceiveProcess">
+        <dc:Bounds x="752" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="740" y="122" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
