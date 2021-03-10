@@ -218,7 +218,7 @@
 
 	<repositories>
 		<repository>
-			<id>highmed-dsf</id>
+			<id>github</id>
 			<name>GitHub HiGHmed Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
 			<releases>
