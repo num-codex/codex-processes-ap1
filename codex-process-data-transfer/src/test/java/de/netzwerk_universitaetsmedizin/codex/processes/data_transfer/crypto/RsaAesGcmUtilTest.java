@@ -1,6 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class RsaAesGcmUtilTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(RsaAesGcmUtilTest.class);
-	
+
 	@Test
 	public void testEncryptDecypt() throws Exception
 	{

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class HandleNoConsent extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(HandleNoConsent.class);
-	
+
 	public HandleNoConsent(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
