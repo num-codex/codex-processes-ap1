@@ -47,7 +47,7 @@ public class ReplacePseudonym extends AbstractServiceDelegate
 
 		String dicPseudonym = getPseudonym(task).get();
 
-		String crrPseudonym = fttpClientFactory.getFttpClient().getCrrPseudonym(dicPseudonym);
+		String crrPseudonym = fttpClientFactory.getFttpClient().getCrrPseudonym(dicPseudonym).get();
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(crrPseudonym));
 	}

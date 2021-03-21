@@ -1,5 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -49,19 +53,22 @@ public class TransferDataConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.localFhirStoreBaseUrl:@null}")
-	private String localFhirStoreBaseUrl;
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.serverBase:@null}")
+	private String fhirStoreBaseUrl;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.localFhirUsername:@null}")
-	private String localFhirStoreUsername;
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.username:@null}")
+	private String fhirStoreUsername;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.localFhirPassword:@null}")
-	private String localFhirStorePassword;
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.password:@null}")
+	private String fhirStorePassword;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crrPublicKeyFile:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:@null}")
+	private String fhirStoreBearerToken;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.publicKey:@null}")
 	private String crrPublicKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crrPrivateKeyFile:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.privateKey:@null}")
 	private String crrPrivateKeyFile;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:hs-heilbronn.de}")
@@ -70,12 +77,32 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crrIdentifierValue:num-codex.de}")
 	private String crrIdentifierValue;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.usageGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.1}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.usageGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.1}")
 	private String usageGrantedOid;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
 	private String transferGrantedOid;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:@null}")
+	private String fttpTrustStore;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:@null}")
+	private String fttpCertificate;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:@null}")
+	private String fttpPrivateKey;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.serverBase:@null}")
+	private String fttpServerBase;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.apiKey:@null}")
+	private String fttpApiKey;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.study:num}")
+	private String fttpStudy;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
+	private String fttpTarget;
 
 	@Bean
 	public CrrKeyProvider crrKeyProvider()
@@ -86,14 +113,27 @@ public class TransferDataConfig
 	@Bean
 	public FhirClientFactory fhirClientFactory()
 	{
-		return new FhirClientFactory(fhirContext, localFhirStoreBaseUrl, localFhirStoreUsername, localFhirStorePassword,
-				null);
+		return new FhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
+				fhirStoreBearerToken);
 	}
 
 	@Bean
 	public FttpClientFactory fttpClientFactory()
 	{
-		return new FttpClientFactory();
+		Path trustStorePath = checkExists(Paths.get(fttpTrustStore));
+		Path certificatePath = checkExists(Paths.get(fttpCertificate));
+		Path privateKeyPath = checkExists(Paths.get(fttpPrivateKey));
+
+		return new FttpClientFactory(fhirContext, trustStorePath, certificatePath, privateKeyPath, fttpServerBase,
+				fttpApiKey, fttpStudy, fttpTarget);
+	}
+
+	private Path checkExists(Path path)
+	{
+		if (path != null && !Files.isReadable(path))
+			throw new RuntimeException(path.toString() + " not readable");
+
+		return path;
 	}
 
 	@Bean
