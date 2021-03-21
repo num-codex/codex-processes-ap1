@@ -24,7 +24,6 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FttpClientImpl.class);
 
-	private static final String DIC_PSEUDONYM_PATTERN_STRING = "([^/]+)/([^/]+)";
 	private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(DIC_PSEUDONYM_PATTERN_STRING);
 
 	private final IRestfulClientFactory clientFactory;
@@ -66,9 +65,9 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	}
 
 	@Override
-	public Optional<String> getCrrPseudonym(String dicPseudonym)
+	public Optional<String> getCrrPseudonym(String dicSourceAndPseudonym)
 	{
-		Objects.requireNonNull(dicPseudonym, "dicSourceAndPseudonym");
+		Objects.requireNonNull(dicSourceAndPseudonym, "dicSourceAndPseudonym");
 
 		logger.info("Requesting CRR pseudonym from {} ...", fttpServerBase);
 
@@ -77,7 +76,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 			IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
 
 			Parameters parameters = client.operation().onServer().named("request-psn-workflow")
-					.withParameters(createParameters(dicPseudonym)).accept(Constants.CT_FHIR_XML_NEW)
+					.withParameters(createParameters(dicSourceAndPseudonym)).accept(Constants.CT_FHIR_XML_NEW)
 					.encoded(EncodingEnum.XML).execute();
 
 			return getPseudonym(parameters);
@@ -89,9 +88,9 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		}
 	}
 
-	protected Parameters createParameters(String dicPseudonym)
+	protected Parameters createParameters(String dicSourceAndPseudonym)
 	{
-		Matcher matcher = DIC_PSEUDONYM_PATTERN.matcher(dicPseudonym);
+		Matcher matcher = DIC_PSEUDONYM_PATTERN.matcher(dicSourceAndPseudonym);
 		if (!matcher.matches())
 			throw new IllegalArgumentException("DIC pseudonym not matching " + DIC_PSEUDONYM_PATTERN_STRING);
 
