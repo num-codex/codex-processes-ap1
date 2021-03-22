@@ -116,6 +116,13 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:export-to.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
+    </element>
     <element id="Task.input:export-to.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />

@@ -8,3 +8,35 @@
 **/target/
 
 **/*.iml
+
+###
+# test data generator ignores
+###
+codex-processes-ap1-test-data-generator/cert/**/*.pem
+codex-processes-ap1-test-data-generator/cert/**/*.csr
+codex-processes-ap1-test-data-generator/cert/**/*.p12
+codex-processes-ap1-test-data-generator/cert/thumbprints.txt
+
+codex-processes-ap1-test-data-generator/bundle/*.xml
+
+codex-processes-ap1-test-data-generator/config/*.properties
+
+codex-processes-ap1-test-data-generator/rsa/*.pem
+
+###
+# codex-processes-ap1-docker-test-setup ignores
+###
+codex-processes-ap1-docker-test-setup/**/bpe/app/conf/*.pem
+codex-processes-ap1-docker-test-setup/**/bpe/app/conf/*.p12
+codex-processes-ap1-docker-test-setup/**/bpe/app/log/*.log
+codex-processes-ap1-docker-test-setup/**/bpe/app/log/*.log.gz
+codex-processes-ap1-docker-test-setup/**/bpe/app/plugin/*.jar
+codex-processes-ap1-docker-test-setup/**/bpe/app/process/*.jar
+codex-processes-ap1-docker-test-setup/**/bpe/proxy/ssl/*.pem
+
+codex-processes-ap1-docker-test-setup/**/fhir/app/conf/*.p12
+codex-processes-ap1-docker-test-setup/**/fhir/app/log/*.log
+codex-processes-ap1-docker-test-setup/**/fhir/app/log/*.log.gz
+codex-processes-ap1-docker-test-setup/**/fhir/app/conf/bundle.xml
+codex-processes-ap1-docker-test-setup/**/fhir/app/conf/config.properties
+codex-processes-ap1-docker-test-setup/**/fhir/proxy/ssl/*.pem

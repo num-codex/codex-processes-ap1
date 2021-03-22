@@ -6,18 +6,18 @@
       <bpmn:messageEventDefinition id="MessageEventDefinition_0nqjzhp" messageRef="Message_1nly3ld" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_185r1m5" sourceRef="DataTranslateMessageStartEvent" targetRef="DownloadDataFromDic" />
-    <bpmn:serviceTask id="DownloadDataFromDic" name="download data from dic" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DownloadDataFromDic">
+    <bpmn:serviceTask id="DownloadDataFromDic" name="download data from dic" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic">
       <bpmn:incoming>Flow_185r1m5</bpmn:incoming>
       <bpmn:outgoing>Flow_1e9g35h</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1e9g35h" sourceRef="DownloadDataFromDic" targetRef="ReplacePseudonym" />
     <bpmn:sequenceFlow id="Flow_0onpu3n" sourceRef="ReplacePseudonym" targetRef="StoreDataForCrr" />
     <bpmn:sequenceFlow id="Flow_1c2ibtj" sourceRef="StoreDataForCrr" targetRef="StartReceiveProcess" />
-    <bpmn:serviceTask id="ReplacePseudonym" name="replace pseudonym" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ReplacePseudonym">
+    <bpmn:serviceTask id="ReplacePseudonym" name="replace pseudonym" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym">
       <bpmn:incoming>Flow_1e9g35h</bpmn:incoming>
       <bpmn:outgoing>Flow_0onpu3n</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="StoreDataForCrr" name="store data for crr" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.StoreDataForCrr">
+    <bpmn:serviceTask id="StoreDataForCrr" name="store data for crr" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr">
       <bpmn:incoming>Flow_0onpu3n</bpmn:incoming>
       <bpmn:outgoing>Flow_1c2ibtj</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -31,7 +31,7 @@
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1c2ibtj</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_1m3u2im" messageRef="Message_1uea12x" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.message.StartReceiveProcess" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1m3u2im" messageRef="Message_1uea12x" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess" />
     </bpmn:endEvent>
   </bpmn:process>
   <bpmn:message id="Message_1nly3ld" name="startDataTranslate" />

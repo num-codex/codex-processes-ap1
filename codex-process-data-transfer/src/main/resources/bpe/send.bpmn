@@ -7,11 +7,11 @@
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1km61ly" sourceRef="DataSendMessageStartEvent" targetRef="CheckConsent" />
     <bpmn:sequenceFlow id="Flow_01j9mgm" sourceRef="CheckConsent" targetRef="Gateway_0h3dkik" />
-    <bpmn:serviceTask id="CheckConsent" name="check consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.CheckConsent">
+    <bpmn:serviceTask id="CheckConsent" name="check consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.CheckConsent">
       <bpmn:incoming>Flow_1km61ly</bpmn:incoming>
       <bpmn:outgoing>Flow_01j9mgm</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ReadData" name="read data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ReadData">
+    <bpmn:serviceTask id="ReadData" name="read data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData">
       <bpmn:incoming>Flow_0wpfzi1</bpmn:incoming>
       <bpmn:outgoing>Flow_0yamo5r</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -28,18 +28,18 @@
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_109e2pt</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_06ro4fv" messageRef="Message_1jn7i5w" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.message.StartTranslateProcess" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_06ro4fv" messageRef="Message_1jn7i5w" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess" />
     </bpmn:endEvent>
-    <bpmn:serviceTask id="ValidateData" name="validate data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.ValidateData">
+    <bpmn:serviceTask id="ValidateData" name="validate data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ValidateData">
       <bpmn:incoming>Flow_0yamo5r</bpmn:incoming>
       <bpmn:outgoing>Flow_0zrvqk8</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="EncryptData" name="encrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.EncryptData">
+    <bpmn:serviceTask id="EncryptData" name="encrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData">
       <bpmn:incoming>Flow_0zrvqk8</bpmn:incoming>
       <bpmn:outgoing>Flow_0smf5sr</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0smf5sr" sourceRef="EncryptData" targetRef="StoreDataForTransferHub" />
-    <bpmn:serviceTask id="StoreDataForTransferHub" name="store data for transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.StoreDataForTransferHub">
+    <bpmn:serviceTask id="StoreDataForTransferHub" name="store data for transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForTransferHub">
       <bpmn:incoming>Flow_0smf5sr</bpmn:incoming>
       <bpmn:outgoing>Flow_109e2pt</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -58,7 +58,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!usageAndTransferGranted}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_00kpx7f" sourceRef="HandleNoConsent" targetRef="Event_0ntc53r" />
-    <bpmn:serviceTask id="HandleNoConsent" name="handle no consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.HandleNoConsent">
+    <bpmn:serviceTask id="HandleNoConsent" name="handle no consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent">
       <bpmn:incoming>Flow_0tsm3rc</bpmn:incoming>
       <bpmn:outgoing>Flow_00kpx7f</bpmn:outgoing>
     </bpmn:serviceTask>

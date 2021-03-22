@@ -34,6 +34,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Re
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveBusinessKey;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExecutionTime;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ValidateData;
@@ -53,22 +55,22 @@ public class TransferDataConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.serverBase:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.serverBase:#{null}}")
 	private String fhirStoreBaseUrl;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.username:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.username:#{null}}")
 	private String fhirStoreUsername;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.password:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.password:#{null}}")
 	private String fhirStorePassword;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:#{null}}")
 	private String fhirStoreBearerToken;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.publicKey:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.publicKey:#{null}}")
 	private String crrPublicKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.privateKey:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.privateKey:#{null}}")
 	private String crrPrivateKeyFile;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:hs-heilbronn.de}")
@@ -83,19 +85,19 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
 	private String transferGrantedOid;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:#{null}}")
 	private String fttpTrustStore;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:#{null}}")
 	private String fttpCertificate;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:#{null}}")
 	private String fttpPrivateKey;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.serverBase:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.serverBase:#{null}}")
 	private String fttpServerBase;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.apiKey:@null}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.apiKey:#{null}}")
 	private String fttpApiKey;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.study:num}")
@@ -120,20 +122,27 @@ public class TransferDataConfig
 	@Bean
 	public FttpClientFactory fttpClientFactory()
 	{
-		Path trustStorePath = checkExists(Paths.get(fttpTrustStore));
-		Path certificatePath = checkExists(Paths.get(fttpCertificate));
-		Path privateKeyPath = checkExists(Paths.get(fttpPrivateKey));
+		Path trustStorePath = checkExists(fttpTrustStore);
+		Path certificatePath = checkExists(fttpCertificate);
+		Path privateKeyPath = checkExists(fttpPrivateKey);
 
 		return new FttpClientFactory(fhirContext, trustStorePath, certificatePath, privateKeyPath, fttpServerBase,
 				fttpApiKey, fttpStudy, fttpTarget);
 	}
 
-	private Path checkExists(Path path)
+	private Path checkExists(String file)
 	{
-		if (path != null && !Files.isReadable(path))
-			throw new RuntimeException(path.toString() + " not readable");
+		if (file == null)
+			return null;
+		else
+		{
+			Path path = Paths.get(file);
 
-		return path;
+			if (!Files.isReadable(path))
+				throw new RuntimeException(path.toString() + " not readable");
+
+			return path;
+		}
 	}
 
 	@Bean
@@ -144,12 +153,11 @@ public class TransferDataConfig
 
 	// numCodexDataTrigger
 
-	// TODO remove if expression works
-	// @Bean
-	// public StartTimer startTimer()
-	// {
-	// return new StartTimer(fhirClientProvider, taskHelper);
-	// }
+	@Bean
+	public StartTimer startTimer()
+	{
+		return new StartTimer(fhirClientProvider, taskHelper);
+	}
 
 	@Bean
 	public SaveBusinessKey saveBusinessKey()
@@ -181,12 +189,11 @@ public class TransferDataConfig
 		return new SaveLastExecutionTime(fhirClientProvider, taskHelper);
 	}
 
-	// TODO remove if expression works
-	// @Bean
-	// public StopTimer stopTimer()
-	// {
-	// return new StopTimer(fhirClientProvider, taskHelper);
-	// }
+	@Bean
+	public StopTimer stopTimer()
+	{
+		return new StopTimer(fhirClientProvider, taskHelper);
+	}
 
 	// numCodexDataSend
 

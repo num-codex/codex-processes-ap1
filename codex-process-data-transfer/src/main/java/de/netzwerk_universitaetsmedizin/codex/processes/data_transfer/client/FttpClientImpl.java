@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
+
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,7 +26,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FttpClientImpl.class);
 
-	private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(DIC_PSEUDONYM_PATTERN_STRING);
+	private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(PSEUDONYM_PATTERN_STRING);
 
 	private final IRestfulClientFactory clientFactory;
 	private final String fttpServerBase;
@@ -92,7 +94,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	{
 		Matcher matcher = DIC_PSEUDONYM_PATTERN.matcher(dicSourceAndPseudonym);
 		if (!matcher.matches())
-			throw new IllegalArgumentException("DIC pseudonym not matching " + DIC_PSEUDONYM_PATTERN_STRING);
+			throw new IllegalArgumentException("DIC pseudonym not matching " + PSEUDONYM_PATTERN_STRING);
 
 		String source = matcher.group(1);
 		String psn = matcher.group(2);

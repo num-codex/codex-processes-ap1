@@ -6,12 +6,12 @@
       <bpmn:messageEventDefinition id="MessageEventDefinition_1qwi1k6" messageRef="Message_157qpi8" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1gyqorb" sourceRef="DataReceiveMessageStartEvent" targetRef="DownloadDataFromTransferHub" />
-    <bpmn:serviceTask id="DownloadDataFromTransferHub" name="download data from transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DownloadDataFromTransferHub">
+    <bpmn:serviceTask id="DownloadDataFromTransferHub" name="download data from transfer hub" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub">
       <bpmn:incoming>Flow_1gyqorb</bpmn:incoming>
       <bpmn:outgoing>Flow_064nbas</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_064nbas" sourceRef="DownloadDataFromTransferHub" targetRef="DecryptData" />
-    <bpmn:serviceTask id="DecryptData" name="decrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.DecryptData">
+    <bpmn:serviceTask id="DecryptData" name="decrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DecryptData">
       <bpmn:incoming>Flow_064nbas</bpmn:incoming>
       <bpmn:outgoing>Flow_0si3bwl</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -20,7 +20,7 @@
       <bpmn:incoming>Flow_1w6vljw</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1w6vljw" sourceRef="InsertDataIntoCodex" targetRef="Event_059mi3g" />
-    <bpmn:serviceTask id="InsertDataIntoCodex" name="insert data into codex" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.transfer_data.service.InsertDataIntoCodex">
+    <bpmn:serviceTask id="InsertDataIntoCodex" name="insert data into codex" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex">
       <bpmn:incoming>Flow_0si3bwl</bpmn:incoming>
       <bpmn:outgoing>Flow_1w6vljw</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -1,7 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
-import java.util.Objects;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
@@ -19,7 +17,7 @@ public class FhirClientFactory
 	 * @param fhirContext
 	 *            may be <code>null</code>, will use new {@link FhirContext#forR4()} if <code>null</code>
 	 * @param serverBase
-	 *            not <code>null</code>
+	 *            may be <code>null</code>
 	 * @param basicAuthUsername
 	 *            may be <code>null</code>
 	 * @param basicAuthPassword
@@ -35,7 +33,7 @@ public class FhirClientFactory
 		else
 			this.fhirContext = FhirContext.forR4();
 
-		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		this.serverBase = serverBase;
 		this.basicAuthUsername = basicAuthUsername;
 		this.basicAuthPassword = basicAuthPassword;
 		this.bearerToken = bearerToken;

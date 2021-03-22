@@ -34,7 +34,7 @@
     </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="startDataSend" />
+      <fixedString value="startDataTranslate" />
     </element>
     <element id="Task.input:business-key">
       <path value="Task.input" />
@@ -94,6 +94,13 @@
       <sliceName value="data" />
       <min value="1" />
       <max value="1" />
+    </element>
+    <element id="Task.input:data.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
     </element>
     <element id="Task.input:data.type.coding">
       <path value="Task.input.type.coding" />

@@ -11,16 +11,21 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.rwh.utils.crypto.io.PemIo;
 
 public class CrrKeyProviderImpl implements CrrKeyProvider
 {
+	private static final Logger logger = LoggerFactory.getLogger(CrrKeyProviderImpl.class);
+
 	// openssl genrsa -out keypair.pem 4096
 	// openssl rsa -in keypair.pem -pubout -out publickey.crt
 	// openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out pkcs8.key
 
 	/**
-	 * on of the parameters should be <code>null</code> the other not <code>null</code>
+	 * One or both parameters should be <code>null</code>
 	 * 
 	 * @param crrPrivateKeyFile
 	 * @param crrPublicKeyFile
@@ -28,10 +33,13 @@ public class CrrKeyProviderImpl implements CrrKeyProvider
 	 */
 	public static CrrKeyProviderImpl fromFiles(String crrPrivateKeyFile, String crrPublicKeyFile)
 	{
-		if ((crrPrivateKeyFile == null && crrPublicKeyFile == null)
-				|| (crrPrivateKeyFile != null && crrPublicKeyFile != null))
+		logger.info("Configuring CrrKeyProvider with private-key from {} and public-key from {}", crrPrivateKeyFile,
+				crrPublicKeyFile);
+
+		if (crrPrivateKeyFile != null && crrPublicKeyFile != null)
 		{
-			throw new RuntimeException("Either CRR public key or CRR private key must be set, not both");
+			throw new RuntimeException("Both CRR private-key (" + crrPrivateKeyFile + ") and CRR public-key ("
+					+ crrPublicKeyFile + ") set");
 		}
 
 		RSAPrivateCrtKey crrPrivateKey = null;
