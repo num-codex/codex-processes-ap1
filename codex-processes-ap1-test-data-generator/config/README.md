@@ -1,0 +1,1 @@
+Will contain property files used in the FHIR application generated in the build process
