@@ -24,10 +24,10 @@
     <bpmn:endEvent id="StartReceiveProcess" name="start receive process">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">numCodexDataReceive</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">dataReceive</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataReceive</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1c2ibtj</bpmn:incoming>

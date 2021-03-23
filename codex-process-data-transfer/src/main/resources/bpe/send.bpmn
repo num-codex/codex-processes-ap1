@@ -21,10 +21,10 @@
     <bpmn:endEvent id="StartDataTranslateProcess" name="start data translate process">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">numCodexDataTranslate</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">dataTranslate</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataTranslate</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_109e2pt</bpmn:incoming>
@@ -69,6 +69,19 @@
   <bpmn:message id="Message_1jn7i5w" name="startDataTranslate" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataSend">
+      <bpmndi:BPMNEdge id="Flow_00kpx7f_di" bpmnElement="Flow_00kpx7f">
+        <di:waypoint x="660" y="210" />
+        <di:waypoint x="752" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tsm3rc_di" bpmnElement="Flow_0tsm3rc">
+        <di:waypoint x="450" y="125" />
+        <di:waypoint x="450" y="210" />
+        <di:waypoint x="560" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wpfzi1_di" bpmnElement="Flow_0wpfzi1">
+        <di:waypoint x="475" y="100" />
+        <di:waypoint x="560" y="100" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0smf5sr_di" bpmnElement="Flow_0smf5sr">
         <di:waypoint x="980" y="100" />
         <di:waypoint x="1040" y="100" />
@@ -92,19 +105,6 @@
       <bpmndi:BPMNEdge id="Flow_1km61ly_di" bpmnElement="Flow_1km61ly">
         <di:waypoint x="188" y="100" />
         <di:waypoint x="240" y="100" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0wpfzi1_di" bpmnElement="Flow_0wpfzi1">
-        <di:waypoint x="475" y="100" />
-        <di:waypoint x="560" y="100" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0tsm3rc_di" bpmnElement="Flow_0tsm3rc">
-        <di:waypoint x="450" y="125" />
-        <di:waypoint x="450" y="210" />
-        <di:waypoint x="560" y="210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_00kpx7f_di" bpmnElement="Flow_00kpx7f">
-        <di:waypoint x="660" y="210" />
-        <di:waypoint x="752" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0kggab9_di" bpmnElement="DataSendMessageStartEvent">
         <dc:Bounds x="152" y="82" width="36" height="36" />
