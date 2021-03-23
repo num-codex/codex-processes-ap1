@@ -18,7 +18,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 
@@ -66,8 +66,8 @@ public class EncryptData extends AbstractServiceDelegate
 	private Optional<String> getPseudonym(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, StringType.class).findFirst()
-						.map(StringType::getValue);
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
+						.map(Identifier::getValue);
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface ConsentClient
 {
-	List<String> getConsentOidsFor(String dicPseudonym);
+	List<String> getConsentOidsFor(String dicSourceAndPseudonym);
 }

@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -15,6 +17,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +34,23 @@ public class FttpClientFactory
 	{
 		private static final Logger logger = LoggerFactory.getLogger(FttpClientStub.class);
 
+		private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(PSEUDONYM_PATTERN_STRING);
+
 		@Override
-		public Optional<String> getCrrPseudonym(String dicPseudonym)
+		public Optional<String> getCrrPseudonym(String dicSourceAndPseudonym)
 		{
-			logger.warn("Using SHA-256 hash of DIC pseudonym to simulate CRR pseudonym");
+			logger.warn("Using SHA-256 hash of DIC pseudonym {} to simulate CRR pseudonym", dicSourceAndPseudonym);
+
+			Matcher matcher = DIC_PSEUDONYM_PATTERN.matcher(dicSourceAndPseudonym);
+			if (!matcher.matches())
+				throw new IllegalArgumentException("DIC pseudonym not matching " + PSEUDONYM_PATTERN_STRING);
+
+			String original = matcher.group(2);
 
 			try
 			{
 				MessageDigest digest = MessageDigest.getInstance("SHA-256");
-				byte[] sha256Hash = digest.digest(dicPseudonym.getBytes(StandardCharsets.UTF_8));
+				byte[] sha256Hash = digest.digest(original.getBytes(StandardCharsets.UTF_8));
 				return Optional.of(Base64.getEncoder().encodeToString(sha256Hash));
 			}
 			catch (NoSuchAlgorithmException e)

@@ -71,7 +71,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	{
 		Objects.requireNonNull(dicSourceAndPseudonym, "dicSourceAndPseudonym");
 
-		logger.info("Requesting CRR pseudonym from {} ...", fttpServerBase);
+		logger.info("Requesting CRR pseudonym from {} ...", dicSourceAndPseudonym);
 
 		try
 		{
@@ -97,11 +97,11 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 			throw new IllegalArgumentException("DIC pseudonym not matching " + PSEUDONYM_PATTERN_STRING);
 
 		String source = matcher.group(1);
-		String psn = matcher.group(2);
+		String original = matcher.group(2);
 
 		Parameters p = new Parameters();
 		p.addParameter("study", fttpStudy);
-		p.addParameter("original", psn);
+		p.addParameter("original", original);
 		p.addParameter("source", source);
 		p.addParameter("target", fttpTarget);
 		p.addParameter("apikey", fttpApiKey);

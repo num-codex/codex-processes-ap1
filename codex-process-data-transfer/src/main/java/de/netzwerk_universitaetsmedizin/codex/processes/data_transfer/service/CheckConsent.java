@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
@@ -15,7 +16,7 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -54,32 +55,40 @@ public class CheckConsent extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		boolean usageAndTransferGranted = getPseudonym(task).map(this::usageAndTrransferGranted).orElse(false);
+		Optional<String> dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
+
+		boolean usageAndTransferGranted = dicSourceAndPseudonym.map(this::usageAndTrransferGranted).orElse(false);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
 				Variables.booleanValue(usageAndTransferGranted));
+
+		if (usageAndTransferGranted)
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
+					Variables.stringValue(dicSourceAndPseudonym.get()));
 	}
 
-	protected boolean usageAndTrransferGranted(String dicPseudonym)
+	protected boolean usageAndTrransferGranted(String dicSourceAndPseudonym)
 	{
-		List<String> consentOids = consentClientFactory.getConsentClient().getConsentOidsFor(dicPseudonym);
+		List<String> consentOids = consentClientFactory.getConsentClient().getConsentOidsFor(dicSourceAndPseudonym);
 
 		boolean usageAndTransferGranted = consentOids.contains(usageGrantedOid)
 				&& consentOids.contains(transferGrantedOid);
 
 		if (usageAndTransferGranted)
-			logger.info("Usage and transfer granted for pseudonym {}", dicPseudonym);
+			logger.info("Usage and transfer granted for pseudonym {}", dicSourceAndPseudonym);
 		else
-			logger.warn("Usage or transfer not granted for pseudonym {}", dicPseudonym);
+			logger.warn("Usage or transfer not granted for pseudonym {}", dicSourceAndPseudonym);
 
 		return usageAndTransferGranted;
 	}
 
-	private Optional<String> getPseudonym(Task task)
+	private Optional<String> getDicSourceAndPseudonym(Task task)
 	{
-		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, StringType.class).findFirst()
-						.map(StringType::getValue);
+		Optional<String> value = getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
+						.map(Identifier::getValue);
+
+		return value;
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

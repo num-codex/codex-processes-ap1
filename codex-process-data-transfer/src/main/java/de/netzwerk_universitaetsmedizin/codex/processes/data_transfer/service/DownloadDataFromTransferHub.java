@@ -3,7 +3,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
-import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
 
 import java.io.InputStream;
 import java.util.Optional;
@@ -43,7 +42,7 @@ public class DownloadDataFromTransferHub extends AbstractServiceDelegate
 
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(id.getBaseUrl());
 
-		try (InputStream binary = readBinaryResource(client, id.getIdPart()))
+		try (InputStream binary = readBinaryResource(client, id.getIdPart(), id.getVersionIdPart()))
 		{
 			byte[] encrypted = binary.readAllBytes();
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
@@ -65,13 +64,15 @@ public class DownloadDataFromTransferHub extends AbstractServiceDelegate
 				.map(c -> type.cast(c.getValue()));
 	}
 
-
-	private InputStream readBinaryResource(FhirWebserviceClient client, String id)
+	private InputStream readBinaryResource(FhirWebserviceClient client, String id, String version)
 	{
 		try
 		{
-			logger.info("Reading binary from {} with id {}", client.getBaseUrl(), id);
-			return client.readBinary(id, MediaType.valueOf(OPENEHR_MIMETYPE_JSON));
+			logger.info("Reading binary from {} with id {}/{}", client.getBaseUrl(), id, version);
+			if (version != null && !version.isEmpty())
+				return client.readBinary(id, version, MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM));
+			else
+				return client.readBinary(id, MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM));
 		}
 		catch (Exception e)
 		{

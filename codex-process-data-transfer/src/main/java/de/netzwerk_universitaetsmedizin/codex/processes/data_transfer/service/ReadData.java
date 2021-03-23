@@ -22,9 +22,9 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -80,8 +80,8 @@ public class ReadData extends AbstractServiceDelegate
 	private Optional<String> getPseudonym(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, StringType.class).findFirst()
-						.map(StringType::getValue);
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
+						.map(Identifier::getValue);
 	}
 
 	private Optional<DateTimeType> getExportFrom(Task task)

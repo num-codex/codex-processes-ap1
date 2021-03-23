@@ -6,6 +6,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -56,10 +57,12 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 	{
 		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
 
+		Objects.requireNonNull(pseudonym, "pseudonym");
+
 		ParameterComponent param = new ParameterComponent();
 		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM);
-		param.setValue(new Identifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+		param.setValue(new Identifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM)
 				.setValue(pseudonym));
 		return param;
 	}
@@ -67,6 +70,8 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 	private ParameterComponent dataReferenceParameter(DelegateExecution execution)
 	{
 		String binaryReference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL);
+
+		Objects.requireNonNull(binaryReference, "binaryReference");
 
 		ParameterComponent param = new ParameterComponent();
 		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
