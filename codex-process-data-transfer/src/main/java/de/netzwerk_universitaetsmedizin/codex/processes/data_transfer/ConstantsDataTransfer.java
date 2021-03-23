@@ -14,7 +14,7 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
 	String BPMN_EXECUTION_VARIABLE_BINARY_URL = "binaryUrl";
 
-	String NAMING_SYSTEM_NUM_CODEX_DIZ_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym";
+	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/crr-pseudonym";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER = "http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer";

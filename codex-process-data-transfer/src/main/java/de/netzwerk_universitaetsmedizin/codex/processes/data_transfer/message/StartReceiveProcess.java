@@ -59,7 +59,7 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 		ParameterComponent param = new ParameterComponent();
 		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM);
-		param.setValue(new Identifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIZ_PSEUDONYM)
+		param.setValue(new Identifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
 				.setValue(pseudonym));
 		return param;
 	}

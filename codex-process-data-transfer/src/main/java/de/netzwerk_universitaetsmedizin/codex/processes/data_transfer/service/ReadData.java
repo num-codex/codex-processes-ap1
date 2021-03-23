@@ -5,7 +5,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIZ_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -66,13 +66,13 @@ public class ReadData extends AbstractServiceDelegate
 		b.setType(BundleType.TRANSACTION);
 
 		Patient p = new Patient();
-		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIZ_PSEUDONYM).setValue(pseudonym);
+		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
 
 		BundleEntryComponent pEntry = b.addEntry();
 		pEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 		pEntry.setResource(p);
 		pEntry.getRequest().setMethod(HTTPVerb.PUT)
-				.setUrl("Patient?identifier=" + NAMING_SYSTEM_NUM_CODEX_DIZ_PSEUDONYM + "|" + pseudonym);
+				.setUrl("Patient?identifier=" + NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 
 		return b;
 	}
