@@ -77,6 +77,8 @@ services:
   dic-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
+    ports:
+     - 127.0.0.1:5003:5003
     volumes:
     - type: bind
       source: ./dic/bpe/app/conf
@@ -98,6 +100,7 @@ services:
       target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -189,6 +192,8 @@ services:
   gth-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
+    ports:
+     - 127.0.0.1:5004:5004
     volumes:
     - type: bind
       source: ./gth/bpe/app/conf
@@ -210,7 +215,7 @@ services:
       target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
-      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
     networks:
       gth-bpe-frontend:
       gth-bpe-backend:
@@ -302,6 +307,8 @@ services:
   crr-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
+    ports:
+     - 127.0.0.1:5005:5005
     volumes:
     - type: bind
       source: ./crr/bpe/app/conf
@@ -323,6 +330,7 @@ services:
       target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
