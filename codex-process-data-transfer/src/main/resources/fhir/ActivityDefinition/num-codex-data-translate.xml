@@ -44,7 +44,7 @@
 		</extension>
 	</extension>
 	<url
-		value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate" />
+		value="http://highmed.org/bpe/Process/dataTranslate" />
 	<!-- version managed by bpe -->
 	<version value="${version}" />
 	<name value="dataTranslate" />
