@@ -36,7 +36,6 @@ import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -193,7 +192,7 @@ public class TaskProfileTest
 	public void testTaskStartDataSendValidWithExportFrom() throws Exception
 	{
 		Task task = createValidTaskStartDataSend();
-		task.addInput().setValue(new DateType(new Date(), TemporalPrecisionEnum.DAY)).getType().addCoding()
+		task.addInput().setValue(new DateTimeType(new Date(), TemporalPrecisionEnum.DAY)).getType().addCoding()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM);
 		logTask(task);
