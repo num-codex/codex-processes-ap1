@@ -5,7 +5,7 @@ services:
     image: haproxy:2.3
     restart: on-failure
     ports:
-    - 443:443
+    - 127.0.0.1:443:443
     volumes:
     - type: bind
       source: ./ingress/conf
@@ -55,8 +55,6 @@ services:
   dic-fhir-db:
     image: postgres:13
     restart: on-failure
-    ports:
-    - 5432:5432
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
       interval: 10s
@@ -142,7 +140,7 @@ services:
       APP_SERVER_IP: gth-fhir-app
     networks:
       internet:
-        ipv4_address: 172.10.0.5
+        ipv4_address: 172.10.0.4
         aliases:
         - gth
       gth-fhir-frontend:
@@ -169,8 +167,6 @@ services:
   gth-fhir-db:
     image: postgres:13
     restart: on-failure
-    ports:
-    - 5432:5432
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
       interval: 10s
@@ -193,8 +189,6 @@ services:
   gth-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
-    ports:
-    - 5005:5005
     volumes:
     - type: bind
       source: ./gth/bpe/app/conf
@@ -221,7 +215,7 @@ services:
       gth-bpe-frontend:
       gth-bpe-backend:
       internet:
-        ipv4_address: 172.10.0.105
+        ipv4_address: 172.10.0.104
     depends_on:
     - gth-bpe-db
     - gth-fhir-proxy
@@ -259,7 +253,7 @@ services:
       APP_SERVER_IP: crr-fhir-app
     networks:
       internet:
-        ipv4_address: 172.10.0.3
+        ipv4_address: 172.10.0.5
         aliases:
         - crr
       crr-fhir-frontend:
@@ -286,8 +280,6 @@ services:
   crr-fhir-db:
     image: postgres:13
     restart: on-failure
-    ports:
-    - 5432:5432
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
       interval: 10s
@@ -335,7 +327,7 @@ services:
       crr-bpe-frontend:
       crr-bpe-backend:
       internet:
-        ipv4_address: 172.10.0.103
+        ipv4_address: 172.10.0.105
     depends_on:
     - crr-bpe-db
     - crr-fhir-proxy
