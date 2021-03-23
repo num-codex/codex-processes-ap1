@@ -71,7 +71,7 @@
     <element id="Task.input:pseudonym.value[x].system">
       <path value="Task.input.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/diz-pseudonym" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym" />
     </element>
     <element id="Task.input:pseudonym.value[x].value">
       <path value="Task.input.value[x].value" />
@@ -80,6 +80,7 @@
     <element id="Task.input:export-from">
       <path value="Task.input" />
       <sliceName value="export-from" />
+      <min value="0" />
       <max value="1" />
     </element>
     <element id="Task.input:export-from.type">

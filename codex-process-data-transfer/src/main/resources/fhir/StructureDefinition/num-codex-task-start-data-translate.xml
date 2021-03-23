@@ -21,7 +21,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/${version}" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/${version}" />
     </element>
     <element id="Task.input">
       <path value="Task.input" />
@@ -83,7 +83,7 @@
     <element id="Task.input:pseudonym.value[x].system">
       <path value="Task.input.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/diz-pseudonym" />
+      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym" />
     </element>
     <element id="Task.input:pseudonym.value[x].value">
       <path value="Task.input.value[x].value" />
