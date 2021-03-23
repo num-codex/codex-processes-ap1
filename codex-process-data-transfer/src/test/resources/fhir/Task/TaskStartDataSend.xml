@@ -1,0 +1,55 @@
+<Task xmlns="http://hl7.org/fhir">
+   <meta>
+      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
+   </meta>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.1.0"></instantiatesUri>
+   <status value="requested"></status>
+   <intent value="order"></intent>
+   <authoredOn value="2021-03-23T19:13:20+01:00"></authoredOn>
+   <requester>
+      <type value="Organization"></type>
+      <identifier>
+         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+         <value value="Test_DIC"></value>
+      </identifier>
+   </requester>
+   <restriction>
+      <recipient>
+         <type value="Organization"></type>
+         <identifier>
+            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+            <value value="Test_DIC"></value>
+         </identifier>
+      </recipient>
+   </restriction>
+   <input>
+      <type>
+         <coding>
+            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
+            <code value="message-name"></code>
+         </coding>
+      </type>
+      <valueString value="startDataSend"></valueString>
+   </input>
+   <input>
+      <type>
+         <coding>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <code value="pseudonym"></code>
+         </coding>
+      </type>
+      <valueIdentifier>
+         <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"></system>
+         <value value="source/original"></value>
+      </valueIdentifier>
+   </input>
+   <input>
+      <type>
+         <coding>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <code value="export-to"></code>
+         </coding>
+      </type>
+      <valueInstant value="2021-03-23T19:13:20.900+01:00"></valueInstant>
+   </input>
+</Task>
