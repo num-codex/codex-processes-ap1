@@ -54,12 +54,19 @@
         <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
       </binding>
     </element>
+    <element id="Task.input:pseudonym.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.input:pseudonym.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
     </element>
     <element id="Task.input:pseudonym.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="pseudonym" />
     </element>
     <element id="Task.input:pseudonym.value[x]">

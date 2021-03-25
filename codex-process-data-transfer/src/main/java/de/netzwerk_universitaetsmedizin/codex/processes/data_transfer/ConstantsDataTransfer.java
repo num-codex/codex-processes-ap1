@@ -7,6 +7,7 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_PSEUDONYMS_LIST = "pseudonyms";
 	String BPMN_EXECUTION_VARIABLE_PSEUDONYM = "pseudonym";
 	String BPMN_EXECUTION_VARIABLE_STOP_TIMER = "stopTimer";
+	String BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO = "lastExportTo";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_FROM = "exportFrom";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION = "exportFromPrecision";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_TO = "exportTo";

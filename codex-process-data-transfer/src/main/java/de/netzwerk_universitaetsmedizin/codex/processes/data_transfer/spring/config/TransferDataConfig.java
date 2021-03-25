@@ -30,10 +30,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Fi
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadLastExecutionTime;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveBusinessKey;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExecutionTime;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr;
@@ -160,18 +158,6 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public SaveBusinessKey saveBusinessKey()
-	{
-		return new SaveBusinessKey(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
-	public ReadLastExecutionTime readLastExecutionTime()
-	{
-		return new ReadLastExecutionTime(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
 	public FindNewData findNewData()
 	{
 		return new FindNewData(fhirClientProvider, taskHelper, organizationProvider, fhirClientFactory());
@@ -184,15 +170,15 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public SaveLastExecutionTime saveLastExecutionTime()
-	{
-		return new SaveLastExecutionTime(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
 	public StopTimer stopTimer()
 	{
 		return new StopTimer(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public SaveLastExportTo saveLastExportTo()
+	{
+		return new SaveLastExportTo(fhirClientProvider, taskHelper);
 	}
 
 	// numCodexDataSend
