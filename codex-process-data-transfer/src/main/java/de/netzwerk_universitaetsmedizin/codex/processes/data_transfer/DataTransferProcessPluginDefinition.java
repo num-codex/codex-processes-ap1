@@ -16,10 +16,11 @@ import org.highmed.dsf.fhir.resources.ValueSetResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
-	public static final String VERSION = "0.1.0";
+	public static final String VERSION = "0.2.0";
 
 	@Override
 	public String getName()
@@ -42,7 +43,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(TransferDataConfig.class);
+		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class);
 	}
 
 	@Override
