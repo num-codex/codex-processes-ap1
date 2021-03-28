@@ -81,7 +81,7 @@ public class EncryptData extends AbstractServiceDelegate
 	private byte[] toByteArray(String pseudonym, Bundle bundle) throws IOException
 	{
 		String bundleString = fhirContext.newJsonParser().encodeResourceToString(bundle);
-		
+
 		return bundleString.replace(pseudonym, PSEUDONYM_PLACEHOLDER)
 				.replace(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM)
 				.getBytes(StandardCharsets.UTF_8);
