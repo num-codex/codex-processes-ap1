@@ -36,9 +36,9 @@ import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
 import ca.uhn.fhir.rest.gclient.IValidate;
 
-public class FhirClientFactory
+public class HapiFhirClientFactory
 {
-	private static final Logger logger = LoggerFactory.getLogger(FhirClientFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(HapiFhirClientFactory.class);
 
 	private final FhirContext fhirContext;
 	private final String serverBase;
@@ -58,7 +58,7 @@ public class FhirClientFactory
 	 * @param bearerToken
 	 *            may be <code>null</code>
 	 */
-	public FhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
+	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
 			String basicAuthPassword, String bearerToken)
 	{
 		if (fhirContext != null)

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
@@ -111,9 +111,9 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public FhirClientFactory fhirClientFactory()
+	public HapiFhirClientFactory fhirClientFactory()
 	{
-		return new FhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
+		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
 				fhirStoreBearerToken);
 	}
 

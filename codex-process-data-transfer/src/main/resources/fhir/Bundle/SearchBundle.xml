@@ -1,0 +1,381 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <type value="transaction"/>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-kidney-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-liver-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-neurological-mental-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/complications-covid-19"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/dependence-on-ventilator"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/diabetes-mellitus"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/diagnosis-covid-19"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/gastrointestinal-ulcers"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/gecco-base-condition"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/human-immunodeficiency-virus-infection"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/malignant-neoplastic-disease"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/organ-recipient"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/rheumatological-immunological-diseases"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/symptoms-covid-19"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Consent?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/do-not-resuscitate-order"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="DiagnosticReport?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/diagnostic-report-radiology"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Immunization?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/immunization"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="MedicationStatement?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pharmacological-therapy"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="MedicationStatement?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pharmacological-therapy-ace-inhibitors"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="MedicationStatement?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pharmacological-therapy-anticoagulants"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="MedicationStatement?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pharmacological-therapy-immunoglobulins"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-pressure"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/body-height"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/body-temperature"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/body-weight"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/carbon-dioxide-partial-pressure"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/discharge-disposition"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/frailty-score"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/heart-rate"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/history-of-travel"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/inhaled-oxygen-concentration"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/interventional-clinical-trial-participation"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/known-exposure"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/oxygen-partial-pressure"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/oxygen-saturation"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pH"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/patient-in-icu"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pregnancy-status"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/respiratory-rate"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-ab-pnl-ser-pl-ia"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-ab-ser-pl-ia-acnc"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-ab-ser-pl-ql-ia"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-iga-ser-pl-ia-acnc"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-iga-ser-pl-ql-ia"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-igg-ser-pl-ia-acnc"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-igg-ser-pl-ql-ia"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-igm-ser-pl-ia-acnc"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-igm-ser-pl-ql-ia"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sex-assigned-at-birth"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/smoking-status"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sofa-score"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/study-inclusion-covid-19"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Patient?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/apheresis"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/dialysis"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/extracorporeal-membrane-oxygenation"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/prone-position"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/radiology-procedures"/>
+      </request>
+   </entry>
+   <entry>
+      <request>
+         <method value="GET"/>
+         <url value="Procedure?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/respiratory-therapies"/>
+      </request>
+   </entry>
+</Bundle>

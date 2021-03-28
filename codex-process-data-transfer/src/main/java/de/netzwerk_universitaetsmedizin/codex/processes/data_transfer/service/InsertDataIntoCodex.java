@@ -13,16 +13,16 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final FhirClientFactory localFhirStoreClientFactory;
+	private final HapiFhirClientFactory localFhirStoreClientFactory;
 
 	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			FhirClientFactory localFhirStoreClientFactory)
+			HapiFhirClientFactory localFhirStoreClientFactory)
 	{
 		super(clientProvider, taskHelper);
 
