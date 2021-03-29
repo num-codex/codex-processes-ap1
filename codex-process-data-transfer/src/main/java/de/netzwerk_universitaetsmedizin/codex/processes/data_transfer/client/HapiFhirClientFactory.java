@@ -45,6 +45,7 @@ public class HapiFhirClientFactory
 	private final String basicAuthUsername;
 	private final String basicAuthPassword;
 	private final String bearerToken;
+	private final boolean supportsIdentifierReferenceSearch;
 
 	/**
 	 * @param fhirContext
@@ -57,9 +58,10 @@ public class HapiFhirClientFactory
 	 *            may be <code>null</code>
 	 * @param bearerToken
 	 *            may be <code>null</code>
+	 * @param supportsIdentifierReferenceSearch
 	 */
 	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
-			String basicAuthPassword, String bearerToken)
+			String basicAuthPassword, String bearerToken, boolean supportsIdentifierReferenceSearch)
 	{
 		if (fhirContext != null)
 			this.fhirContext = fhirContext;
@@ -70,9 +72,15 @@ public class HapiFhirClientFactory
 		this.basicAuthUsername = basicAuthUsername;
 		this.basicAuthPassword = basicAuthPassword;
 		this.bearerToken = bearerToken;
+		this.supportsIdentifierReferenceSearch = supportsIdentifierReferenceSearch;
 	}
 
-	private boolean isConfigured()
+	public boolean supportsIdentifierReferenceSearch()
+	{
+		return supportsIdentifierReferenceSearch;
+	}
+
+	protected boolean isConfigured()
 	{
 		return serverBase != null && !serverBase.isEmpty();
 	}

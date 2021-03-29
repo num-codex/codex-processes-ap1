@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
@@ -104,7 +105,7 @@ public class FhirClientImpl implements FhirClient
 	 */
 	private Bundle getSearchBundle(DateWithPrecision exportFrom, Date exportTo)
 	{
-		return doGetSearchBundle(null, exportFrom, exportTo, true);
+		return doGetSearchBundle(null, null, exportFrom, exportTo, true);
 	}
 
 	/**
@@ -116,12 +117,30 @@ public class FhirClientImpl implements FhirClient
 	 *            not <code>null</code>
 	 * @return
 	 */
-	private Bundle getSearchBundle(String pseudonym, DateWithPrecision exportFrom, Date exportTo)
+	private Bundle getSearchBundleWithPseudonym(String pseudonym, DateWithPrecision exportFrom, Date exportTo)
 	{
-		return doGetSearchBundle(pseudonym, exportFrom, exportTo, false);
+		Objects.requireNonNull(pseudonym, "pseudonym");
+
+		return doGetSearchBundle(null, pseudonym, exportFrom, exportTo, false);
 	}
 
-	private Bundle doGetSearchBundle(String pseudonym, DateWithPrecision exportFrom, Date exportTo,
+	/**
+	 * @param patientId
+	 *            not <code>null</code>
+	 * @param exportFrom
+	 *            may be <code>null</code>
+	 * @param exportTo
+	 *            not <code>null</code>
+	 * @return
+	 */
+	private Bundle getSearchBundleWithPatientId(String patientId, DateWithPrecision exportFrom, Date exportTo)
+	{
+		Objects.requireNonNull(patientId, "patientId");
+
+		return doGetSearchBundle(patientId, null, exportFrom, exportTo, false);
+	}
+
+	private Bundle doGetSearchBundle(String patientId, String pseudonym, DateWithPrecision exportFrom, Date exportTo,
 			boolean includePatient)
 	{
 		Objects.requireNonNull(exportTo, "exportTo");
@@ -134,13 +153,17 @@ public class FhirClientImpl implements FhirClient
 			throw new RuntimeException("Search-Bundle type not batch or transaction");
 		}
 
-		bundle.getEntry().forEach(modifySearchUrl(pseudonym, exportFrom, exportTo, includePatient));
+		List<BundleEntryComponent> entries = bundle.getEntry().stream()
+				.map(modifySearchUrl(patientId, pseudonym, exportFrom, exportTo, includePatient)).filter(e -> e != null)
+				.collect(Collectors.toList());
+
+		bundle.setEntry(entries);
 
 		return bundle;
 	}
 
-	private Consumer<? super BundleEntryComponent> modifySearchUrl(String pseudonym, DateWithPrecision exportFrom,
-			Date exportTo, boolean includePatient)
+	private Function<BundleEntryComponent, BundleEntryComponent> modifySearchUrl(String patientId, String pseudonym,
+			DateWithPrecision exportFrom, Date exportTo, boolean includePatient)
 	{
 		return entry ->
 		{
@@ -163,13 +186,20 @@ public class FhirClientImpl implements FhirClient
 
 			if (RESOURCES_WITH_PATIENT_REF.contains(resource))
 			{
-				query += createPatPrefixPseudonymSearchUrlPart(pseudonym);
+				if (patientId != null)
+					query += createPatIdSearchUrlPart(patientId);
+				else
+					query += createPatPrefixPseudonymSearchUrlPart(pseudonym);
 
 				if (includePatient)
 					query += createIncludeSearchUrlPart(resource);
 			}
 			else if ("Patient".equals(resource))
 			{
+				// filtering search for patient if patient id known
+				if (patientId != null)
+					return null;
+
 				query += createPseudonymSearchUrlPart(pseudonym);
 			}
 			else
@@ -185,6 +215,8 @@ public class FhirClientImpl implements FhirClient
 			query += createExportToSearchUrlPart(exportTo);
 
 			entry.getRequest().setUrl(resource + query);
+
+			return entry;
 		};
 	}
 
@@ -192,6 +224,14 @@ public class FhirClientImpl implements FhirClient
 	{
 		if (pseudonym != null && !pseudonym.isBlank())
 			return "&identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+		else
+			return "";
+	}
+
+	private String createPatIdSearchUrlPart(String patientId)
+	{
+		if (patientId != null && !patientId.isBlank())
+			return "&patient=" + patientId;
 		else
 			return "";
 	}
@@ -279,7 +319,7 @@ public class FhirClientImpl implements FhirClient
 			{
 				try (InputStream in = FhirClientImpl.class.getResourceAsStream("/fhir/Bundle/SearchBundle.xml"))
 				{
-					logger.warn("Using internal Search-Bundle");
+					logger.info("Using internal Search-Bundle");
 					return fhirContext.newXmlParser().parseResource(Bundle.class, in);
 				}
 
@@ -301,7 +341,8 @@ public class FhirClientImpl implements FhirClient
 			logger.debug("Executing Search-Bundle: {}",
 					fhirContext.newJsonParser().encodeResourceToString(searchBundle));
 
-		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle).execute();
+		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
@@ -352,7 +393,8 @@ public class FhirClientImpl implements FhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Executing search: {}", url);
 
-		Bundle resultBundle = (Bundle) clientFactory.getFhirStoreClient().search().byUrl(url).execute();
+		Bundle resultBundle = (Bundle) clientFactory.getFhirStoreClient().search().byUrl(url)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
@@ -363,19 +405,68 @@ public class FhirClientImpl implements FhirClient
 	@Override
 	public Stream<DomainResource> getNewData(String pseudonym, DateWithPrecision exportFrom, Date exportTo)
 	{
-		Bundle searchBundle = getSearchBundle(pseudonym, exportFrom, exportTo);
+		if (clientFactory.supportsIdentifierReferenceSearch())
+			return getNewDataWithIdentifierReferenceSupport(pseudonym, exportFrom, exportTo);
+		else
+			return getNewDataWithoutIdentifierReferenceSupport(pseudonym, exportFrom, exportTo);
+	}
+
+	private Stream<DomainResource> getNewDataWithIdentifierReferenceSupport(String pseudonym,
+			DateWithPrecision exportFrom, Date exportTo)
+	{
+		Bundle searchBundle = getSearchBundleWithPseudonym(pseudonym, exportFrom, exportTo);
 
 		if (logger.isDebugEnabled())
 			logger.debug("Executing Search-Bundle: {}",
 					fhirContext.newJsonParser().encodeResourceToString(searchBundle));
 
-		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle).execute();
+		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
 		return resultBundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
 				.map(e -> (Bundle) e.getResource()).flatMap(this::getDomainResources);
+	}
+
+	private Stream<DomainResource> getNewDataWithoutIdentifierReferenceSupport(String pseudonym,
+			DateWithPrecision exportFrom, Date exportTo)
+	{
+		Bundle patientBundle = (Bundle) clientFactory.getFhirStoreClient().search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, pseudonym))
+				.execute();
+
+		if (logger.isDebugEnabled())
+			logger.debug("Patient search-bundle result: {}",
+					fhirContext.newJsonParser().encodeResourceToString(patientBundle));
+
+		if (patientBundle.getTotal() != 1 || !(patientBundle.getEntryFirstRep().getResource() instanceof Patient))
+		{
+			logger.warn(
+					"Error while retrieving patient for pseudonym {}, result bundle total not 1 or first entry not patient",
+					pseudonym);
+			throw new RuntimeException("Error while retrieving patient for pseudonym " + pseudonym);
+		}
+
+		Patient patient = (Patient) patientBundle.getEntryFirstRep().getResource();
+
+		Bundle searchBundle = getSearchBundleWithPatientId(patient.getIdElement().getIdPart(), exportFrom, exportTo);
+
+		if (logger.isDebugEnabled())
+			logger.debug("Executing Search-Bundle: {}",
+					fhirContext.newJsonParser().encodeResourceToString(searchBundle));
+
+		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
+
+		if (logger.isDebugEnabled())
+			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
+
+		return Stream.concat(Stream.of(patient),
+				resultBundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
+						.map(e -> (Bundle) e.getResource()).flatMap(this::getDomainResources));
 	}
 
 	private Stream<DomainResource> getDomainResources(Bundle bundle)
@@ -392,7 +483,7 @@ public class FhirClientImpl implements FhirClient
 	private Stream<DomainResource> getDomainResourcesFromBundle(Bundle bundle)
 	{
 		return bundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof DomainResource)
-				.map(e -> (Patient) e.getResource());
+				.map(e -> (DomainResource) e.getResource());
 	}
 
 	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
@@ -410,6 +501,7 @@ public class FhirClientImpl implements FhirClient
 	@Override
 	public void storeBundle(Bundle bundle)
 	{
-		clientFactory.getFhirStoreClient().transaction().withBundle(bundle).execute();
+		clientFactory.getFhirStoreClient().transaction().withBundle(bundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 	}
 }

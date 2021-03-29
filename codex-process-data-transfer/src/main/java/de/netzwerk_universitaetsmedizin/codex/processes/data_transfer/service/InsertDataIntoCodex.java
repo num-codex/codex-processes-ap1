@@ -13,16 +13,16 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final HapiFhirClientFactory localFhirStoreClientFactory;
+	private final FhirClientFactory localFhirStoreClientFactory;
 
 	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			HapiFhirClientFactory localFhirStoreClientFactory)
+			FhirClientFactory localFhirStoreClientFactory)
 	{
 		super(clientProvider, taskHelper);
 
@@ -45,7 +45,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		try
 		{
 			logger.info("Executing bundle against FHIR store ...");
-			localFhirStoreClientFactory.getFhirStoreClient().transaction().withBundle(bundle).execute();
+			localFhirStoreClientFactory.getFhirClient().storeBundle(bundle);
 		}
 		catch (Exception e)
 		{
