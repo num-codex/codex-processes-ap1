@@ -1,439 +1,105 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.rest.gclient.ICreate;
-import ca.uhn.fhir.rest.gclient.IDelete;
-import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
-import ca.uhn.fhir.rest.gclient.IGetPage;
-import ca.uhn.fhir.rest.gclient.IHistory;
-import ca.uhn.fhir.rest.gclient.IMeta;
-import ca.uhn.fhir.rest.gclient.IOperation;
-import ca.uhn.fhir.rest.gclient.IPatch;
-import ca.uhn.fhir.rest.gclient.IRead;
-import ca.uhn.fhir.rest.gclient.ITransaction;
-import ca.uhn.fhir.rest.gclient.ITransactionTyped;
-import ca.uhn.fhir.rest.gclient.IUntypedQuery;
-import ca.uhn.fhir.rest.gclient.IUpdate;
-import ca.uhn.fhir.rest.gclient.IValidate;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
 
 public class FhirClientFactory
 {
+	private static final String condition = "{\"resourceType\":\"Condition\",\"meta\":{\"profile\":[\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases\"]},\"clinicalStatus\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/condition-clinical\",\"code\":\"active\",\"display\":\"Active\"}]},\"verificationStatus\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/condition-ver-status\",\"code\":\"confirmed\",\"display\":\"Confirmed\"},{\"system\":\"http://snomed.info/sct\",\"code\":\"410605003\",\"display\":\"Confirmed present (qualifier value)\"}]},\"category\":[{\"coding\":[{\"system\":\"http://snomed.info/sct\",\"code\":\"418112009\",\"display\":\"Pulmonary medicine\"}]}],\"code\":{\"coding\":[{\"system\":\"http://snomed.info/sct\",\"code\":\"413839001\",\"display\":\"Chronic lung disease\"}]},\"recordedDate\":\"2020-11-10T15:50:41+01:00\"}";
+	private static final String patient = "{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient\"]},\"extension\":[{\"url\":\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/ethnic-group\",\"valueCoding\":{\"system\":\"http://snomed.info/sct\",\"code\":\"186019001\",\"display\":\"Other ethnic, mixed origin\"}},{\"url\":\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/age\",\"extension\":[{\"url\":\"dateTimeOfDocumentation\",\"valueDateTime\":\"2020-10-01\"},{\"url\":\"age\",\"valueAge\":{\"value\":67,\"unit\":\"years\",\"system\":\"http://unitsofmeasure.org\",\"code\":\"a\"}}]}],\"birthDate\":\"1953-09-30\"}";
+	private static final String observation = "{\"resourceType\":\"Observation\",\"meta\":{\"profile\":[\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr\"]},\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"OBI\"}]}}],\"status\":\"final\",\"category\":[{\"coding\":[{\"system\":\"http://loinc.org\",\"code\":\"26436-6\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/observation-category\",\"code\":\"laboratory\"}]}],\"code\":{\"coding\":[{\"system\":\"http://loinc.org\",\"code\":\"94500-6\",\"display\":\"SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory specimen by NAA with probe detection\"}],\"text\":\"SARS-CoV-2-RNA (PCR)\"},\"effectiveDateTime\":\"2020-11-10T15:50:41+01:00\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"http://snomed.info/sct\",\"code\":\"260373001\",\"display\":\"Detected (qualifier value)\"}],\"text\":\"SARS-CoV-2-RNA positiv\"}}";
+
 	private static final Logger logger = LoggerFactory.getLogger(FhirClientFactory.class);
 
+	private final HapiFhirClientFactory hapiClientFactory;
 	private final FhirContext fhirContext;
-	private final String serverBase;
-	private final String basicAuthUsername;
-	private final String basicAuthPassword;
-	private final String bearerToken;
+	private final Path searchBundleOverride;
+	private final String localIdentifierValue;
 
-	/**
-	 * @param fhirContext
-	 *            may be <code>null</code>, will use new {@link FhirContext#forR4()} if <code>null</code>
-	 * @param serverBase
-	 *            may be <code>null</code>
-	 * @param basicAuthUsername
-	 *            may be <code>null</code>
-	 * @param basicAuthPassword
-	 *            may be <code>null</code>
-	 * @param bearerToken
-	 *            may be <code>null</code>
-	 */
-	public FhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
-			String basicAuthPassword, String bearerToken)
+	public FhirClientFactory(HapiFhirClientFactory hapiClientFactory, FhirContext fhirContext,
+			Path searchBundleOverride, String localIdentifierValue)
 	{
-		if (fhirContext != null)
-			this.fhirContext = fhirContext;
+		this.hapiClientFactory = hapiClientFactory;
+		this.fhirContext = fhirContext;
+		this.searchBundleOverride = searchBundleOverride;
+		this.localIdentifierValue = localIdentifierValue;
+	}
+
+	public FhirClient getFhirClient()
+	{
+		if (hapiClientFactory.isConfigured())
+			return new FhirClientImpl(hapiClientFactory, fhirContext, searchBundleOverride);
 		else
-			this.fhirContext = FhirContext.forR4();
-
-		this.serverBase = serverBase;
-		this.basicAuthUsername = basicAuthUsername;
-		this.basicAuthPassword = basicAuthPassword;
-		this.bearerToken = bearerToken;
+			return createFhirClientStub();
 	}
 
-	private boolean isConfigured()
+	private FhirClient createFhirClientStub()
 	{
-		return serverBase != null && !serverBase.isEmpty();
-	}
-
-	public IGenericClient getFhirStoreClient()
-	{
-		if (isConfigured())
-		{
-			IGenericClient client = fhirContext.newRestfulGenericClient(serverBase);
-			configureBasicAuthInterceptor(client);
-			configureBearerTokenAuthInterceptor(client);
-			return client;
-		}
-		else
-		{
-			return createFhirStoreClientStub();
-		}
-	}
-
-	private IGenericClient createFhirStoreClientStub()
-	{
-		return new IGenericClient()
+		return new FhirClient()
 		{
 			@Override
-			public void setSummary(SummaryEnum theSummary)
+			public void storeBundle(Bundle bundle)
 			{
-				throw new UnsupportedOperationException("Not implemented");
+				logger.warn("Ignoring bundle with {} {}", bundle.getEntry().size(),
+						bundle.getEntry().size() != 1 ? "entries" : "entry");
+
+				if (logger.isDebugEnabled())
+					logger.debug("Ignored bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 			}
 
 			@Override
-			public void setPrettyPrint(Boolean thePrettyPrint)
+			public PseudonymList getPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
 			{
-				throw new UnsupportedOperationException("Not implemented");
+				logger.warn("Returning demo pseudonyms for {}", localIdentifierValue);
+
+				List<String> pseudonyms;
+				if ("charite-tmptst.de".equals(localIdentifierValue))
+					pseudonyms = Arrays.asList("dic_berlin/dic_CT6E6", "dic_berlin/dic_9LDA5");
+				else if ("klinikum.uni-heidelberg.de".equals(localIdentifierValue))
+					pseudonyms = Arrays.asList("dic_heidelberg/dic_3YKQW", "dic_heidelberg/dic_RPRM3");
+				else
+					pseudonyms = Arrays.asList("foo/bar", "baz/qux");
+
+				return new PseudonymList(pseudonyms);
 			}
 
 			@Override
-			public void setInterceptorService(IInterceptorService theInterceptorService)
+			public Stream<DomainResource> getNewData(String pseudonym, DateWithPrecision exportFrom, Date exportTo)
 			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
+				logger.warn("Returning demo resources for {}", pseudonym);
 
-			@Override
-			public void setFormatParamStyle(RequestFormatParamStyleEnum theRequestFormatParamStyle)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
+				Patient p = fhirContext.newJsonParser().parseResource(Patient.class, patient);
+				p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+						.setValue(pseudonym);
+				p.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
 
-			@Override
-			public void setEncoding(EncodingEnum theEncoding)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
+				Condition c = fhirContext.newJsonParser().parseResource(Condition.class, condition);
+				c.setSubject(new Reference(p.getIdElement()));
 
-			@Override
-			public String getServerBase()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
+				Observation o = fhirContext.newJsonParser().parseResource(Observation.class, observation);
+				o.setSubject(new Reference(p.getIdElement()));
 
-			@Override
-			public IInterceptorService getInterceptorService()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IHttpClient getHttpClient()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public FhirContext getFhirContext()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public EncodingEnum getEncoding()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseResource> T vread(Class<T> theType, IdDt theId)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public MethodOutcome validate(IBaseResource theResource)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IValidate validate()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public MethodOutcome update(String theId, IBaseResource theResource)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public MethodOutcome update(IdDt theId, IBaseResource theResource)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IUpdate update()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public void unregisterInterceptor(Object theInterceptor)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public ITransaction transaction()
-			{
-				return new ITransaction()
-				{
-					@Override
-					public ITransactionTyped<List<IBaseResource>> withResources(
-							List<? extends IBaseResource> theResources)
-					{
-						throw new UnsupportedOperationException("Not implemented");
-					}
-
-					@Override
-					public ITransactionTyped<String> withBundle(String theBundle)
-					{
-						throw new UnsupportedOperationException("Not implemented");
-					}
-
-					@Override
-					public <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundleResource)
-					{
-						return new ITransactionTyped<T>()
-						{
-							@Override
-							public ITransactionTyped<T> andLogRequestAndResponse(boolean theLogRequestAndResponse)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> cacheControl(CacheControlDirective theCacheControlDirective)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> elementsSubset(String... theElements)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> encoded(EncodingEnum theEncoding)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> encodedJson()
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> encodedXml()
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> withAdditionalHeader(String theHeaderName,
-									String theHeaderValue)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public T execute()
-							{
-								if (logger.isInfoEnabled())
-									logger.info("Bundle from GTH: {}",
-											fhirContext.newJsonParser().encodeResourceToString(theBundleResource));
-
-								return null;
-							}
-
-							@Override
-							public ITransactionTyped<T> preferResponseType(Class<? extends IBaseResource> theType)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> preferResponseTypes(
-									List<Class<? extends IBaseResource>> theTypes)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> prettyPrint()
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> summaryMode(SummaryEnum theSummary)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-
-							@Override
-							public ITransactionTyped<T> accept(String theHeaderValue)
-							{
-								throw new UnsupportedOperationException("Not implemented");
-							}
-						};
-					}
-				};
-			}
-
-			@Override
-			public void setLogRequestAndResponse(boolean theLogRequestAndResponse)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseBundle> IUntypedQuery<T> search()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public void registerInterceptor(Object theInterceptor)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseResource> T read(Class<T> theType, UriDt theUrl)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public <T extends IBaseResource> T read(Class<T> theType, String theId)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IBaseResource read(UriDt theUrl)
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IRead read()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IPatch patch()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IOperation operation()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IMeta meta()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IGetPage loadPage()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IHistory history()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public void forceConformanceCheck() throws FhirClientConnectionException
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IFetchConformanceUntyped fetchConformance()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IDelete delete()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public ICreate create()
-			{
-				throw new UnsupportedOperationException("Not implemented");
-			}
-
-			@Override
-			public IFetchConformanceUntyped capabilities()
-			{
-				throw new UnsupportedOperationException("Not implemented");
+				return Stream.of(p, c, o);
 			}
 		};
-	}
-
-	private void configureBasicAuthInterceptor(IGenericClient client)
-	{
-		if (basicAuthUsername != null && basicAuthPassword != null)
-			client.registerInterceptor(new BasicAuthInterceptor(basicAuthUsername, basicAuthPassword));
-	}
-
-	private void configureBearerTokenAuthInterceptor(IGenericClient client)
-	{
-		if (bearerToken != null)
-			client.registerInterceptor(new BearerTokenAuthInterceptor(bearerToken));
 	}
 }

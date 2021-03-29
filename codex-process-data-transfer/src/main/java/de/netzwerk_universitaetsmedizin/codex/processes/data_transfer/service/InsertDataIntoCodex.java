@@ -45,7 +45,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		try
 		{
 			logger.info("Executing bundle against FHIR store ...");
-			localFhirStoreClientFactory.getFhirStoreClient().transaction().withBundle(bundle).execute();
+			localFhirStoreClientFactory.getFhirClient().storeBundle(bundle);
 		}
 		catch (Exception e)
 		{

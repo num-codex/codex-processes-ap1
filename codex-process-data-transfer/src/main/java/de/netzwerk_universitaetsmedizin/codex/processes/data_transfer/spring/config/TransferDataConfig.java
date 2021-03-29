@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
@@ -65,6 +66,12 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:#{null}}")
 	private String fhirStoreBearerToken;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.supportsIdentifierReferenceSearch:false}")
+	private boolean fhirStoreSupportsIdentifierReferenceSearch;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.searchBundleOverride:#{null}}")
+	private String fhirStoreSearchBundleOverride;
+
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.publicKey:#{null}}")
 	private String crrPublicKeyFile;
 
@@ -104,6 +111,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
+	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
+	private String localIdentifierValue;
+
 	@Bean
 	public CrrKeyProvider crrKeyProvider()
 	{
@@ -111,10 +121,10 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public FhirClientFactory fhirClientFactory()
+	public HapiFhirClientFactory hapiFhirClientFactory()
 	{
-		return new FhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-				fhirStoreBearerToken);
+		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
+				fhirStoreBearerToken, fhirStoreSupportsIdentifierReferenceSearch);
 	}
 
 	@Bean
@@ -126,6 +136,14 @@ public class TransferDataConfig
 
 		return new FttpClientFactory(fhirContext, trustStorePath, certificatePath, privateKeyPath, fttpServerBase,
 				fttpApiKey, fttpStudy, fttpTarget);
+	}
+
+	@Bean
+	public FhirClientFactory fhirClientFactory()
+	{
+		Path searchBundleOverride = checkExists(fhirStoreSearchBundleOverride);
+
+		return new FhirClientFactory(hapiFhirClientFactory(), fhirContext, searchBundleOverride, localIdentifierValue);
 	}
 
 	private Path checkExists(String file)
@@ -199,7 +217,7 @@ public class TransferDataConfig
 	@Bean
 	public ReadData readData()
 	{
-		return new ReadData(fhirClientProvider, taskHelper);
+		return new ReadData(fhirClientProvider, taskHelper, fhirContext, fhirClientFactory());
 	}
 
 	@Bean

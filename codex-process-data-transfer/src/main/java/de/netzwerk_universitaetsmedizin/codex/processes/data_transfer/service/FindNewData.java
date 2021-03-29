@@ -9,7 +9,6 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,24 +31,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymListValues;
 
 public class FindNewData extends AbstractServiceDelegate implements InitializingBean
 {
-	@SuppressWarnings("serial")
-	private static class DateWithPrecision extends Date
-	{
-		private final TemporalPrecisionEnum precision;
-
-		DateWithPrecision(Date exportFrom, TemporalPrecisionEnum precision)
-		{
-			super(exportFrom.getTime());
-			this.precision = precision;
-		}
-	}
-
 	private static final Logger logger = LoggerFactory.getLogger(FindNewData.class);
 
 	private final OrganizationProvider organizationProvider;
@@ -83,7 +72,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM, Variables.dateValue(exportFrom.orElse(null)));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION,
-				Variables.stringValue(exportFrom.map(p -> p.precision).map(Enum::name).orElse(null)));
+				Variables.stringValue(exportFrom.map(DateWithPrecision::getPrecision).map(Enum::name).orElse(null)));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_TO, Variables.dateValue(exportTo));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO, Variables.dateValue(exportTo));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYMS_LIST, PseudonymListValues.create(pseudonyms));
@@ -119,13 +108,10 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 	protected PseudonymList searchForPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
-				exportFrom.precision, exportTo);
+				exportFrom.getPrecision(), exportTo);
 
-		// TODO implement FHIR search
+		FhirClient fhirClient = localFhirStoreClientFactory.getFhirClient();
 
-		// IGenericClient client = localFhirStoreClientFactory.createClient();
-		// client.search().forResource(Patient.class).withProfile("profile").lastUpdated(new DateRangeParam().set)
-
-		return new PseudonymList(Arrays.asList("source/original"));
+		return fhirClient.getPseudonymsWithNewData(exportFrom, exportTo);
 	}
 }
