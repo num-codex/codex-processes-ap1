@@ -91,6 +91,22 @@ public class TaskProfileTest
 	}
 
 	@Test
+	public void testTaskStartDataTriggerValidWithExportFrom() throws Exception
+	{
+		Task task = createValidTaskStartDataTrigger();
+		task.addInput().setValue(new DateTimeType(new Date())).getType().addCoding()
+				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM);
+		logTask(task);
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
 	public void testTaskStartDataTriggerWithOutputValid() throws Exception
 	{
 		Task task = createValidTaskStartDataTrigger();
@@ -120,9 +136,8 @@ public class TaskProfileTest
 				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME)).getType()
 				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new DateTimeType(new Date())).getType().addCoding()
-				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
-				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM);
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 
 		return task;
 	}

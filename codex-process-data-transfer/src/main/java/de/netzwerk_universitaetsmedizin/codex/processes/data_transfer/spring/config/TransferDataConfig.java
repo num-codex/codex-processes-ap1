@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
@@ -30,10 +31,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Fi
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadLastExecutionTime;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveBusinessKey;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExecutionTime;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr;
@@ -66,6 +65,12 @@ public class TransferDataConfig
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:#{null}}")
 	private String fhirStoreBearerToken;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.supportsIdentifierReferenceSearch:false}")
+	private boolean fhirStoreSupportsIdentifierReferenceSearch;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.searchBundleOverride:#{null}}")
+	private String fhirStoreSearchBundleOverride;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.publicKey:#{null}}")
 	private String crrPublicKeyFile;
@@ -106,6 +111,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
+	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
+	private String localIdentifierValue;
+
 	@Bean
 	public CrrKeyProvider crrKeyProvider()
 	{
@@ -113,10 +121,10 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public FhirClientFactory fhirClientFactory()
+	public HapiFhirClientFactory hapiFhirClientFactory()
 	{
-		return new FhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-				fhirStoreBearerToken);
+		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
+				fhirStoreBearerToken, fhirStoreSupportsIdentifierReferenceSearch);
 	}
 
 	@Bean
@@ -128,6 +136,14 @@ public class TransferDataConfig
 
 		return new FttpClientFactory(fhirContext, trustStorePath, certificatePath, privateKeyPath, fttpServerBase,
 				fttpApiKey, fttpStudy, fttpTarget);
+	}
+
+	@Bean
+	public FhirClientFactory fhirClientFactory()
+	{
+		Path searchBundleOverride = checkExists(fhirStoreSearchBundleOverride);
+
+		return new FhirClientFactory(hapiFhirClientFactory(), fhirContext, searchBundleOverride, localIdentifierValue);
 	}
 
 	private Path checkExists(String file)
@@ -160,18 +176,6 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public SaveBusinessKey saveBusinessKey()
-	{
-		return new SaveBusinessKey(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
-	public ReadLastExecutionTime readLastExecutionTime()
-	{
-		return new ReadLastExecutionTime(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
 	public FindNewData findNewData()
 	{
 		return new FindNewData(fhirClientProvider, taskHelper, organizationProvider, fhirClientFactory());
@@ -184,15 +188,15 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public SaveLastExecutionTime saveLastExecutionTime()
-	{
-		return new SaveLastExecutionTime(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
 	public StopTimer stopTimer()
 	{
 		return new StopTimer(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public SaveLastExportTo saveLastExportTo()
+	{
+		return new SaveLastExportTo(fhirClientProvider, taskHelper);
 	}
 
 	// numCodexDataSend
@@ -213,7 +217,7 @@ public class TransferDataConfig
 	@Bean
 	public ReadData readData()
 	{
-		return new ReadData(fhirClientProvider, taskHelper);
+		return new ReadData(fhirClientProvider, taskHelper, fhirContext, fhirClientFactory());
 	}
 
 	@Bean
