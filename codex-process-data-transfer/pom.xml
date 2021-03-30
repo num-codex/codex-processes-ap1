@@ -63,6 +63,23 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>copy-hapi-fhir-client/crr</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-client</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/plugin</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-process-plugin-to-docker-test-setup/dic</id>
 						<phase>package</phase>
 						<goals>
@@ -77,6 +94,23 @@
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/process</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-hapi-fhir-client/dic</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-client</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/plugin</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -111,9 +145,23 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
+							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/plugin</directory>
+							<includes>
+								<include>hapi-fhir-client-${hapi.version}.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
 							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/process</directory>
 							<includes>
 								<include>${project.artifactId}-${project.version}.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/plugin</directory>
+							<includes>
+								<include>hapi-fhir-client-${hapi.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
