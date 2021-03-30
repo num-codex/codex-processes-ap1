@@ -108,7 +108,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 	protected PseudonymList searchForPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
-				exportFrom.getPrecision(), exportTo);
+				exportFrom == null ? null : exportFrom.getPrecision(), exportTo);
 
 		FhirClient fhirClient = localFhirStoreClientFactory.getFhirClient();
 
