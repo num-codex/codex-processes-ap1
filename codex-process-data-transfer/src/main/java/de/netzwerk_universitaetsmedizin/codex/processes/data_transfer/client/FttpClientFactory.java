@@ -14,12 +14,12 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class FttpClientFactory
 			{
 				MessageDigest digest = MessageDigest.getInstance("SHA-256");
 				byte[] sha256Hash = digest.digest(original.getBytes(StandardCharsets.UTF_8));
-				return Optional.of(Base64.getEncoder().encodeToString(sha256Hash));
+				return Optional.of(Hex.encodeHexString(sha256Hash));
 			}
 			catch (NoSuchAlgorithmException e)
 			{
