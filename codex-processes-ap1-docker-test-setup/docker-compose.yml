@@ -109,6 +109,7 @@ services:
     depends_on:
     - dic-bpe-db
     - dic-fhir-proxy
+    - dic-fhir-store
   dic-bpe-db:
     image: postgres:13
     restart: on-failure
@@ -129,6 +130,13 @@ services:
       target: /var/lib/postgresql/data
     secrets:
     - dic-bpe-postgres_password
+  dic-fhir-store:
+    image: hapiproject/hapi:v5.2.0
+    restart: on-failure
+    ports:
+     - 127.0.0.1:8003:8080
+    networks:
+    - dic-bpe-backend   
 
 
   gth-fhir-proxy:
@@ -339,6 +347,7 @@ services:
     depends_on:
     - crr-bpe-db
     - crr-fhir-proxy
+    - crr-fhir-store
   crr-bpe-db:
     image: postgres:13
     restart: on-failure
@@ -359,7 +368,14 @@ services:
       target: /var/lib/postgresql/data
     secrets:
     - crr-bpe-postgres_password
-
+  crr-fhir-store:
+    image: hapiproject/hapi:v5.2.0
+    restart: on-failure
+    ports:
+     - 127.0.0.1:8005:8080
+    networks:
+    - crr-bpe-backend    
+    
 secrets:
   dic-fhir-postgres_password:
     file: ./dic/fhir/db/conf/postgres_password

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -143,6 +145,7 @@ public class ReadData extends AbstractServiceDelegate
 		List<BundleEntryComponent> entries = resources.map(r ->
 		{
 			BundleEntryComponent entry = b.addEntry();
+			entry.setFullUrl("urn:uuid:" + UUID.randomUUID());
 			entry.getRequest().setMethod(HTTPVerb.PUT).setUrl(getConditionalUpdateUrl(pseudonym, r));
 			entry.setResource(setSubjectOrIdentifier(clean(r), pseudonym));
 			return entry;
@@ -163,7 +166,7 @@ public class ReadData extends AbstractServiceDelegate
 		return r;
 	}
 
-	private DomainResource setSubjectOrIdentifier(DomainResource resource, String pseudonym)
+	private Resource setSubjectOrIdentifier(Resource resource, String pseudonym)
 	{
 		Identifier identifier = new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
 
