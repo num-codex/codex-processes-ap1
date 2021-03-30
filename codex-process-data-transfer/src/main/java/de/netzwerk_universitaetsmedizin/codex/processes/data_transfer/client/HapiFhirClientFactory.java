@@ -16,8 +16,10 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
@@ -47,6 +49,8 @@ public class HapiFhirClientFactory
 	private final String bearerToken;
 	private final boolean supportsIdentifierReferenceSearch;
 
+	private final ApacheRestfulClientFactory clientFactory;
+
 	/**
 	 * @param fhirContext
 	 *            may be <code>null</code>, will use new {@link FhirContext#forR4()} if <code>null</code>
@@ -73,6 +77,14 @@ public class HapiFhirClientFactory
 		this.basicAuthPassword = basicAuthPassword;
 		this.bearerToken = bearerToken;
 		this.supportsIdentifierReferenceSearch = supportsIdentifierReferenceSearch;
+
+		if (isConfigured())
+		{
+			clientFactory = new ApacheRestfulClientFactory(this.fhirContext);
+			clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+		}
+		else
+			clientFactory = null;
 	}
 
 	public boolean supportsIdentifierReferenceSearch()
@@ -89,7 +101,7 @@ public class HapiFhirClientFactory
 	{
 		if (isConfigured())
 		{
-			IGenericClient client = fhirContext.newRestfulGenericClient(serverBase);
+			IGenericClient client = clientFactory.newGenericClient(serverBase);
 			configureBasicAuthInterceptor(client);
 			configureBearerTokenAuthInterceptor(client);
 			return client;
