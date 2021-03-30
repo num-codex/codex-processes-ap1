@@ -5,7 +5,7 @@
    <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.2.1"></instantiatesUri>
    <status value="requested"></status>
    <intent value="order"></intent>
-   <authoredOn value="2021-03-29T20:08:00+01:00"></authoredOn>
+   <authoredOn value="2021-03-30T02:30:00+01:00"></authoredOn>
    <requester>
       <type value="Organization"></type>
       <identifier>
@@ -56,7 +56,7 @@
             <code value="export-to"></code>
          </coding>
       </type>
-      <valueInstant value="2021-03-29T20:08:00+01:00"></valueInstant>
+      <valueInstant value="2021-03-30T02:30:00+01:00"></valueInstant>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
