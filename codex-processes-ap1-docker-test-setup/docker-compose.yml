@@ -131,7 +131,7 @@ services:
     secrets:
     - dic-bpe-postgres_password
   dic-fhir-store:
-    image: hapiproject/hapi:v5.2.0
+    build: ./dic/hapi
     restart: on-failure
     ports:
      - 127.0.0.1:8003:8080
@@ -369,7 +369,7 @@ services:
     secrets:
     - crr-bpe-postgres_password
   crr-fhir-store:
-    image: hapiproject/hapi:v5.2.0
+    build: ./crr/hapi
     restart: on-failure
     ports:
      - 127.0.0.1:8005:8080
