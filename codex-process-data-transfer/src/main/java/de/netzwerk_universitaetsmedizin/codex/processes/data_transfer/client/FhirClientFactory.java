@@ -3,7 +3,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -70,16 +69,7 @@ public class FhirClientFactory
 			public PseudonymList getPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
 			{
 				logger.warn("Returning demo pseudonyms for {}", localIdentifierValue);
-
-				List<String> pseudonyms;
-				if ("charite-tmptst.de".equals(localIdentifierValue))
-					pseudonyms = Arrays.asList("dic_berlin/dic_CT6E6", "dic_berlin/dic_9LDA5");
-				else if ("klinikum.uni-heidelberg.de".equals(localIdentifierValue))
-					pseudonyms = Arrays.asList("dic_heidelberg/dic_3YKQW", "dic_heidelberg/dic_RPRM3");
-				else
-					pseudonyms = Arrays.asList("foo/bar", "baz/qux");
-
-				return new PseudonymList(pseudonyms);
+				return new PseudonymList(Arrays.asList("dic_foo/bar", "dic_foo/baz"));
 			}
 
 			@Override

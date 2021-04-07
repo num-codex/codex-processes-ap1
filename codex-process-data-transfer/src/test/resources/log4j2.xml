@@ -51,6 +51,7 @@
 		<Logger name="com.sun.jersey" level="WARN"/>
 		<Logger name="liquibase" level="WARN"/>
 		<Logger name="ca.uhn.hl7v2" level="WARN"/>
+		<Logger name="ca.uhn.fhir" level="DEBUG"/>
 
 		<!-- <Logger name="certificate-warning-logger" level="INFO">
 			<AppenderRef ref="MAIL_CERTIFICATE" />
