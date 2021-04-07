@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class FttpClientImpl implements FttpClient, InitializingBean
 {
@@ -34,11 +36,10 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private final String fttpTarget;
 	private final String fttpApiKey;
 
-	public FttpClientImpl(FhirContext fhirContext, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
+	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String fttpServerBase,
+			String fttpApiKey, String fttpStudy, String fttpTarget)
 	{
-		clientFactory = createClientFactory(fhirContext, trustStore, keyStore, keyStorePassword);
-		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword);
 
 		this.fttpServerBase = fttpServerBase;
 		this.fttpApiKey = fttpApiKey;
@@ -46,15 +47,19 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		this.fttpTarget = fttpTarget;
 	}
 
-	protected ApacheRestfulClientFactoryWithTlsConfig createClientFactory(FhirContext fhirContext, KeyStore trustStore,
-			KeyStore keyStore, char[] keyStorePassword)
+	protected ApacheRestfulClientFactoryWithTlsConfig createClientFactory(KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword)
 	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(trustStore, "trustStore");
 		Objects.requireNonNull(keyStore, "keyStore");
 		Objects.requireNonNull(keyStorePassword, "keyStorePassword");
 
-		return new ApacheRestfulClientFactoryWithTlsConfig(fhirContext, trustStore, keyStore, keyStorePassword);
+		FhirContext fhirContext = FhirContext.forR4();
+		ApacheRestfulClientFactoryWithTlsConfig hapiClientFactory = new ApacheRestfulClientFactoryWithTlsConfig(
+				fhirContext, trustStore, keyStore, keyStorePassword);
+		hapiClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+		fhirContext.setRestfulClientFactory(hapiClientFactory);
+		return hapiClientFactory;
 	}
 
 	@Override
@@ -76,6 +81,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		try
 		{
 			IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
+			client.registerInterceptor(new LoggingInterceptor());
 
 			Parameters parameters = client.operation().onServer().named("request-psn-workflow")
 					.withParameters(createParameters(dicSourceAndPseudonym)).accept(Constants.CT_FHIR_XML_NEW)
@@ -124,5 +130,15 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		}
 
 		return Optional.empty();
+	}
+
+	@Override
+	public void testConnection()
+	{
+		IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
+		CapabilityStatement statement = client.capabilities().ofType(CapabilityStatement.class).execute();
+
+		logger.info("Connection test OK {} - {}", statement.getSoftware().getName(),
+				statement.getSoftware().getVersion());
 	}
 }

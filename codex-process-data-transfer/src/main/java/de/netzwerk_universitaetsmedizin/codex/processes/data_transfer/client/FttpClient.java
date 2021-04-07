@@ -10,4 +10,6 @@ public interface FttpClient
 	 * @return
 	 */
 	Optional<String> getCrrPseudonym(String dicSourceAndPseudonym);
+
+	void testConnection();
 }

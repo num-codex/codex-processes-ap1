@@ -134,8 +134,8 @@ public class TransferDataConfig
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(fhirContext, trustStorePath, certificatePath, privateKeyPath, fttpServerBase,
-				fttpApiKey, fttpStudy, fttpTarget);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey,
+				fttpStudy, fttpTarget);
 	}
 
 	@Bean
