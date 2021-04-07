@@ -22,14 +22,16 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
-public class FttpClientFactory
+public class FttpClientFactory implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(FttpClientFactory.FttpClientStub.class);
+
 	private static final class FttpClientStub implements FttpClient
 	{
 		private static final Logger logger = LoggerFactory.getLogger(FttpClientStub.class);
@@ -59,9 +61,14 @@ public class FttpClientFactory
 				return Optional.empty();
 			}
 		}
+
+		@Override
+		public void testConnection()
+		{
+			logger.warn("Stub implementation, no connection test performed");
+		}
 	}
 
-	private final FhirContext fhirContext;
 	private final Path trustStorePath;
 	private final Path certificatePath;
 	private final Path privateKeyPath;
@@ -70,14 +77,9 @@ public class FttpClientFactory
 	private final String fttpStudy;
 	private final String fttpTarget;
 
-	public FttpClientFactory(FhirContext fhirContext, Path trustStorePath, Path certificatePath, Path privateKeyPath,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, String fttpServerBase,
+			String fttpApiKey, String fttpStudy, String fttpTarget)
 	{
-		if (fhirContext != null)
-			this.fhirContext = fhirContext;
-		else
-			this.fhirContext = FhirContext.forR4();
-
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
@@ -86,6 +88,23 @@ public class FttpClientFactory
 		this.fttpApiKey = fttpApiKey;
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		try
+		{
+			logger.info(
+					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
+					trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+
+			getFttpClient().testConnection();
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while testing connection to fTTP", e);
+		}
 	}
 
 	public FttpClient getFttpClient()
@@ -105,12 +124,15 @@ public class FttpClientFactory
 
 	protected FttpClient createFttpClient()
 	{
+		logger.debug("Reading trust-store from {}", trustStorePath.toString());
 		KeyStore trustStore = readTrustStore(trustStorePath);
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
+		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
 		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
 
-		return new FttpClientImpl(fhirContext, trustStore, keyStore, keyStorePassword, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget);
+		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, fttpServerBase, fttpApiKey, fttpStudy,
+				fttpTarget);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

@@ -29,6 +29,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -39,6 +41,8 @@ import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 
 public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactory
 {
+	private static final Logger logger = LoggerFactory.getLogger(ApacheRestfulClientFactoryWithTlsConfig.class);
+
 	private HttpClient myHttpClient;
 	private HttpHost myProxy;
 
@@ -59,6 +63,8 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 	@Override
 	protected synchronized ApacheHttpClient getHttpClient(String theServerBase)
 	{
+		logger.info("Returning new ApacheHttpClient for ServerNase {}", theServerBase);
+
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
@@ -91,7 +97,7 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 					.setProxy(myProxy).build();
 
 			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();
+					.setSSLContext(sslContext).setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();
 
 			if (myProxy != null && StringUtils.isNotBlank(getProxyUsername())
 					&& StringUtils.isNotBlank(getProxyPassword()))

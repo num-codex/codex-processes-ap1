@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1bd6yss" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
-  <bpmn:process id="dataTrigger" isExecutable="true" camunda:versionTag="0.2.1">
+  <bpmn:process id="dataTrigger" isExecutable="true" camunda:versionTag="0.2.2">
     <bpmn:serviceTask id="FindNewData" name="find new data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData">
       <bpmn:incoming>Flow_0jy9ipp</bpmn:incoming>
       <bpmn:outgoing>Flow_015mo33</bpmn:outgoing>
@@ -9,7 +9,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">dataSend</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.2.2</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataSend</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send</camunda:inputParameter>
         </camunda:inputOutput>
