@@ -27,11 +27,13 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.De
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPsn;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePsn;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
@@ -200,6 +202,18 @@ public class TransferDataConfig
 	}
 
 	// numCodexDataSend
+
+	@Bean
+	public ExtractPsn extractPsn()
+	{
+		return new ExtractPsn(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public ResolvePsn resolvePsn()
+	{
+		return new ResolvePsn(fhirClientProvider, taskHelper);
+	}
 
 	@Bean
 	public CheckConsent checkConsent()

@@ -1,0 +1,72 @@
+<Task xmlns="http://hl7.org/fhir">
+   <meta>
+      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-rbf"></profile>
+   </meta>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.2.2"></instantiatesUri>
+   <status value="requested"></status>
+   <intent value="order"></intent>
+   <authoredOn value="2021-04-07T12:30:00+01:00"></authoredOn>
+   <requester>
+      <type value="Organization"></type>
+      <identifier>
+         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+         <value value="Test_DIC"></value>
+      </identifier>
+   </requester>
+   <restriction>
+      <recipient>
+         <type value="Organization"></type>
+         <identifier>
+            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+            <value value="Test_DIC"></value>
+         </identifier>
+      </recipient>
+   </restriction>
+   <input>
+      <type>
+         <coding>
+            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
+            <code value="message-name"></code>
+         </coding>
+      </type>
+      <valueString value="startDataSendWithRbf"></valueString>
+   </input>
+   <!-- parameter defined the patient, for whom data should be transferred,
+		specified using the Record Bloom Filter NamingSystem -->
+   <input>
+      <type>
+         <coding>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <code value="record-bloom-filter"></code>
+         </coding>
+      </type>
+      <valueIdentifier>
+         <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter"></system>
+         <value value="source/original"></value>
+      </valueIdentifier>
+   </input>
+   <!-- parameter specifying GECCO resources should be send stopping at the 
+		defined date, resources that have been modified after the specified date 
+		will not be transmitted, typically this will be the current date time -->
+   <input>
+      <type>
+         <coding>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <code value="export-to"></code>
+         </coding>
+      </type>
+      <valueInstant value="2021-04-07T12:30:00+01:00"></valueInstant>
+   </input>
+   <!-- optional parameter specifying GECCO resources should be send starting 
+		at the defined date, resources older than the specified date will not be 
+		transported -->
+   <!-- <input>
+      <type>
+         <coding>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <code value="export-from"></code>
+         </coding>
+      </type>
+      <valueDateTime value="2021-04-07"></valueDateTime>
+   </input> -->
+</Task>

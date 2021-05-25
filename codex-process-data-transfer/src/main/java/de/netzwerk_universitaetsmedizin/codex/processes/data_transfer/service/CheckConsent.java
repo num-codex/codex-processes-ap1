@@ -53,18 +53,12 @@ public class CheckConsent extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		String dicSourceAndPseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
 
-		Optional<String> dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
-
-		boolean usageAndTransferGranted = dicSourceAndPseudonym.map(this::usageAndTrransferGranted).orElse(false);
+		boolean usageAndTransferGranted = usageAndTrransferGranted(dicSourceAndPseudonym);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
 				Variables.booleanValue(usageAndTransferGranted));
-
-		if (usageAndTransferGranted)
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
-					Variables.stringValue(dicSourceAndPseudonym.get()));
 	}
 
 	protected boolean usageAndTrransferGranted(String dicSourceAndPseudonym)
@@ -80,22 +74,5 @@ public class CheckConsent extends AbstractServiceDelegate
 			logger.warn("Usage or transfer not granted for pseudonym {}", dicSourceAndPseudonym);
 
 		return usageAndTransferGranted;
-	}
-
-	private Optional<String> getDicSourceAndPseudonym(Task task)
-	{
-		Optional<String> value = getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue);
-
-		return value;
-	}
-
-	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
-	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
-				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> type.cast(c.getValue()));
 	}
 }

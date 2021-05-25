@@ -1,0 +1,20 @@
+<NamingSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<name value="NUM-CODEX_Record-Bloom-Filter_Identifier"/>
+	<status value="active" />
+	<kind value="identifier"/>
+	<date value="2021-04-07"/>
+	<publisher value="NUM-Codex"/>
+	<responsible value="THS Greifswald"/>
+	<description value="Record Bloom Filter"/>
+	<usage value="Used withing the NUM-CODEX project for resolution of data integration center pseudonyms"/>
+	<uniqueId>
+		<type value="other"/>
+		<value value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter"/>
+	</uniqueId>
+</NamingSystem>

@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
+      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-psn"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.2.2"></instantiatesUri>
    <status value="requested"></status>
@@ -29,9 +29,9 @@
             <code value="message-name"></code>
          </coding>
       </type>
-      <valueString value="startDataSend"></valueString>
+      <valueString value="startDataSendWithPsn"></valueString>
    </input>
-   <!-- parameter defined the patient, for whom data should be transfered, 
+   <!-- parameter defined the patient, for whom data should be transferred,
 		specified using the dic-pseudonym NamingSystem in the form source/original 
 		(source = fttp domain, original = DIC pseudonym) -->
    <input>

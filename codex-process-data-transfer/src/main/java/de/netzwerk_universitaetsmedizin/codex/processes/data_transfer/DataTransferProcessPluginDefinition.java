@@ -58,12 +58,16 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
+		var nR = NamingSystemResource.file("fhir/NamingSystem/num-codex-record-bloom-filter-identifier.xml");
 
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
 		var sTstoDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-stop-data-trigger.xml");
-		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
+		var sTstaDsenPsn = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-send-with-psn.xml");
+		var sTstaDsenRbf = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-send-with-rbf.xml");
 		var sTstaDtra = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
 		var sTstaDrec = StructureDefinitionResource
@@ -73,7 +77,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
 				"dataTrigger/" + VERSION, Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
-				"dataSend/" + VERSION, Arrays.asList(aSen, cD, nD, sTstaDsen, vD), //
+				"dataSend/" + VERSION, Arrays.asList(aSen, cD, nD, nR, sTstaDsenPsn, sTstaDsenRbf, vD), //
 				"dataTranslate/" + VERSION, Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
 				"dataReceive/" + VERSION, Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
 
