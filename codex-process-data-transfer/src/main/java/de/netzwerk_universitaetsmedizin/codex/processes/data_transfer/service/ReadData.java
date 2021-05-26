@@ -1,6 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
@@ -81,7 +82,7 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		Optional<String> pseudonym = getPseudonym(task);
+		Optional<String> pseudonym = getPseudonym(execution);
 		Optional<DateTimeType> exportFrom = getExportFrom(task);
 		Optional<InstantType> exportTo = getExportTo(task);
 
@@ -110,11 +111,10 @@ public class ReadData extends AbstractServiceDelegate
 		return bundle;
 	}
 
-	private Optional<String> getPseudonym(Task task)
+	private Optional<String> getPseudonym(DelegateExecution execution)
 	{
-		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue);
+		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+		return Optional.of(pseudonym);
 	}
 
 	private Optional<DateTimeType> getExportFrom(Task task)

@@ -63,9 +63,8 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 
 	private String resolvePseudonym(String bloomFilter)
 	{
-		fttpClientFactory.getFttpClient().testConnection();
-
-		return "source/original";
+		return fttpClientFactory.getFttpClient().getDicPseudonym(bloomFilter)
+				.orElseThrow(() -> new RuntimeException("Could not resolve bloomfilter to pseudonym"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
