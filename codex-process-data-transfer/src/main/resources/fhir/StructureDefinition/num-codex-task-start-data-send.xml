@@ -41,35 +41,35 @@
       <sliceName value="correlation-key" />
       <max value="0" />
     </element>
-    <element id="Task.input:pseudonym">
+    <element id="Task.input:patient">
       <path value="Task.input" />
-      <sliceName value="pseudonym" />
+      <sliceName value="patient" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:pseudonym.type">
+    <element id="Task.input:patient.type">
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
         <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
       </binding>
     </element>
-    <element id="Task.input:pseudonym.type.coding">
+    <element id="Task.input:patient.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:pseudonym.type.coding.system">
+    <element id="Task.input:patient.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
       <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
     </element>
-    <element id="Task.input:pseudonym.type.coding.code">
+    <element id="Task.input:patient.type.coding.code">
       <path value="Task.input.type.coding.code" />
       <min value="1" />
-      <fixedCode value="pseudonym" />
+      <fixedCode value="patient" />
     </element>
-    <element id="Task.input:pseudonym.value[x]">
+    <element id="Task.input:patient.value[x]">
       <path value="Task.input.value[x]" />
       <type>
         <code value="Reference" />

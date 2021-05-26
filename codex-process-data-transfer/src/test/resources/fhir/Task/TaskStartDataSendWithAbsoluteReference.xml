@@ -37,7 +37,7 @@
       <type>
          <coding>
             <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
-            <code value="pseudonym"></code>
+            <code value="patient"></code>
          </coding>
       </type>
       <valueReference>

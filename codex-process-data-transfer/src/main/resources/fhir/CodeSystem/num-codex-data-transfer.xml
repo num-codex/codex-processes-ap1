@@ -24,16 +24,16 @@
 	<versionNeeded value="false" />
 	<content value="complete" />
 	<concept>
+		<code value="patient" />
+		<display value="Patient" />
+		<definition
+				value="Patient used in the data export process" />
+	</concept>
+	<concept>
 		<code value="pseudonym" />
 		<display value="Pseudonym" />
 		<definition
 			value="Pseudonym used in the data export process" />
-	</concept>
-	<concept>
-		<code value="record-bloom-filter" />
-		<display value="Record Bloom Filter" />
-		<definition
-				value="Record Bloom Filter used to determine the patient's DIC pseudonym" />
 	</concept>
 	<concept>
 		<code value="data-reference" />

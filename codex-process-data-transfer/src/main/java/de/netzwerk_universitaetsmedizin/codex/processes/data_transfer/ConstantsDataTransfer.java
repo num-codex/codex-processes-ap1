@@ -20,8 +20,8 @@ public interface ConstantsDataTransfer
 	String NAMING_SYSTEM_NUM_CODEX_RECORD_BLOOM_FILTER = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER = "http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT = "patient";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM = "pseudonym";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_RECORD_BLOOM_FILTER = "record-bloom-filter";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM = "export-from";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO = "export-to";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE = "data-reference";
