@@ -64,8 +64,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
 		var sTstoDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-stop-data-trigger.xml");
-		var sTstaDsen = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
+		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
 		var sTstaDtra = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
 		var sTstaDrec = StructureDefinitionResource
