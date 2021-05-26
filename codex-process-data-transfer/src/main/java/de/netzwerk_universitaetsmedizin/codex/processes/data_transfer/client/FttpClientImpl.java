@@ -2,12 +2,14 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -151,7 +153,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	{
 		Parameters p = new Parameters();
 		p.addParameter("study", fttpStudy);
-		p.addParameter("bloomfilter", bloomFilter);
+		p.addParameter("bloomfilter", new Base64BinaryType(bloomFilter));
 		p.addParameter("target", fttpTarget);
 		p.addParameter("apikey", fttpApiKey);
 
