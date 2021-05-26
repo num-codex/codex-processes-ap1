@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-rbf"></profile>
+      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.2.2"></instantiatesUri>
    <status value="requested"></status>
@@ -29,21 +29,21 @@
             <code value="message-name"></code>
          </coding>
       </type>
-      <valueString value="startDataSendWithRbf"></valueString>
+      <valueString value="startDataSend"></valueString>
    </input>
    <!-- parameter defined the patient, for whom data should be transferred,
-		specified using the Record Bloom Filter NamingSystem -->
+		specified using an absolute reference -->
    <input>
       <type>
          <coding>
             <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
-            <code value="record-bloom-filter"></code>
+            <code value="pseudonym"></code>
          </coding>
       </type>
-      <valueIdentifier>
-         <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter"></system>
-         <value value="source/original"></value>
-      </valueIdentifier>
+      <valueReference>
+         <reference value="https://dic/fhir/Patient/1">
+         </reference>
+      </valueReference>
    </input>
    <!-- parameter specifying GECCO resources should be send stopping at the 
 		defined date, resources that have been modified after the specified date 

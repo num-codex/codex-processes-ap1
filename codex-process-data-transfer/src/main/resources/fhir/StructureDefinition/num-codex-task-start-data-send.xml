@@ -6,9 +6,9 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-rbf" />
+  <url value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send" />
   <version value="${version}" />
-  <name value="TaskStartDataSendWithRbf" />
+  <name value="TaskStartDataSend" />
   <status value="unknown" />
   <experimental value="false" />
   <date value="2021-04-07" />
@@ -34,55 +34,47 @@
     </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="startDataSendWithRbf" />
+      <fixedString value="startDataSend" />
     </element>
     <element id="Task.input:correlation-key">
       <path value="Task.input" />
       <sliceName value="correlation-key" />
       <max value="0" />
     </element>
-    <element id="Task.input:record-bloom-filter">
+    <element id="Task.input:pseudonym">
       <path value="Task.input" />
-      <sliceName value="record-bloom-filter" />
+      <sliceName value="pseudonym" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:record-bloom-filter.type">
+    <element id="Task.input:pseudonym.type">
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
         <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
       </binding>
     </element>
-    <element id="Task.input:record-bloom-filter.type.coding">
+    <element id="Task.input:pseudonym.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:record-bloom-filter.type.coding.system">
+    <element id="Task.input:pseudonym.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
       <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
     </element>
-    <element id="Task.input:record-bloom-filter.type.coding.code">
+    <element id="Task.input:pseudonym.type.coding.code">
       <path value="Task.input.type.coding.code" />
       <min value="1" />
-      <fixedCode value="record-bloom-filter" />
+      <fixedCode value="pseudonym" />
     </element>
-    <element id="Task.input:record-bloom-filter.value[x]">
+    <element id="Task.input:pseudonym.value[x]">
       <path value="Task.input.value[x]" />
       <type>
-        <code value="Identifier" />
+        <code value="Reference" />
+        <targetProfile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient" />
       </type>
-    </element>
-    <element id="Task.input:record-bloom-filter.value[x].system">
-      <path value="Task.input.value[x].system" />
-      <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter" />
-    </element>
-    <element id="Task.input:record-bloom-filter.value[x].value">
-      <path value="Task.input.value[x].value" />
-      <min value="1" />
     </element>
     <element id="Task.input:export-from">
       <path value="Task.input" />

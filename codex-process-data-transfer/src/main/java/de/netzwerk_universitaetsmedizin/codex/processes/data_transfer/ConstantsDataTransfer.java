@@ -34,13 +34,11 @@ public interface ConstantsDataTransfer
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME = "startDataTrigger";
 	String PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER_MESSAGE_NAME = "stopDataTrigger";
 
-	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_WITH_PSN = "http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-psn";
-	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_WITH_RBF = "http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-rbf";
+	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND = "http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send";
 	String PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI = "http://highmed.org/bpe/Process/dataSend/";
 	String PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI
 			+ VERSION;
-	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_WITH_PSN_MESSAGE_NAME = "startDataSendWithPsn";
-	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_WITH_RBF_MESSAGE_NAME = "startDataSendWithRbf";
+	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_MESSAGE_NAME = "startDataSend";
 
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE = "http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate";
 	String PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI = "http://highmed.org/bpe/Process/dataTranslate/";

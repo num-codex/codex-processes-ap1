@@ -12,7 +12,7 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -27,7 +27,6 @@ public class ExtractPseudonym extends AbstractServiceDelegate
 		super(clientProvider, taskHelper);
 	}
 
-
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
@@ -40,8 +39,9 @@ public class ExtractPseudonym extends AbstractServiceDelegate
 	private String getDicSourceAndPseudonym(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("no dic pseudonym found"));
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Reference.class).findFirst()
+						.map(reference -> reference.getIdentifier().getValue())
+						.orElseThrow(() -> new RuntimeException("no dic pseudonym found"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

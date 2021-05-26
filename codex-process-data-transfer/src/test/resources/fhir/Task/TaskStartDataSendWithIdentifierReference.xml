@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-psn"></profile>
+      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.2.2"></instantiatesUri>
    <status value="requested"></status>
@@ -29,7 +29,7 @@
             <code value="message-name"></code>
          </coding>
       </type>
-      <valueString value="startDataSendWithPsn"></valueString>
+      <valueString value="startDataSend"></valueString>
    </input>
    <!-- parameter defined the patient, for whom data should be transferred,
 		specified using the dic-pseudonym NamingSystem in the form source/original 
@@ -41,10 +41,12 @@
             <code value="pseudonym"></code>
          </coding>
       </type>
-      <valueIdentifier>
-         <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"></system>
-         <value value="source/original"></value>
-      </valueIdentifier>
+      <valueReference>
+         <identifier>
+            <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"></system>
+            <value value="source/original"></value>
+         </identifier>
+      </valueReference>
    </input>
    <!-- parameter specifying GECCO resources should be send stopping at the 
 		defined date, resources that have been modified after the specified date 

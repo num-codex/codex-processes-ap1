@@ -17,7 +17,7 @@ services:
 
   
   dic-fhir-proxy:
-    image: highmed/fhir_proxy:latest
+    image: ghcr.io/highmed/fhir_proxy:0.4.0
     restart: on-failure
     volumes:
     - type: bind
@@ -36,7 +36,7 @@ services:
     - ingress
     - dic-fhir-app
   dic-fhir-app:
-    image: highmed/fhir:latest
+    image: ghcr.io/highmed/fhir:0.4.0
     restart: on-failure
     volumes:
     - type: bind
@@ -75,7 +75,7 @@ services:
 
   # dic-bpe-proxy not needed
   dic-bpe-app:
-    image: highmed/bpe:latest
+    image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
     ports:
      - 127.0.0.1:5003:5003

@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_008keuw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:process id="dataSend" isExecutable="true" camunda:versionTag="0.2.2">
-    <bpmn:startEvent id="DataSendMessagePsnStartEvent" name="start data send process psn">
+    <bpmn:startEvent id="DataSendMessageStartEvent" name="start data send process">
       <bpmn:outgoing>Flow_1km61ly</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_07sumgd" messageRef="Message_0mcjkpi" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1km61ly" sourceRef="DataSendMessagePsnStartEvent" targetRef="extractPsn" />
+    <bpmn:sequenceFlow id="Flow_1km61ly" sourceRef="DataSendMessageStartEvent" targetRef="extractPsn" />
     <bpmn:sequenceFlow id="Flow_01j9mgm" sourceRef="CheckConsent" targetRef="Gateway_0h3dkik" />
     <bpmn:serviceTask id="CheckConsent" name="check consent" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.CheckConsent">
-      <bpmn:incoming>Flow_0yk0gl5</bpmn:incoming>
-      <bpmn:incoming>Flow_1bwyogr</bpmn:incoming>
+      <bpmn:incoming>Flow_1q5ztkg</bpmn:incoming>
       <bpmn:outgoing>Flow_01j9mgm</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="ReadData" name="read data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData">
@@ -63,127 +62,110 @@
       <bpmn:incoming>Flow_0tsm3rc</bpmn:incoming>
       <bpmn:outgoing>Flow_00kpx7f</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:startEvent id="DataSendMessageRbfStartEvent" name="start data send process rbf">
-      <bpmn:outgoing>Flow_0p6djuq</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0d1jq0i" messageRef="Message_1qr9h21" />
-    </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_0p6djuq" sourceRef="DataSendMessageRbfStartEvent" targetRef="resolvePsn" />
-    <bpmn:sequenceFlow id="Flow_0yk0gl5" sourceRef="extractPsn" targetRef="CheckConsent" />
-    <bpmn:sequenceFlow id="Flow_1bwyogr" sourceRef="resolvePsn" targetRef="CheckConsent" />
+    <bpmn:sequenceFlow id="Flow_0yk0gl5" sourceRef="extractPsn" targetRef="resolvePsn" />
     <bpmn:serviceTask id="extractPsn" name="extract psn" camunda:asyncAfter="true" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPseudonym">
       <bpmn:incoming>Flow_1km61ly</bpmn:incoming>
       <bpmn:outgoing>Flow_0yk0gl5</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="resolvePsn" name="resolve psn" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePseudonym">
-      <bpmn:incoming>Flow_0p6djuq</bpmn:incoming>
-      <bpmn:outgoing>Flow_1bwyogr</bpmn:outgoing>
+      <bpmn:incoming>Flow_0yk0gl5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1q5ztkg</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1q5ztkg" sourceRef="resolvePsn" targetRef="CheckConsent" />
   </bpmn:process>
   <bpmn:message id="Message_1c7e014" name="stopTimer" />
   <bpmn:message id="Message_1u007k0" name="startTimer" />
-  <bpmn:message id="Message_0mcjkpi" name="startDataSendWithPsn" />
+  <bpmn:message id="Message_0mcjkpi" name="startDataSend" />
   <bpmn:message id="Message_1jn7i5w" name="startDataTranslate" />
   <bpmn:message id="Message_1qr9h21" name="startDataSendWithRbf" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataSend">
+      <bpmndi:BPMNEdge id="Flow_0yk0gl5_di" bpmnElement="Flow_0yk0gl5">
+        <di:waypoint x="420" y="100" />
+        <di:waypoint x="520" y="100" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00kpx7f_di" bpmnElement="Flow_00kpx7f">
-        <di:waypoint x="1010" y="210" />
-        <di:waypoint x="1102" y="210" />
+        <di:waypoint x="1150" y="210" />
+        <di:waypoint x="1242" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0tsm3rc_di" bpmnElement="Flow_0tsm3rc">
-        <di:waypoint x="800" y="125" />
-        <di:waypoint x="800" y="210" />
-        <di:waypoint x="910" y="210" />
+        <di:waypoint x="940" y="125" />
+        <di:waypoint x="940" y="210" />
+        <di:waypoint x="1050" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0wpfzi1_di" bpmnElement="Flow_0wpfzi1">
-        <di:waypoint x="825" y="100" />
-        <di:waypoint x="910" y="100" />
+        <di:waypoint x="965" y="100" />
+        <di:waypoint x="1050" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0smf5sr_di" bpmnElement="Flow_0smf5sr">
-        <di:waypoint x="1330" y="100" />
-        <di:waypoint x="1390" y="100" />
+        <di:waypoint x="1470" y="100" />
+        <di:waypoint x="1530" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_109e2pt_di" bpmnElement="Flow_109e2pt">
-        <di:waypoint x="1490" y="100" />
-        <di:waypoint x="1542" y="100" />
+        <di:waypoint x="1630" y="100" />
+        <di:waypoint x="1682" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zrvqk8_di" bpmnElement="Flow_0zrvqk8">
-        <di:waypoint x="1170" y="100" />
-        <di:waypoint x="1230" y="100" />
+        <di:waypoint x="1310" y="100" />
+        <di:waypoint x="1370" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0yamo5r_di" bpmnElement="Flow_0yamo5r">
-        <di:waypoint x="1010" y="100" />
-        <di:waypoint x="1070" y="100" />
+        <di:waypoint x="1150" y="100" />
+        <di:waypoint x="1210" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_01j9mgm_di" bpmnElement="Flow_01j9mgm">
-        <di:waypoint x="690" y="100" />
-        <di:waypoint x="775" y="100" />
+        <di:waypoint x="830" y="100" />
+        <di:waypoint x="915" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1km61ly_di" bpmnElement="Flow_1km61ly">
         <di:waypoint x="208" y="100" />
-        <di:waypoint x="330" y="100" />
+        <di:waypoint x="320" y="100" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0p6djuq_di" bpmnElement="Flow_0p6djuq">
-        <di:waypoint x="208" y="230" />
-        <di:waypoint x="330" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0yk0gl5_di" bpmnElement="Flow_0yk0gl5">
-        <di:waypoint x="430" y="100" />
-        <di:waypoint x="590" y="100" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1bwyogr_di" bpmnElement="Flow_1bwyogr">
-        <di:waypoint x="430" y="230" />
-        <di:waypoint x="540" y="230" />
-        <di:waypoint x="540" y="100" />
-        <di:waypoint x="590" y="100" />
+      <bpmndi:BPMNEdge id="Flow_1q5ztkg_di" bpmnElement="Flow_1q5ztkg">
+        <di:waypoint x="620" y="100" />
+        <di:waypoint x="730" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Activity_1e4ychv_di" bpmnElement="CheckConsent">
-        <dc:Bounds x="590" y="60" width="100" height="80" />
+        <dc:Bounds x="730" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0p0ebgq_di" bpmnElement="ReadData">
-        <dc:Bounds x="910" y="60" width="100" height="80" />
+        <dc:Bounds x="1050" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1xc17m0_di" bpmnElement="StartDataTranslateProcess">
-        <dc:Bounds x="1542" y="82" width="36" height="36" />
+        <dc:Bounds x="1682" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1519" y="125" width="84" height="27" />
+          <dc:Bounds x="1659" y="125" width="84" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0d1am14_di" bpmnElement="ValidateData">
-        <dc:Bounds x="1070" y="60" width="100" height="80" />
+        <dc:Bounds x="1210" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0mi94m2_di" bpmnElement="EncryptData">
-        <dc:Bounds x="1230" y="60" width="100" height="80" />
+        <dc:Bounds x="1370" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0d04yf5_di" bpmnElement="StoreDataForTransferHub">
-        <dc:Bounds x="1390" y="60" width="100" height="80" />
+        <dc:Bounds x="1530" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0h3dkik_di" bpmnElement="Gateway_0h3dkik" isMarkerVisible="true">
-        <dc:Bounds x="775" y="75" width="50" height="50" />
+        <dc:Bounds x="915" y="75" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0ntc53r_di" bpmnElement="Event_0ntc53r">
-        <dc:Bounds x="1102" y="192" width="36" height="36" />
+        <dc:Bounds x="1242" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1uvryxy_di" bpmnElement="HandleNoConsent">
-        <dc:Bounds x="910" y="170" width="100" height="80" />
+        <dc:Bounds x="1050" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0kggab9_di" bpmnElement="DataSendMessagePsnStartEvent">
+      <bpmndi:BPMNShape id="Event_0kggab9_di" bpmnElement="DataSendMessageStartEvent">
         <dc:Bounds x="172" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="154" y="125" width="73" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_17p3vpn_di" bpmnElement="DataSendMessageRbfStartEvent">
-        <dc:Bounds x="172" y="212" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="154" y="255" width="73" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0pw7tym_di" bpmnElement="extractPsn">
-        <dc:Bounds x="330" y="60" width="100" height="80" />
+        <dc:Bounds x="320" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1btox3g_di" bpmnElement="resolvePsn">
-        <dc:Bounds x="330" y="190" width="100" height="80" />
+        <dc:Bounds x="520" y="60" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
