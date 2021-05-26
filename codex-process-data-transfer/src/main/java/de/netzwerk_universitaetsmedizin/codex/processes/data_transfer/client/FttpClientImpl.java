@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class FttpClientImpl implements FttpClient, InitializingBean
@@ -31,14 +32,21 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(PSEUDONYM_PATTERN_STRING);
 
 	private final IRestfulClientFactory clientFactory;
+
+	private final String basicAuthUsername;
+	private final String basicAuthPassword;
+
 	private final String fttpServerBase;
 	private final String fttpStudy;
 	private final String fttpTarget;
 	private final String fttpApiKey;
 
-	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String fttpServerBase,
-			String fttpApiKey, String fttpStudy, String fttpTarget)
+	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String basicAuthUsername,
+			String basicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
 	{
+		this.basicAuthUsername = basicAuthUsername;
+		this.basicAuthPassword = basicAuthPassword;
+
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword);
 
 		this.fttpServerBase = fttpServerBase;
@@ -58,6 +66,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		ApacheRestfulClientFactoryWithTlsConfig hapiClientFactory = new ApacheRestfulClientFactoryWithTlsConfig(
 				fhirContext, trustStore, keyStore, keyStorePassword);
 		hapiClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+
 		fhirContext.setRestfulClientFactory(hapiClientFactory);
 		return hapiClientFactory;
 	}
@@ -80,23 +89,22 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 
 		try
 		{
-			IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
-			client.registerInterceptor(new LoggingInterceptor());
+			IGenericClient client = createGenericClient();
 
 			Parameters parameters = client.operation().onServer().named("request-psn-workflow")
-					.withParameters(createParameters(dicSourceAndPseudonym)).accept(Constants.CT_FHIR_XML_NEW)
-					.encoded(EncodingEnum.XML).execute();
+					.withParameters(createParametersForPsnWorkflow(dicSourceAndPseudonym))
+					.accept(Constants.CT_FHIR_XML_NEW).encoded(EncodingEnum.XML).execute();
 
 			return getPseudonym(parameters);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while retrieving pseudonym", e);
+			logger.error("Error while retrieving crr pseudonym", e);
 			return Optional.empty();
 		}
 	}
 
-	protected Parameters createParameters(String dicSourceAndPseudonym)
+	protected Parameters createParametersForPsnWorkflow(String dicSourceAndPseudonym)
 	{
 		Matcher matcher = DIC_PSEUDONYM_PATTERN.matcher(dicSourceAndPseudonym);
 		if (!matcher.matches())
@@ -109,6 +117,41 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		p.addParameter("study", fttpStudy);
 		p.addParameter("original", original);
 		p.addParameter("source", source);
+		p.addParameter("target", fttpTarget);
+		p.addParameter("apikey", fttpApiKey);
+
+		return p;
+	}
+
+	@Override
+	public Optional<String> getDicPseudonym(String bloomFilter)
+	{
+		Objects.requireNonNull(bloomFilter, "bloomFilter");
+
+		logger.info("Requesting DIC pseudonym from {} ...", bloomFilter);
+
+		try
+		{
+			IGenericClient client = createGenericClient();
+
+			Parameters parameters = client.operation().onServer().named("$request-psn-from-bf-workflow")
+					.withParameters(createParametersForRbfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
+					.encoded(EncodingEnum.XML).execute();
+
+			return getPseudonym(parameters);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while retrieving dic pseudonym", e);
+			return Optional.empty();
+		}
+	}
+
+	protected Parameters createParametersForRbfWorkflow(String bloomFilter)
+	{
+		Parameters p = new Parameters();
+		p.addParameter("study", fttpStudy);
+		p.addParameter("bloomfilter", bloomFilter);
 		p.addParameter("target", fttpTarget);
 		p.addParameter("apikey", fttpApiKey);
 
@@ -135,10 +178,27 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	@Override
 	public void testConnection()
 	{
-		IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
+		IGenericClient client = createGenericClient();
+
 		CapabilityStatement statement = client.capabilities().ofType(CapabilityStatement.class).execute();
 
 		logger.info("Connection test OK {} - {}", statement.getSoftware().getName(),
 				statement.getSoftware().getVersion());
+	}
+
+	private IGenericClient createGenericClient()
+	{
+		IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
+		client.registerInterceptor(new LoggingInterceptor());
+
+		if (configuredWithBasicAuth())
+			client.registerInterceptor(new BasicAuthInterceptor(basicAuthUsername, basicAuthPassword));
+
+		return client;
+	}
+
+	private boolean configuredWithBasicAuth()
+	{
+		return basicAuthUsername != null && basicAuthPassword != null;
 	}
 }

@@ -70,11 +70,11 @@
     <bpmn:sequenceFlow id="Flow_0p6djuq" sourceRef="DataSendMessageRbfStartEvent" targetRef="resolvePsn" />
     <bpmn:sequenceFlow id="Flow_0yk0gl5" sourceRef="extractPsn" targetRef="CheckConsent" />
     <bpmn:sequenceFlow id="Flow_1bwyogr" sourceRef="resolvePsn" targetRef="CheckConsent" />
-    <bpmn:serviceTask id="extractPsn" name="extract psn" camunda:asyncAfter="true" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPsn">
+    <bpmn:serviceTask id="extractPsn" name="extract psn" camunda:asyncAfter="true" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPseudonym">
       <bpmn:incoming>Flow_1km61ly</bpmn:incoming>
       <bpmn:outgoing>Flow_0yk0gl5</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="resolvePsn" name="resolve psn" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePsn">
+    <bpmn:serviceTask id="resolvePsn" name="resolve psn" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePseudonym">
       <bpmn:incoming>Flow_0p6djuq</bpmn:incoming>
       <bpmn:outgoing>Flow_1bwyogr</bpmn:outgoing>
     </bpmn:serviceTask>

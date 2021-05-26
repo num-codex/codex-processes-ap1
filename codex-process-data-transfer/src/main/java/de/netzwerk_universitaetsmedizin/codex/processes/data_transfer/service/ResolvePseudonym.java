@@ -1,13 +1,10 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_RECORD_BLOOM_FILTER;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,33 +18,54 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 
-public class ExtractPsn extends AbstractServiceDelegate
+public class ResolvePseudonym extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ExtractPsn.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResolvePseudonym.class);
 
-	public ExtractPsn(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	private final FttpClientFactory fttpClientFactory;
+
+	public ResolvePseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			FttpClientFactory fttpClientFactory)
 	{
 		super(clientProvider, taskHelper);
+
+		this.fttpClientFactory = fttpClientFactory;
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(fttpClientFactory, "fttpClientFactory");
+	}
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
-		String dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
+		String bloomFilter = getBloomFilter(task);
+		String pseudonym = resolvePseudonym(bloomFilter);
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(dicSourceAndPseudonym));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
 	}
 
-	private String getDicSourceAndPseudonym(Task task)
+	private String getBloomFilter(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("no dic pseudonym found"));
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_RECORD_BLOOM_FILTER, Identifier.class).findFirst()
+						.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("no bloom filter found"));
+	}
+
+	private String resolvePseudonym(String bloomFilter)
+	{
+		fttpClientFactory.getFttpClient().testConnection();
+
+		return "source/original";
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

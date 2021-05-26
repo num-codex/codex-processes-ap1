@@ -63,6 +63,12 @@ public class FttpClientFactory implements InitializingBean
 		}
 
 		@Override
+		public Optional<String> getDicPseudonym(String bloomFilter)
+		{
+			return Optional.of("source/original");
+		}
+
+		@Override
 		public void testConnection()
 		{
 			logger.warn("Stub implementation, no connection test performed");
@@ -72,17 +78,22 @@ public class FttpClientFactory implements InitializingBean
 	private final Path trustStorePath;
 	private final Path certificatePath;
 	private final Path privateKeyPath;
+	private final String basicAuthUsername;
+	private final String basicAuthPassword;
 	private final String fttpServerBase;
 	private final String fttpApiKey;
 	private final String fttpStudy;
 	private final String fttpTarget;
 
-	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, String fttpServerBase,
-			String fttpApiKey, String fttpStudy, String fttpTarget)
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, String basicAuthUsername,
+			String basicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
+
+		this.basicAuthUsername = basicAuthUsername;
+		this.basicAuthPassword = basicAuthPassword;
 
 		this.fttpServerBase = fttpServerBase;
 		this.fttpApiKey = fttpApiKey;
@@ -131,8 +142,8 @@ public class FttpClientFactory implements InitializingBean
 		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
 		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
 
-		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, fttpServerBase, fttpApiKey, fttpStudy,
-				fttpTarget);
+		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, basicAuthUsername, basicAuthPassword,
+				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

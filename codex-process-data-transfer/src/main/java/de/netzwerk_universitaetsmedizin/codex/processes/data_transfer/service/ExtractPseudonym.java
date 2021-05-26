@@ -1,13 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -22,32 +18,30 @@ import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
-
-public class ResolvePsn extends AbstractServiceDelegate
+public class ExtractPseudonym extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResolvePsn.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExtractPseudonym.class);
 
-	public ResolvePsn(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public ExtractPseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 	}
+
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
+		String dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue("source/original"));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(dicSourceAndPseudonym));
 	}
 
-	private Optional<String> resolveDicSourceAndPseudonym(Task task)
+	private String getDicSourceAndPseudonym(Task task)
 	{
-		Optional<String> value = getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
+		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue);
-
-		return value;
+						.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("no dic pseudonym found"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

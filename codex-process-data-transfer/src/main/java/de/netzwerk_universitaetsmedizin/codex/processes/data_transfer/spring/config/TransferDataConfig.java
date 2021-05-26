@@ -27,13 +27,13 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.De
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPsn;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPseudonym;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePsn;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePseudonym;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
@@ -101,6 +101,12 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:#{null}}")
 	private String fttpPrivateKey;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicAuthUsername:#{null}}")
+	private String fttpBasicAuthUsername;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicAuthPassword:#{null}}")
+	private String fttpBasicAuthPassword;
+
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.serverBase:#{null}}")
 	private String fttpServerBase;
 
@@ -136,8 +142,8 @@ public class TransferDataConfig
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpBasicAuthUsername,
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
 	}
 
 	@Bean
@@ -204,15 +210,15 @@ public class TransferDataConfig
 	// numCodexDataSend
 
 	@Bean
-	public ExtractPsn extractPsn()
+	public ExtractPseudonym extractPseudonym()
 	{
-		return new ExtractPsn(fhirClientProvider, taskHelper);
+		return new ExtractPseudonym(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public ResolvePsn resolvePsn()
+	public ResolvePseudonym resolvePseudonym()
 	{
-		return new ResolvePsn(fhirClientProvider, taskHelper);
+		return new ResolvePseudonym(fhirClientProvider, taskHelper, fttpClientFactory());
 	}
 
 	@Bean
