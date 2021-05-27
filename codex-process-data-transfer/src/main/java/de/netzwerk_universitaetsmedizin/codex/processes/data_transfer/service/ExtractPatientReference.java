@@ -34,8 +34,8 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		Task task = getCurrentTaskFromExecutionVariables();
 		Reference patient = getPatientReference(task);
 
-		if (patient.hasIdentifier() && patient.getIdentifier().getSystem()
-				.equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
+		if (patient.hasIdentifier()
+				&& patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
 					Variables.stringValue(patient.getIdentifier().getValue()));
@@ -61,7 +61,7 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT, Reference.class).findFirst()
-				.orElseThrow(() -> new RuntimeException("No patient reference input parameter found"));
+						.orElseThrow(() -> new RuntimeException("No patient reference input parameter found"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
