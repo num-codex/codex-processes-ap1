@@ -52,8 +52,7 @@ public class EncryptData extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
-		Optional<String> pseudonym = getPseudonym(task);
+		Optional<String> pseudonym = getPseudonym(execution);
 
 		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 		byte[] bundleData = toByteArray(pseudonym.get(), bundle);
@@ -63,19 +62,10 @@ public class EncryptData extends AbstractServiceDelegate
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
 	}
 
-	private Optional<String> getPseudonym(Task task)
+	private Optional<String> getPseudonym(DelegateExecution execution)
 	{
-		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue);
-	}
-
-	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
-	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
-				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> type.cast(c.getValue()));
+		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+		return Optional.of(pseudonym);
 	}
 
 	private byte[] toByteArray(String pseudonym, Bundle bundle) throws IOException
