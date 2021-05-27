@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
@@ -694,5 +695,17 @@ public class FhirClientImpl implements FhirClient
 			return ((Procedure) resource).getSubject();
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
+	}
+
+	@Override
+	public Patient getPatient(String reference)
+	{
+		IdType idType = new IdType(reference);
+		IGenericClient client = clientFactory.getFhirStoreClient();
+
+		if (idType.hasBaseUrl() && client.getServerBase().equals(idType.getBaseUrl()))
+			return client.read().resource(Patient.class).withUrl(reference).execute();
+		else
+			throw new RuntimeException("reference should be an absolute local fhir store url");
 	}
 }

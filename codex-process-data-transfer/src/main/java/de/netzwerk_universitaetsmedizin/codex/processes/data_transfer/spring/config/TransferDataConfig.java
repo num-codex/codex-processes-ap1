@@ -218,7 +218,7 @@ public class TransferDataConfig
 	@Bean
 	public ResolvePseudonym resolvePseudonym()
 	{
-		return new ResolvePseudonym(fhirClientProvider, taskHelper, fttpClientFactory());
+		return new ResolvePseudonym(fhirClientProvider, taskHelper, fhirClientFactory(), fttpClientFactory());
 	}
 
 	@Bean
