@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymListSerializer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListSerializer;
 
 @Configuration
 public class TransferDataSerializerConfig
@@ -15,8 +15,8 @@ public class TransferDataSerializerConfig
 	private ObjectMapper objectMapper;
 
 	@Bean
-	public PseudonymListSerializer pseudonymListSerializer()
+	public PatientReferenceListSerializer pseudonymListSerializer()
 	{
-		return new PseudonymListSerializer(objectMapper);
+		return new PatientReferenceListSerializer(objectMapper);
 	}
 }

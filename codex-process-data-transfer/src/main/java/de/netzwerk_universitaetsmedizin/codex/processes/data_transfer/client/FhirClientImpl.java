@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
 public class FhirClientImpl implements FhirClient
 {
@@ -347,7 +347,7 @@ public class FhirClientImpl implements FhirClient
 	}
 
 	@Override
-	public PseudonymList getPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
+	public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		Bundle searchBundle = getSearchBundle(exportFrom, exportTo);
 
@@ -361,12 +361,30 @@ public class FhirClientImpl implements FhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
-		Stream<Patient> patients = resultBundle.getEntry().stream()
+		List<Patient> patients = resultBundle.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
-				.flatMap(this::getPatients);
+				.flatMap(this::getPatients).collect(Collectors.toList());
 
-		return new PseudonymList(patients.map(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).orElse(null))
-				.filter(p -> p != null).distinct().collect(Collectors.toList()));
+		List<String> identifiers = patients.stream()
+				.map(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).orElse(null)).filter(Objects::nonNull)
+				.distinct().collect(Collectors.toList());
+
+		List<String> absoluteUrls = patients.stream()
+				.filter(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).isEmpty()).map(this::getAbsoluteUrl)
+				.distinct().collect(Collectors.toList());
+
+		return new PatientReferenceList(identifiers, absoluteUrls);
+	}
+
+	private String getAbsoluteUrl(Patient patient)
+	{
+		IdType idElement = patient.getIdElement();
+		String value = new IdType(clientFactory.getFhirStoreClient().getServerBase(), idElement.getResourceType(),
+				idElement.getIdPart(), null).getValue();
+
+		logger.info("VALUE ID: {}", value);
+
+		return value;
 	}
 
 	private Optional<String> getPseudonym(Patient p, String namingSystem)

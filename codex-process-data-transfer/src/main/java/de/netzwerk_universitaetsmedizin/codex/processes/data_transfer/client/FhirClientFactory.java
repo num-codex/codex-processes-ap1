@@ -21,7 +21,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
 public class FhirClientFactory
 {
@@ -68,10 +68,11 @@ public class FhirClientFactory
 			}
 
 			@Override
-			public PseudonymList getPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
+			public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 			{
 				logger.warn("Returning demo pseudonyms for {}", localIdentifierValue);
-				return new PseudonymList(Arrays.asList("dic_foo/bar", "dic_foo/baz"));
+				return new PatientReferenceList(Arrays.asList("dic_foo/bar", "dic_foo/baz"),
+						Arrays.asList("http://dic-foo/fhir/Patient/3", "http://dic-foo/fhir/Patient/4"));
 			}
 
 			@Override

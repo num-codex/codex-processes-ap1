@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
 public interface FhirClient
 {
@@ -20,7 +20,7 @@ public interface FhirClient
 	 *            not <code>null</code>
 	 * @return
 	 */
-	PseudonymList getPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo);
+	PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo);
 
 	/**
 	 * @param pseudonym

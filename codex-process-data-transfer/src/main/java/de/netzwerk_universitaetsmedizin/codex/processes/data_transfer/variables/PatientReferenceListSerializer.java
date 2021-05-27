@@ -11,15 +11,16 @@ import org.springframework.beans.factory.InitializingBean;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymListValues.PseudonymListValue;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListValues.PatientReferenceListValue;
 
-public class PseudonymListSerializer extends PrimitiveValueSerializer<PseudonymListValue> implements InitializingBean
+public class PatientReferenceListSerializer extends PrimitiveValueSerializer<PatientReferenceListValue>
+		implements InitializingBean
 {
 	private final ObjectMapper objectMapper;
 
-	public PseudonymListSerializer(ObjectMapper objectMapper)
+	public PatientReferenceListSerializer(ObjectMapper objectMapper)
 	{
-		super(PseudonymListValues.VALUE_TYPE);
+		super(PatientReferenceListValues.VALUE_TYPE);
 
 		this.objectMapper = objectMapper;
 	}
@@ -31,9 +32,9 @@ public class PseudonymListSerializer extends PrimitiveValueSerializer<PseudonymL
 	}
 
 	@Override
-	public void writeValue(PseudonymListValue value, ValueFields valueFields)
+	public void writeValue(PatientReferenceListValue value, ValueFields valueFields)
 	{
-		PseudonymList results = value.getValue();
+		PatientReferenceList results = value.getValue();
 		try
 		{
 			if (results != null)
@@ -46,21 +47,21 @@ public class PseudonymListSerializer extends PrimitiveValueSerializer<PseudonymL
 	}
 
 	@Override
-	public PseudonymListValue convertToTypedValue(UntypedValueImpl untypedValue)
+	public PatientReferenceListValue convertToTypedValue(UntypedValueImpl untypedValue)
 	{
-		return PseudonymListValues.create((PseudonymList) untypedValue.getValue());
+		return PatientReferenceListValues.create((PatientReferenceList) untypedValue.getValue());
 	}
 
 	@Override
-	public PseudonymListValue readValue(ValueFields valueFields, boolean asTransientValue)
+	public PatientReferenceListValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 
 		try
 		{
-			PseudonymList pseudonyms = (bytes == null || bytes.length <= 0) ? null
-					: objectMapper.readValue(bytes, PseudonymList.class);
-			return PseudonymListValues.create(pseudonyms);
+			PatientReferenceList referenceList = (bytes == null || bytes.length <= 0) ? null
+					: objectMapper.readValue(bytes, PatientReferenceList.class);
+			return PatientReferenceListValues.create(referenceList);
 		}
 		catch (IOException e)
 		{
