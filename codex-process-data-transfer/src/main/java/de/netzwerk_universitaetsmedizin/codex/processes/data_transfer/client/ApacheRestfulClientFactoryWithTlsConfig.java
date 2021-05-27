@@ -63,7 +63,7 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 	@Override
 	protected synchronized ApacheHttpClient getHttpClient(String theServerBase)
 	{
-		logger.info("Returning new ApacheHttpClient for ServerNase {}", theServerBase);
+		logger.info("Returning new ApacheHttpClient for ServerBase {}", theServerBase);
 
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}

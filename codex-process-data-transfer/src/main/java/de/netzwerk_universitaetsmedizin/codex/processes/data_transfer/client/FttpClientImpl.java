@@ -169,8 +169,11 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		{
 			if ("pseudonym".equals(comp.getName()))
 			{
-				return Optional.of(comp.getValue()).filter(v -> v instanceof StringType).map(v -> (StringType) v)
-						.map(StringType::getValue);
+				if (!comp.hasValue())
+					logger.warn("fTTP return parameter object has no value for sub-parameter 'pseudonym'");
+
+				return Optional.ofNullable(comp.getValue()).filter(v -> v instanceof StringType)
+						.map(v -> (StringType) v).map(StringType::getValue);
 			}
 		}
 
