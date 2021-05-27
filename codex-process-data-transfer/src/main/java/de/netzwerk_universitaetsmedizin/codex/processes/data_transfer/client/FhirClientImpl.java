@@ -379,12 +379,8 @@ public class FhirClientImpl implements FhirClient
 	private String getAbsoluteUrl(Patient patient)
 	{
 		IdType idElement = patient.getIdElement();
-		String value = new IdType(clientFactory.getFhirStoreClient().getServerBase(), idElement.getResourceType(),
+		return new IdType(clientFactory.getFhirStoreClient().getServerBase(), idElement.getResourceType(),
 				idElement.getIdPart(), null).getValue();
-
-		logger.info("VALUE ID: {}", value);
-
-		return value;
 	}
 
 	private Optional<String> getPseudonym(Patient p, String namingSystem)
