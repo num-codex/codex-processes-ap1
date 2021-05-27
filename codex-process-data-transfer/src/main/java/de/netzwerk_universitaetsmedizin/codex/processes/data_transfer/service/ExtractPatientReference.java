@@ -16,9 +16,13 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExtractPatientReference extends AbstractServiceDelegate
 {
+	private static final Logger logger = LoggerFactory.getLogger(ExtractPatientReference.class);
+
 	public ExtractPatientReference(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
@@ -30,20 +34,26 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		Task task = getCurrentTaskFromExecutionVariables();
 		Reference patient = getPatientReference(task);
 
-		if (patient.hasIdentifier()
-				&& patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
+		if (patient.hasIdentifier() && patient.getIdentifier().getSystem()
+				.equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
 					Variables.stringValue(patient.getIdentifier().getValue()));
+			logger.info("Found pseudonym {} in task", patient.getIdentifier().getValue());
 		}
 		else if (patient.hasReference())
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
 					Variables.stringValue(patient.getReference()));
+
+			logger.info("Found absolut patient reference {} in task", patient.getReference());
 		}
 		else
 		{
-			throw new RuntimeException("Could not find patient reference");
+			logger.warn(
+					"Patient reference input parameter does not contain pseudonym identifier or absolute patient reference");
+			throw new RuntimeException(
+					"Patient reference input parameter does not contain pseudonym identifier or absolute patient reference");
 		}
 	}
 
@@ -51,7 +61,7 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT, Reference.class).findFirst()
-						.orElseThrow(() -> new RuntimeException("No patient reference found"));
+				.orElseThrow(() -> new RuntimeException("No patient reference input parameter found"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

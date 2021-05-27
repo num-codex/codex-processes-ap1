@@ -34,5 +34,9 @@ public interface FhirClient
 
 	void storeBundle(Bundle bundle);
 
+	/**
+	 * @param reference Absolute reference, not <code>null</code>
+	 * @return
+	 */
 	Patient getPatient(String reference);
 }

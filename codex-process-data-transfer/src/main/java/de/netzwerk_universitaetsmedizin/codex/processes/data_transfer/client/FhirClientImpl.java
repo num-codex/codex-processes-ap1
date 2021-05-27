@@ -700,12 +700,16 @@ public class FhirClientImpl implements FhirClient
 	@Override
 	public Patient getPatient(String reference)
 	{
+		Objects.requireNonNull(reference, "reference");
+
+		logger.info("Requesting patient from {} ...", reference);
+
 		IdType idType = new IdType(reference);
 		IGenericClient client = clientFactory.getFhirStoreClient();
 
 		if (idType.hasBaseUrl() && client.getServerBase().equals(idType.getBaseUrl()))
 			return client.read().resource(Patient.class).withUrl(reference).execute();
 		else
-			throw new RuntimeException("reference should be an absolute local fhir store url");
+			throw new RuntimeException("Reference should be an absolute local fhir store url");
 	}
 }

@@ -50,6 +50,9 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		String reference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
+
+		logger.info("Resolving pseudonym for absolut patient reference {}", reference);
+
 		Patient patient = getPatient(reference);
 		String bloomFilter = getBloomFilter(patient);
 		String pseudonym = resolvePseudonym(bloomFilter);

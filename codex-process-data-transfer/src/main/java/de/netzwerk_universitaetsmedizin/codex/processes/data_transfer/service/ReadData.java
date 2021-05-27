@@ -82,16 +82,14 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		Optional<String> pseudonym = getPseudonym(execution);
+		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
 		Optional<DateTimeType> exportFrom = getExportFrom(task);
 		Optional<InstantType> exportTo = getExportTo(task);
 
-		if (pseudonym.isEmpty())
-			throw new IllegalStateException("No pseudonym in Task");
 		if (exportTo.isEmpty())
 			throw new IllegalStateException("No export-to in Task");
 
-		Bundle bundle = readDataAndCreateBundle(pseudonym.get(), exportFrom.orElse(null), exportTo.get());
+		Bundle bundle = readDataAndCreateBundle(pseudonym, exportFrom.orElse(null), exportTo.get());
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
 	}
@@ -109,12 +107,6 @@ public class ReadData extends AbstractServiceDelegate
 			logger.debug("Created bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
 		return bundle;
-	}
-
-	private Optional<String> getPseudonym(DelegateExecution execution)
-	{
-		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
-		return Optional.of(pseudonym);
 	}
 
 	private Optional<DateTimeType> getExportFrom(Task task)
