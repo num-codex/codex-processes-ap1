@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
@@ -235,7 +238,7 @@ public class FhirClientImpl implements FhirClient
 	private String createPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym != null && !pseudonym.isBlank())
-			return "&identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+			return "&identifier=" + NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 		else
 			return "";
 	}
@@ -251,8 +254,7 @@ public class FhirClientImpl implements FhirClient
 	private String createPatPrefixPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym != null && !pseudonym.isBlank())
-			return "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-					+ pseudonym;
+			return "&patient:identifier=" + NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 		else
 			return "";
 	}
@@ -363,8 +365,7 @@ public class FhirClientImpl implements FhirClient
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
 				.flatMap(this::getPatients);
 
-		return new PseudonymList(patients
-				.map(p -> getPseudonym(p, ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).orElse(null))
+		return new PseudonymList(patients.map(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).orElse(null))
 				.filter(p -> p != null).distinct().collect(Collectors.toList()));
 	}
 
@@ -449,8 +450,7 @@ public class FhirClientImpl implements FhirClient
 	private Stream<DomainResource> getNewDataWithoutIdentifierReferenceSupport(String pseudonym,
 			DateWithPrecision exportFrom, Date exportTo)
 	{
-		Optional<Patient> localPatient = findPatientInLocalFhirStore(
-				ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, pseudonym);
+		Optional<Patient> localPatient = findPatientInLocalFhirStore(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, pseudonym);
 		if (localPatient.isEmpty())
 		{
 			logger.warn(
@@ -458,7 +458,6 @@ public class FhirClientImpl implements FhirClient
 					pseudonym);
 			throw new RuntimeException("Error while retrieving patient for pseudonym " + pseudonym);
 		}
-
 
 		Bundle searchBundle = getSearchBundleWithPatientId(localPatient.get().getIdElement().getIdPart(), exportFrom,
 				exportTo);
@@ -702,7 +701,7 @@ public class FhirClientImpl implements FhirClient
 	{
 		Objects.requireNonNull(reference, "reference");
 
-		logger.info("Requesting patient from {} ...", reference);
+		logger.info("Requesting patient from {}", reference);
 
 		IdType idType = new IdType(reference);
 		IGenericClient client = clientFactory.getFhirStoreClient();
@@ -711,5 +710,20 @@ public class FhirClientImpl implements FhirClient
 			return client.read().resource(Patient.class).withUrl(reference).execute();
 		else
 			throw new RuntimeException("Reference should be an absolute local fhir store url");
+	}
+
+	@Override
+	public MethodOutcome updatePatient(Patient patient)
+	{
+		Objects.requireNonNull(patient, "patient");
+
+		String pseudonym = patient.getIdentifier().stream()
+				.filter(i -> i.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)).findFirst()
+				.orElseThrow(() -> new RuntimeException("Patient does not contain DIC pseudonym")).getValue();
+
+		logger.info("Updating absolute patient reference {} with DIC pseudonym {} ...",
+				patient.getIdElement().toVersionless().getValue(), pseudonym);
+
+		return clientFactory.getFhirStoreClient().update().resource(patient).execute();
 	}
 }

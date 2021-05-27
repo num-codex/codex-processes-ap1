@@ -96,7 +96,7 @@ public class ReadData extends AbstractServiceDelegate
 
 	protected Bundle readDataAndCreateBundle(String pseudonym, DateTimeType from, InstantType to)
 	{
-		logger.info("Reading data for pseudonym {}", pseudonym);
+		logger.info("Reading data for DIC pseudonym {}", pseudonym);
 
 		Stream<DomainResource> resources = fhirClientFactory.getFhirClient().getNewData(pseudonym,
 				from == null ? null : new DateWithPrecision(from.getValue(), from.getPrecision()), to.getValue());

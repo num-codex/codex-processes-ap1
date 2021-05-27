@@ -65,7 +65,8 @@ public class FttpClientFactory implements InitializingBean
 		@Override
 		public Optional<String> getDicPseudonym(String bloomFilter)
 		{
-			return Optional.of("source/original");
+			logger.info("Requesting DIC pseudonym from bloom filter {} ", bloomFilter);
+			return Optional.of("source2/original2");
 		}
 
 		@Override

@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Patient;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
 
@@ -40,4 +41,13 @@ public interface FhirClient
 	 * @return
 	 */
 	Patient getPatient(String reference);
+
+	/**
+	 * @param patient
+	 *            containing an identifier with system
+	 *            {@link de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer#NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM}
+	 *            not <code>null</code>
+	 * @return
+	 */
+	MethodOutcome updatePatient(Patient patient);
 }

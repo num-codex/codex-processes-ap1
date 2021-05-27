@@ -101,7 +101,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while retrieving crr pseudonym", e);
+			logger.error("Error while retrieving CRR pseudonym", e);
 			return Optional.empty();
 		}
 	}
@@ -130,7 +130,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	{
 		Objects.requireNonNull(bloomFilter, "bloomFilter");
 
-		logger.info("Requesting DIC pseudonym from {} ...", bloomFilter);
+		logger.info("Requesting DIC pseudonym from bloomfilter {} ", bloomFilter);
 
 		try
 		{
@@ -144,7 +144,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while retrieving dic pseudonym", e);
+			logger.error("Error while retrieving DIC pseudonym", e);
 			return Optional.empty();
 		}
 	}

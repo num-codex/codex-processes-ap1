@@ -62,9 +62,9 @@ public class CheckConsent extends AbstractServiceDelegate
 				&& consentOids.contains(transferGrantedOid);
 
 		if (usageAndTransferGranted)
-			logger.info("Usage and transfer granted for pseudonym {}", dicSourceAndPseudonym);
+			logger.info("Usage and transfer granted for DIC pseudonym {}", dicSourceAndPseudonym);
 		else
-			logger.warn("Usage or transfer not granted for pseudonym {}", dicSourceAndPseudonym);
+			logger.warn("Usage or transfer not granted for DIC pseudonym {}", dicSourceAndPseudonym);
 
 		return usageAndTransferGranted;
 	}

@@ -39,21 +39,21 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
 					Variables.stringValue(patient.getIdentifier().getValue()));
-			logger.info("Found pseudonym {} in task", patient.getIdentifier().getValue());
+			logger.info("Task contains DIC pseudonym {}", patient.getIdentifier().getValue());
 		}
 		else if (patient.hasReference())
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
 					Variables.stringValue(patient.getReference()));
 
-			logger.info("Found absolut patient reference {} in task", patient.getReference());
+			logger.info("Task contains absolut patient reference {}", patient.getReference());
 		}
 		else
 		{
 			logger.warn(
-					"Patient reference input parameter does not contain pseudonym identifier or absolute patient reference");
+					"Patient reference input parameter does not contain DIC pseudonym identifier or absolute patient reference");
 			throw new RuntimeException(
-					"Patient reference input parameter does not contain pseudonym identifier or absolute patient reference");
+					"Patient reference input parameter does not contain DIC pseudonym identifier or absolute patient reference");
 		}
 	}
 
