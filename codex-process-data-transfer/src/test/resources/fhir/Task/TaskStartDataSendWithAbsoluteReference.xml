@@ -41,7 +41,7 @@
          </coding>
       </type>
       <valueReference>
-         <reference value="https://dic/fhir/Patient/1">
+         <reference value="http://localhost:8003/fhir/Patient/4">
          </reference>
       </valueReference>
    </input>

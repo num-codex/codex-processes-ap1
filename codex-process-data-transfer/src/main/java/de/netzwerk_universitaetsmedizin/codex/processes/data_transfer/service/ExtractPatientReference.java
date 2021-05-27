@@ -1,13 +1,13 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
 import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
@@ -16,33 +16,42 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class ExtractPseudonym extends AbstractServiceDelegate
+public class ExtractPatientReference extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(ExtractPseudonym.class);
-
-	public ExtractPseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public ExtractPatientReference(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
-		String dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
+		Reference patient = getPatientReference(task);
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(dicSourceAndPseudonym));
+		if (patient.hasIdentifier()
+				&& patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
+		{
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
+					Variables.stringValue(patient.getIdentifier().getValue()));
+		}
+		else if (patient.hasReference())
+		{
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
+					Variables.stringValue(patient.getReference()));
+		}
+		else
+		{
+			throw new RuntimeException("Could not find patient reference");
+		}
 	}
 
-	private String getDicSourceAndPseudonym(Task task)
+	private Reference getPatientReference(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT, Reference.class).findFirst()
-						.map(reference -> reference.getIdentifier().getValue())
-						.orElseThrow(() -> new RuntimeException("no dic pseudonym found"));
+						.orElseThrow(() -> new RuntimeException("No patient reference found"));
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

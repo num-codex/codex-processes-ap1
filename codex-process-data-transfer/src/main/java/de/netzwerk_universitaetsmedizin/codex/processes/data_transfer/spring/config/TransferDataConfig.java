@@ -27,7 +27,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.De
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPseudonym;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
@@ -210,9 +210,9 @@ public class TransferDataConfig
 	// numCodexDataSend
 
 	@Bean
-	public ExtractPseudonym extractPseudonym()
+	public ExtractPatientReference extractPseudonym()
 	{
-		return new ExtractPseudonym(fhirClientProvider, taskHelper);
+		return new ExtractPatientReference(fhirClientProvider, taskHelper);
 	}
 
 	@Bean

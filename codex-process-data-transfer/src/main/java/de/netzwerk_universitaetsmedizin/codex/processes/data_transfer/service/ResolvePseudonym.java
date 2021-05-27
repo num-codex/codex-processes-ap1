@@ -3,7 +3,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -49,6 +48,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
+
 		String bloomFilter = getBloomFilter(task);
 		String pseudonym = resolvePseudonym(bloomFilter);
 
