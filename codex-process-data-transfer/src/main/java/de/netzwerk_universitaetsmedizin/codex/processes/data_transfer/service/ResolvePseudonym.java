@@ -2,8 +2,8 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_RECORD_BLOOM_FILTER;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -87,8 +87,8 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	private String getBloomFilter(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(identifier -> identifier.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_RECORD_BLOOM_FILTER))
-				.findFirst().orElseThrow(() -> new RuntimeException("No bloom filter present in patient")).getValue();
+				.filter(identifier -> identifier.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER)).findFirst()
+				.orElseThrow(() -> new RuntimeException("No bloom filter present in patient")).getValue();
 	}
 
 	private String resolveBloomFilter(String bloomFilter)

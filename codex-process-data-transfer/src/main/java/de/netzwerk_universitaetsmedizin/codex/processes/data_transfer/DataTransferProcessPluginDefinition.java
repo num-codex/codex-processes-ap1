@@ -58,7 +58,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
-		var nR = NamingSystemResource.file("fhir/NamingSystem/num-codex-record-bloom-filter-identifier.xml");
+		var nR = NamingSystemResource.file("fhir/NamingSystem/num-codex-bloom-filter-identifier.xml");
 
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");

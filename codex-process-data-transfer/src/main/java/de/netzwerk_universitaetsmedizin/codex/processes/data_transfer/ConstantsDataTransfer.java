@@ -20,7 +20,7 @@ public interface ConstantsDataTransfer
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/crr-pseudonym";
-	String NAMING_SYSTEM_NUM_CODEX_RECORD_BLOOM_FILTER = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/record-bloom-filter";
+	String NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/bloom-filter";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER = "http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT = "patient";
