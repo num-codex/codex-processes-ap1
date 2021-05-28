@@ -55,56 +55,69 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 
 		logger.info("Resolving DIC pseudonym for absolut patient reference {}", reference);
 
-		Patient patient = getPatient(reference);
-		String pseudonym = getPseudonym(patient).or(() -> resolvePseudonym(patient))
-				.orElseThrow(() -> new RuntimeException("Could not resolve DIC pseudonym")).getValue();
-
-		logger.info("Absolut patient reference {} has DIC pseudonym {}", reference, pseudonym);
-
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
+		Optional<Patient> optPatient = getPatient(reference);
+		optPatient.ifPresentOrElse(patient ->
+		{
+			Optional<String> optPseudonym = getPseudonym(patient);
+			optPseudonym.ifPresentOrElse(pseudonym ->
+			{
+				logger.debug("Patient with absolute reference {} has DIC pseudonym {}", reference, pseudonym);
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
+			}, () ->
+			{
+				logger.debug("Patient with absolute reference {} has no DIC pseudonym", reference);
+				Patient updatedPatient = resolvePseudonymAndUpdatePatient(optPatient.get());
+				String pseudonym = getPseudonym(updatedPatient).orElseThrow();
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
+			});
+		}, () ->
+		{
+			logger.error("Patient with absolute reference {} not found", reference);
+			throw new RuntimeException("Patient with absolute reference " + reference + " not found");
+		});
 	}
 
-	private Patient getPatient(String reference)
+	private Optional<Patient> getPatient(String reference)
 	{
 		return fhirClientFactory.getFhirClient().getPatient(reference);
 	}
 
-	private Optional<Identifier> getPseudonym(Patient patient)
+	private Optional<String> getPseudonym(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(i -> i.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
-				.findFirst();
+				.findFirst().map(Identifier::getValue);
 	}
 
-	private Optional<Identifier> resolvePseudonym(Patient patient)
+	private Patient resolvePseudonymAndUpdatePatient(Patient patient)
 	{
 		String bloomFilter = getBloomFilter(patient);
 		String pseudonym = resolveBloomFilter(bloomFilter);
-		Patient updatedPatient = storePseudonym(patient, pseudonym);
-
-		return getPseudonym(updatedPatient);
+		return storePseudonym(patient, pseudonym);
 	}
 
 	private String getBloomFilter(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(identifier -> identifier.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER)).findFirst()
-				.orElseThrow(() -> new RuntimeException("No bloom filter present in patient")).getValue();
+				.filter(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem()) && i.hasValue()).findFirst()
+				.map(Identifier::getValue)
+				.orElseThrow(() -> new RuntimeException("No bloom filter present in patient"));
 	}
 
 	private String resolveBloomFilter(String bloomFilter)
 	{
 		return fttpClientFactory.getFttpClient().getDicPseudonym(bloomFilter)
-				.orElseThrow(() -> new RuntimeException("Could not resolve bloom filter to DIC pseudonym"));
+				.orElseThrow(() -> new RuntimeException("Could not get DIC pseudonym with bloom filter"));
 	}
 
 	private Patient storePseudonym(Patient patient, String pseudonym)
 	{
-		logger.info("Storing DIC pseudonym for absolut patient reference {}",
+		logger.info("Storing DIC pseudonym patient with absolute reference {}",
 				patient.getIdElement().toVersionless().getValue());
-
 		patient.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
-		MethodOutcome outcome = fhirClientFactory.getFhirClient().updatePatient(patient);
 
-		return (Patient) outcome.getResource();
+		Optional<Patient> updatePatient = fhirClientFactory.getFhirClient().updatePatient(patient);
+
+		return updatePatient.orElseThrow(() -> new RuntimeException("Unable to update Patient with absolute reference "
+				+ patient.getIdElement().toVersionless().getValue()));
 	}
 }

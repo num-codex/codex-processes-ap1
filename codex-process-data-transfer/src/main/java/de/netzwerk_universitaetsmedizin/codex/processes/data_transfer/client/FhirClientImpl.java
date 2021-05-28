@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
@@ -713,7 +715,7 @@ public class FhirClientImpl implements FhirClient
 	}
 
 	@Override
-	public Patient getPatient(String reference)
+	public Optional<Patient> getPatient(String reference)
 	{
 		Objects.requireNonNull(reference, "reference");
 
@@ -723,14 +725,25 @@ public class FhirClientImpl implements FhirClient
 		IGenericClient client = clientFactory.getFhirStoreClient();
 
 		if (client.getServerBase().equals(idType.getBaseUrl()))
-			return client.read().resource(Patient.class).withUrl(reference).execute();
+		{
+			try
+			{
+				Patient patient = client.read().resource(Patient.class).withUrl(reference).execute();
+				return Optional.of(patient);
+			}
+			catch (Exception e)
+			{
+				logger.error("Patient with absolute reference " + reference + " not found", e);
+				return Optional.empty();
+			}
+		}
 		else
 			throw new RuntimeException(
 					"Reference should be an absolute local fhir store url to " + client.getServerBase());
 	}
 
 	@Override
-	public MethodOutcome updatePatient(Patient patient)
+	public Optional<Patient> updatePatient(Patient patient)
 	{
 		Objects.requireNonNull(patient, "patient");
 
@@ -738,9 +751,41 @@ public class FhirClientImpl implements FhirClient
 				.filter(i -> i.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)).findFirst()
 				.orElseThrow(() -> new RuntimeException("Patient does not contain DIC pseudonym")).getValue();
 
-		logger.info("Updating absolute patient reference {} with DIC pseudonym {} ...",
-				patient.getIdElement().toVersionless().getValue(), pseudonym);
+		String reference = patient.getIdElement().toVersionless().getValue();
+		logger.info("Updating absolute patient reference {} with DIC pseudonym {} ...", reference, pseudonym);
 
-		return clientFactory.getFhirStoreClient().update().resource(patient).execute();
+		try
+		{
+			MethodOutcome methodOutcome = clientFactory.getFhirStoreClient().update().resource(patient).execute();
+
+			OperationOutcome operationOutcome = (OperationOutcome) methodOutcome.getOperationOutcome();
+
+			for (OperationOutcome.OperationOutcomeIssueComponent issue : operationOutcome.getIssue())
+			{
+				OperationOutcome.IssueSeverity severity = issue.getSeverity();
+				String details = issue.getDetails().getText();
+
+				switch (severity)
+				{
+					case INFORMATION:
+						logger.info(details);
+						break;
+					case WARNING:
+						logger.warn(details);
+						break;
+					case ERROR:
+					case FATAL:
+						logger.error(details);
+						break;
+				}
+			}
+
+			return Optional.ofNullable((Patient) methodOutcome.getResource());
+		}
+		catch (Exception e)
+		{
+			logger.error("Could not update patient with absolute reference " + reference, e);
+			return Optional.empty();
+		}
 	}
 }

@@ -3,6 +3,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -95,22 +96,21 @@ public class FhirClientFactory
 			}
 
 			@Override
-			public Patient getPatient(String reference)
+			public Optional<Patient> getPatient(String reference)
 			{
-				Patient p = fhirContext.newJsonParser().parseResource(Patient.class, patient);
-				p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER).setValue(
+				Patient patient = fhirContext.newJsonParser().parseResource(Patient.class, FhirClientFactory.patient);
+				patient.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER).setValue(
 						"J75gYl+RiKSsxeu33tixBEEtFGCZwIEsWIKgvESaluvpSGBte/SBNZilz+sLSZdHSDKTL2J2d1yZsakqjtV5U2SMMJZ5IF3gEk1MT3sCRkxXEo1aJWKpnqndUTR+fvtSeMFj0y/O5yqrLV9zU79CNiTfZN5t1/6XGxZUXq2DovfCRrrpRxWjFwjKIDo0OkRANf7Mqp+Fsu0Un53JF57p/p1RLpWcJkC3xO+UslGbDo3mjgczdvxz0aLmWNA7/NIhk+Q50gxCX3B4QrntPfLLlBkrmIpsKRcLFVuYZik7pYZ9prd0qCLQ9tc8qiw1ry5kMfIvLnIS/FV36w==");
-				p.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
-				return p;
+				patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
+				return Optional.of(patient);
 			}
 
 			@Override
-			public MethodOutcome updatePatient(Patient patient)
+			public Optional<Patient> updatePatient(Patient patient)
 			{
 				String newVersion = String.valueOf(Integer.parseInt(patient.getMeta().getVersionId()) + 1);
 				patient.getMeta().setVersionId(newVersion).setLastUpdated(new Date());
-				return new MethodOutcome().setResource(patient).setId(patient.getIdElement())
-						.setOperationOutcome(new OperationOutcome());
+				return Optional.of(patient);
 			}
 		};
 	}
