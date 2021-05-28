@@ -753,33 +753,35 @@ public class FhirClientImpl implements FhirClient
 				.orElseThrow(() -> new RuntimeException("Patient does not contain DIC pseudonym")).getValue();
 
 		String reference = patient.getIdElement().toVersionless().getValue();
-		logger.info("Updating absolute patient reference {} with DIC pseudonym {} ...", reference, pseudonym);
+		logger.info("Updating absolute patient reference {} with DIC pseudonym {}", reference, pseudonym);
 
 		try
 		{
 			MethodOutcome methodOutcome = clientFactory.getFhirStoreClient().update().resource(patient).execute();
 
-			OperationOutcome operationOutcome = (OperationOutcome) methodOutcome.getOperationOutcome();
-
-			for (OperationOutcome.OperationOutcomeIssueComponent issue : operationOutcome.getIssue())
+			Optional.ofNullable((OperationOutcome) methodOutcome.getOperationOutcome()).ifPresent(oo ->
 			{
-				OperationOutcome.IssueSeverity severity = issue.getSeverity();
-				String details = issue.getDetails().getText();
-
-				switch (severity)
+				for (OperationOutcome.OperationOutcomeIssueComponent issue : oo.getIssue())
 				{
-					case INFORMATION:
-						logger.info(details);
-						break;
-					case WARNING:
-						logger.warn(details);
-						break;
-					case ERROR:
-					case FATAL:
-						logger.error(details);
-						break;
+					OperationOutcome.IssueSeverity severity = issue.getSeverity();
+					String details = issue.getDetails().getText();
+
+					switch (severity)
+					{
+						case INFORMATION:
+							logger.info(details);
+							break;
+						case WARNING:
+							logger.warn(details);
+							break;
+						case ERROR:
+						case FATAL:
+							logger.error(details);
+							break;
+					}
 				}
-			}
+
+			});
 
 			return Optional.ofNullable((Patient) methodOutcome.getResource());
 		}
