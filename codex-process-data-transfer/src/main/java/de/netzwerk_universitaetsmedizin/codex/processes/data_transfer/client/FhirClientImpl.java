@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
@@ -365,13 +366,14 @@ public class FhirClientImpl implements FhirClient
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
 				.flatMap(this::getPatients).collect(Collectors.toList());
 
-		List<String> identifiers = patients.stream()
-				.map(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).orElse(null)).filter(Objects::nonNull)
-				.distinct().collect(Collectors.toList());
+		List<String> identifiers = new ArrayList<>();
+		List<String> absoluteUrls = new ArrayList<>();
 
-		List<String> absoluteUrls = patients.stream()
-				.filter(p -> getPseudonym(p, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).isEmpty()).map(this::getAbsoluteUrl)
-				.distinct().collect(Collectors.toList());
+		for (Patient patient : patients)
+		{
+			getPseudonym(patient, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).ifPresentOrElse(identifiers::add,
+					() -> absoluteUrls.add(getAbsoluteUrl(patient)));
+		}
 
 		return new PatientReferenceList(identifiers, absoluteUrls);
 	}
@@ -720,10 +722,11 @@ public class FhirClientImpl implements FhirClient
 		IdType idType = new IdType(reference);
 		IGenericClient client = clientFactory.getFhirStoreClient();
 
-		if (idType.hasBaseUrl() && client.getServerBase().equals(idType.getBaseUrl()))
+		if (client.getServerBase().equals(idType.getBaseUrl()))
 			return client.read().resource(Patient.class).withUrl(reference).execute();
 		else
-			throw new RuntimeException("Reference should be an absolute local fhir store url");
+			throw new RuntimeException(
+					"Reference should be an absolute local fhir store url to " + client.getServerBase());
 	}
 
 	@Override

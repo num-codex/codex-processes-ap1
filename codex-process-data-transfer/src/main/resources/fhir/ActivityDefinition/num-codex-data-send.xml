@@ -40,7 +40,7 @@
 		</extension>
 		<extension url="task-profile">
 			<valueCanonical
-				value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send-with-rbf" />
+				value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send" />
 		</extension>
 	</extension>
 	<url

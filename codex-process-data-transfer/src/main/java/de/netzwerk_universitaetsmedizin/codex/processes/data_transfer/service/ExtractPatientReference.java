@@ -34,8 +34,8 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		Task task = getCurrentTaskFromExecutionVariables();
 		Reference patient = getPatientReference(task);
 
-		if (patient.hasIdentifier()
-				&& patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM))
+		if (patient.hasIdentifier() && patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+				&& patient.getIdentifier().hasValue())
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
 					Variables.stringValue(patient.getIdentifier().getValue()));

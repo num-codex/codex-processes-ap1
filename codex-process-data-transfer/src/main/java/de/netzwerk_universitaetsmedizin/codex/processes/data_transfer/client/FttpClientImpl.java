@@ -2,7 +2,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
 
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.Optional;
@@ -130,14 +129,14 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	{
 		Objects.requireNonNull(bloomFilter, "bloomFilter");
 
-		logger.info("Requesting DIC pseudonym from bloomfilter {} ", bloomFilter);
+		logger.info("Requesting DIC pseudonym for bloomfilter {} ", bloomFilter);
 
 		try
 		{
 			IGenericClient client = createGenericClient();
 
 			Parameters parameters = client.operation().onServer().named("$request-psn-from-bf-workflow")
-					.withParameters(createParametersForRbfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
+					.withParameters(createParametersForBfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
 					.encoded(EncodingEnum.XML).execute();
 
 			return getPseudonym(parameters);
@@ -149,7 +148,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		}
 	}
 
-	protected Parameters createParametersForRbfWorkflow(String bloomFilter)
+	protected Parameters createParametersForBfWorkflow(String bloomFilter)
 	{
 		Parameters p = new Parameters();
 		p.addParameter("study", fttpStudy);
