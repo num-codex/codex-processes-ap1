@@ -136,7 +136,7 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 
 	/**
 	 * Only allows to set an instance of type org.apache.http.client.HttpClient
-	 * 
+	 *
 	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(Object)
 	 */
 	@Override

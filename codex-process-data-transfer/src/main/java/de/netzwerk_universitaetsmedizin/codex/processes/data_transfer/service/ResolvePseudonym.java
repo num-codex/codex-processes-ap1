@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 

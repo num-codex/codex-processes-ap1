@@ -12,14 +12,12 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
