@@ -30,7 +30,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Do
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentIdatMerge;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentUsageAndTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
@@ -92,6 +93,9 @@ public class TransferDataConfig
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
 	private String transferGrantedOid;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.idatMergeGrantedOid:2.16.840.1.113883.3.1937.777.24.5.3.4}")
+	private String idatMergeGrantedOid;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:#{null}}")
 	private String fttpTrustStore;
@@ -233,14 +237,20 @@ public class TransferDataConfig
 	@Bean
 	public CheckConsent checkConsent()
 	{
-		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), usageGrantedOid,
-				transferGrantedOid);
+		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), idatMergeGrantedOid,
+				usageGrantedOid, transferGrantedOid);
 	}
 
 	@Bean
-	public HandleNoConsent handleNoConsent()
+	public HandleNoConsentUsageAndTransfer handleNoConsentUsageAndTransfer()
 	{
-		return new HandleNoConsent(fhirClientProvider, taskHelper);
+		return new HandleNoConsentUsageAndTransfer(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public HandleNoConsentIdatMerge handleNoConsentIdatMerge()
+	{
+		return new HandleNoConsentIdatMerge(fhirClientProvider, taskHelper);
 	}
 
 	@Bean

@@ -17,11 +17,20 @@ public class ConsentClientFactory
 		return new ConsentClient()
 		{
 			@Override
-			public List<String> getConsentOidsFor(String dicSourceAndPseudonym)
+			public List<String> getConsentOidsForIdentifierReference(String dicSourceAndPseudonym)
 			{
 				logger.warn("Returning 'all allowed' OIDs for DIC pseudonym {}", dicSourceAndPseudonym);
+				return Arrays.asList(BASE_OID + ".24.5.1.1", BASE_OID + ".24.5.1.34", BASE_OID + ".24.5.1.37",
+						BASE_OID + ".24.5.3.4");
+			}
 
-				return Arrays.asList(BASE_OID + ".24.5.1.1", BASE_OID + ".24.5.1.34", BASE_OID + ".24.5.1.37");
+			@Override
+			public List<String> getConsentOidsForAbsoluteReference(String reference)
+			{
+				logger.warn("Returning 'all allowed' OIDs for absolute patient reference {}", reference);
+
+				return Arrays.asList(BASE_OID + ".24.5.1.1", BASE_OID + ".24.5.1.34", BASE_OID + ".24.5.1.37",
+						BASE_OID + ".24.5.3.4");
 			}
 		};
 	}

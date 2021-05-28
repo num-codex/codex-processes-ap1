@@ -4,5 +4,7 @@ import java.util.List;
 
 public interface ConsentClient
 {
-	List<String> getConsentOidsFor(String dicSourceAndPseudonym);
+	List<String> getConsentOidsForIdentifierReference(String dicSourceAndPseudonym);
+
+	List<String> getConsentOidsForAbsoluteReference(String reference);
 }

@@ -16,6 +16,7 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_EXPORT_TO = "exportTo";
 	String BPMN_EXECUTION_VARIABLE_BUNDLE = "bundle";
 	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
+	String BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED = "idatMergeGranted";
 	String BPMN_EXECUTION_VARIABLE_BINARY_URL = "binaryUrl";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym";
