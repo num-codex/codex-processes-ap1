@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -367,8 +369,8 @@ public class FhirClientImpl implements FhirClient
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
 				.flatMap(this::getPatients).collect(Collectors.toList());
 
-		List<String> identifiers = new ArrayList<>();
-		List<String> absoluteUrls = new ArrayList<>();
+		Set<String> identifiers = new HashSet<>();
+		Set<String> absoluteUrls = new HashSet<>();
 
 		for (Patient patient : patients)
 		{
