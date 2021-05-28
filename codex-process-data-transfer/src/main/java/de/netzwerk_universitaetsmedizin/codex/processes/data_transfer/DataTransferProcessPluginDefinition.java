@@ -20,7 +20,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.con
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
-	public static final String VERSION = "0.2.2";
+	public static final String VERSION = "0.3.0";
 
 	@Override
 	public String getName()
