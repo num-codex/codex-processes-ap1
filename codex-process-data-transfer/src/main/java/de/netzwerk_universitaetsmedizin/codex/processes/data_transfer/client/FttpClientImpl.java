@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -92,7 +92,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		{
 			IGenericClient client = createGenericClient();
 
-			Parameters parameters = client.operation().onServer().named("request-psn-workflow")
+			Parameters parameters = client.operation().onServer().named("requestPsnWorkflow")
 					.withParameters(createParametersForPsnWorkflow(dicSourceAndPseudonym))
 					.accept(Constants.CT_FHIR_XML_NEW).encoded(EncodingEnum.XML).execute();
 
@@ -135,7 +135,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		{
 			IGenericClient client = createGenericClient();
 
-			Parameters parameters = client.operation().onServer().named("$request-psn-from-bf-workflow")
+			Parameters parameters = client.operation().onServer().named("$requestPsnFromBfWorkflow")
 					.withParameters(createParametersForBfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
 					.encoded(EncodingEnum.XML).execute();
 
@@ -171,8 +171,10 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 				if (!comp.hasValue())
 					logger.warn("fTTP return parameter object has no value for sub-parameter 'pseudonym'");
 
-				return Optional.ofNullable(comp.getValue()).filter(v -> v instanceof StringType)
-						.map(v -> (StringType) v).map(StringType::getValue);
+				return Optional.ofNullable(comp.getValue()).filter(v -> v instanceof Identifier)
+						.map(v -> (Identifier) v)
+						.filter(i -> "https://ths-greifswald.de/dispatcher".equals(i.getSystem()))
+						.map(Identifier::getValue);
 			}
 		}
 
