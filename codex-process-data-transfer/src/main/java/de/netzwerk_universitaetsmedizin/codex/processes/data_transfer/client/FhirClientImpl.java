@@ -10,11 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -32,6 +30,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
@@ -54,6 +53,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
 public class FhirClientImpl implements FhirClient
@@ -374,30 +374,31 @@ public class FhirClientImpl implements FhirClient
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
 				.flatMap(this::getPatients).collect(Collectors.toList());
 
-		Set<String> identifiers = new HashSet<>();
-		Set<String> absoluteUrls = new HashSet<>();
+		List<PatientReference> patientReferences = patients.stream()
+				.map(p -> getIdentifierPatientReference(p).orElse(getAbsoluteUrlPatientReference(p))).distinct()
+				.collect(Collectors.toList());
 
-		for (Patient patient : patients)
-		{
-			getPseudonym(patient, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).ifPresentOrElse(identifiers::add,
-					() -> absoluteUrls.add(getAbsoluteUrl(patient)));
-		}
-
-		return new PatientReferenceList(identifiers, absoluteUrls);
+		return new PatientReferenceList(patientReferences);
 	}
 
-	private String getAbsoluteUrl(Patient patient)
+	private Optional<PatientReference> getIdentifierPatientReference(Patient patient)
 	{
-		IdType idElement = patient.getIdElement();
-		return new IdType(clientFactory.getFhirStoreClient().getServerBase(), idElement.getResourceType(),
-				idElement.getIdPart(), null).getValue();
+		return getPseudonym(patient, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).map(p -> PatientReference
+				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(p)));
 	}
 
 	private Optional<String> getPseudonym(Patient p, String namingSystem)
 	{
 		return p.getIdentifier().stream()
-				.filter(i -> i.hasSystem() && i.hasValue() && namingSystem.equals(i.getSystem())).map(i -> i.getValue())
-				.findFirst();
+				.filter(i -> i.hasSystem() && i.hasValue() && namingSystem.equals(i.getSystem()))
+				.map(Identifier::getValue).findFirst();
+	}
+
+	private PatientReference getAbsoluteUrlPatientReference(Patient patient)
+	{
+		IdType idElement = patient.getIdElement();
+		return PatientReference.from(new IdType(clientFactory.getFhirStoreClient().getServerBase(),
+				idElement.getResourceType(), idElement.getIdPart(), null).getValue());
 	}
 
 	private Stream<Patient> getPatients(Bundle bundle)

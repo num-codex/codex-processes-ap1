@@ -9,27 +9,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PatientReferenceList
 {
-	private final List<String> identifiers = new ArrayList<>();
-	private final List<String> absoluteUrls = new ArrayList<>();
+	private final List<PatientReference> references = new ArrayList<>();
 
 	@JsonCreator
-	public PatientReferenceList(@JsonProperty("identifiers") Collection<String> identifiers,
-			@JsonProperty("absoluteUrls") Collection<String> absoluteUrls)
+	public PatientReferenceList(@JsonProperty("references") Collection<PatientReference> references)
 	{
-		if (identifiers != null)
-			this.identifiers.addAll(identifiers);
-
-		if (absoluteUrls != null)
-			this.absoluteUrls.addAll(absoluteUrls);
+		if (references != null)
+			this.references.addAll(references);
 	}
 
-	public List<String> getIdentifiers()
+	public List<PatientReference> getReferences()
 	{
-		return identifiers;
-	}
-
-	public List<String> getAbsoluteUrls()
-	{
-		return absoluteUrls;
+		return references;
 	}
 }

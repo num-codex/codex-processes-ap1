@@ -4,9 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Dat
 
 public interface ConstantsDataTransfer
 {
-	String BPMN_EXECUTION_VARIABLE_REFERENCE_LIST = "references";
-	String BPMN_EXECUTION_VARIABLE_IDENTIFIER = "identifier";
-	String BPMN_EXECUTION_VARIABLE_ABSOLUTE_URL = "absoluteUrl";
+	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST = "patientReferenceList";
 	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE = "patientReference";
 	String BPMN_EXECUTION_VARIABLE_PSEUDONYM = "pseudonym";
 	String BPMN_EXECUTION_VARIABLE_STOP_TIMER = "stopTimer";

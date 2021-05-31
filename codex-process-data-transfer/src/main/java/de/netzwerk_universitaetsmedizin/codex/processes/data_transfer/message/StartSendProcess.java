@@ -3,11 +3,15 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_TO;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
 
 import java.util.Date;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -15,15 +19,19 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
-public abstract class StartSendProcess extends AbstractTaskMessageSend
+public class StartSendProcess extends AbstractTaskMessageSend
 {
 	private static final Logger logger = LoggerFactory.getLogger(StartSendProcess.class);
 
@@ -31,6 +39,46 @@ public abstract class StartSendProcess extends AbstractTaskMessageSend
 			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	@Override
+	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
+	{
+		return Stream.of(getReferenceParameter(execution), exportFromParameter(execution), exportToParameter(execution))
+				.filter(Objects::nonNull);
+	}
+
+	protected ParameterComponent getReferenceParameter(DelegateExecution execution)
+	{
+		PatientReference patientReference = (PatientReference) execution
+				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
+
+		if (patientReference.hasAbsoluteReference())
+			return getAbsoluteReferenceParameter(patientReference.getAbsoluteReference());
+		else if (patientReference.hasIdentifier())
+			return getIdentifierReferenceParameter(patientReference.getIdentifier());
+		else
+			throw new IllegalStateException("Patient reference does not contain identifier or absolute reference");
+	}
+
+	private Task.ParameterComponent getAbsoluteReferenceParameter(String absoluteReference)
+	{
+		Task.ParameterComponent param = new Task.ParameterComponent();
+		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
+		param.setValue(new Reference(absoluteReference));
+
+		return param;
+	}
+
+	private Task.ParameterComponent getIdentifierReferenceParameter(Identifier identifier)
+	{
+		Task.ParameterComponent param = new Task.ParameterComponent();
+		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
+		param.setValue(new Reference().setIdentifier(identifier));
+
+		return param;
 	}
 
 	protected ParameterComponent exportFromParameter(DelegateExecution execution)

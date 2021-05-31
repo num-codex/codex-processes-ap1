@@ -20,8 +20,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Hap
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcessWithAbsoluteReference;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcessWithIdentifierReference;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.CheckConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DecryptData;
@@ -195,17 +194,9 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public StartSendProcessWithIdentifierReference startSendProcessWithIdentifierReference()
+	public StartSendProcess startSendProcess()
 	{
-		return new StartSendProcessWithIdentifierReference(fhirClientProvider, taskHelper, organizationProvider,
-				fhirContext);
-	}
-
-	@Bean
-	public StartSendProcessWithAbsoluteReference startSendProcessWithAbsoluteReference()
-	{
-		return new StartSendProcessWithAbsoluteReference(fhirClientProvider, taskHelper, organizationProvider,
-				fhirContext);
+		return new StartSendProcess(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Bean

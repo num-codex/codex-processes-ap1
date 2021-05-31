@@ -1,8 +1,10 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
+
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -11,6 +13,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
 public class FhirClientFactory
@@ -70,8 +74,13 @@ public class FhirClientFactory
 			public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 			{
 				logger.warn("Returning demo pseudonyms for {}", localIdentifierValue);
-				return new PatientReferenceList(Arrays.asList("dic_foo/bar", "dic_foo/baz"),
-						Arrays.asList("http://dic-foo/fhir/Patient/3", "http://dic-foo/fhir/Patient/4"));
+				return new PatientReferenceList(List.of(
+						PatientReference.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+								.setValue("dic_foo/bar")),
+						PatientReference.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+								.setValue("dic_foo/baz")),
+						PatientReference.from("http://dic-foo/fhir/Patient/3"),
+						PatientReference.from("http://dic-foo/fhir/Patient/4")));
 			}
 
 			@Override
@@ -80,8 +89,7 @@ public class FhirClientFactory
 				logger.warn("Returning demo resources for {}", pseudonym);
 
 				Patient p = fhirContext.newJsonParser().parseResource(Patient.class, patient);
-				p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
-						.setValue(pseudonym);
+				p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
 				p.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
 
 				Condition c = fhirContext.newJsonParser().parseResource(Condition.class, condition);

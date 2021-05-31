@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PatientReference
+public class PatientReference implements Serializable
 {
 	public static PatientReference from(Identifier identifier)
 	{
@@ -68,5 +69,30 @@ public class PatientReference
 	public String getAbsoluteReference()
 	{
 		return absoluteReference;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+
+		PatientReference that = (PatientReference) o;
+
+		if (this.hasIdentifier() && that.hasIdentifier())
+			return identifierValue.equals(that.identifierValue) && this.identifierSystem.equals(that.identifierSystem);
+
+		if (this.hasAbsoluteReference())
+			return this.absoluteReference.equals(that.absoluteReference);
+
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(identifierValue, identifierSystem, absoluteReference);
 	}
 }
