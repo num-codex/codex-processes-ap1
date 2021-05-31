@@ -80,16 +80,19 @@ public class ReadData extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		Optional<String> pseudonym = getPseudonym(execution);
 
-		String pseudonym = getPseudonym(execution);
+		if (pseudonym.isEmpty())
+			throw new IllegalStateException("Patient reference does not contain identifier");
+
+		Task task = getCurrentTaskFromExecutionVariables();
 		Optional<DateTimeType> exportFrom = getExportFrom(task);
 		Optional<InstantType> exportTo = getExportTo(task);
 
 		if (exportTo.isEmpty())
 			throw new IllegalStateException("No export-to in Task");
 
-		Bundle bundle = readDataAndCreateBundle(pseudonym, exportFrom.orElse(null), exportTo.get());
+		Bundle bundle = readDataAndCreateBundle(pseudonym.get(), exportFrom.orElse(null), exportTo.get());
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
 	}
@@ -109,15 +112,15 @@ public class ReadData extends AbstractServiceDelegate
 		return bundle;
 	}
 
-	private String getPseudonym(DelegateExecution execution)
+	private Optional<String> getPseudonym(DelegateExecution execution)
 	{
 		PatientReference reference = (PatientReference) execution
 				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
 
-		if (!reference.hasIdentifier())
-			throw new IllegalStateException("Pseudonym not set");
-
-		return reference.getIdentifier().getValue();
+		if (reference.hasIdentifier())
+			return Optional.of(reference.getIdentifier().getValue());
+		else
+			return Optional.empty();
 	}
 
 	private Optional<DateTimeType> getExportFrom(Task task)
