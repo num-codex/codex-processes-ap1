@@ -49,7 +49,7 @@
       <bpmn:outgoing>Flow_0tsm3rc</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0wpfzi1" sourceRef="Gateway_0h3dkik" targetRef="ReadData">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${usageAndTransferGranted &amp;&amp; }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${usageAndTransferGranted}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_0ntc53r">
       <bpmn:incoming>Flow_00kpx7f</bpmn:incoming>
