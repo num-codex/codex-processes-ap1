@@ -1,7 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
 public class ReadData extends AbstractServiceDelegate
 {
@@ -81,7 +82,7 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+		String pseudonym = getPseudonym(execution);
 		Optional<DateTimeType> exportFrom = getExportFrom(task);
 		Optional<InstantType> exportTo = getExportTo(task);
 
@@ -106,6 +107,17 @@ public class ReadData extends AbstractServiceDelegate
 			logger.debug("Created bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
 		return bundle;
+	}
+
+	private String getPseudonym(DelegateExecution execution)
+	{
+		PatientReference reference = (PatientReference) execution
+				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
+
+		if (!reference.hasIdentifier())
+			throw new IllegalStateException("Pseudonym not set");
+
+		return reference.getIdentifier().getValue();
 	}
 
 	private Optional<DateTimeType> getExportFrom(Task task)

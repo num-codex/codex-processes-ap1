@@ -1,9 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 
 import java.util.List;
@@ -19,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
 public class CheckConsent extends AbstractServiceDelegate
 {
@@ -52,22 +51,22 @@ public class CheckConsent extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		boolean pseudonymIsSet = (boolean) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET);
+		PatientReference reference = (PatientReference) execution
+				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
 		ConsentClient client = consentClientFactory.getConsentClient();
 
-		if (pseudonymIsSet)
+		if (reference.hasIdentifier() && !reference.hasAbsoluteReference())
 		{
-			String dicSourceAndPseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+			String dicSourceAndPseudonym = reference.getIdentifier().getValue();
 			List<String> consentOids = client.getConsentOidsForIdentifierReference(dicSourceAndPseudonym);
 
 			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, dicSourceAndPseudonym);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
 					Variables.booleanValue(usageAndTransferGranted));
 		}
-		else
+		else if (!reference.hasIdentifier() && reference.hasAbsoluteReference())
 		{
-			String patientAbsoluteReference = (String) execution
-					.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE);
+			String patientAbsoluteReference = reference.getAbsoluteReference();
 			List<String> consentOids = client.getConsentOidsForIdentifierReference(patientAbsoluteReference);
 
 			boolean idatMergeGranted = idatMergeGranted(consentOids, patientAbsoluteReference);
@@ -76,6 +75,10 @@ public class CheckConsent extends AbstractServiceDelegate
 			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, patientAbsoluteReference);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
 					Variables.booleanValue(usageAndTransferGranted));
+		}
+		else
+		{
+			throw new IllegalStateException("PatientReference contains identifier and absolute reference");
 		}
 	}
 

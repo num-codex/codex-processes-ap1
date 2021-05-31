@@ -1,6 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -21,6 +21,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues.PatientReferenceValue;
 
 public class ResolvePseudonym extends AbstractServiceDelegate implements InitializingBean
 {
@@ -50,7 +53,8 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		String reference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE);
+		String reference = ((PatientReference) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE))
+				.getAbsoluteReference();
 
 		logger.info("Resolving DIC pseudonym for patient {}", reference);
 
@@ -59,12 +63,12 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 			getPseudonym(patient).ifPresentOrElse(pseudonym ->
 			{
 				logger.debug("Patient {} has DIC pseudonym {}", reference, pseudonym);
-				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
 			}, () ->
 			{
 				logger.debug("Patient {} has no DIC pseudonym", reference);
 				String pseudonym = resolvePseudonymAndUpdatePatient(patient);
-				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
 			});
 		}, () ->
 		{
@@ -114,5 +118,11 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	private void updatePatient(Patient patient)
 	{
 		fhirClientFactory.getFhirClient().updatePatient(patient);
+	}
+
+	private PatientReferenceValue getPatientReference(String pseudonym)
+	{
+		return PatientReferenceValues.create(PatientReference
+				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym)));
 	}
 }

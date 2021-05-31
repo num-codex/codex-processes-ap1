@@ -7,17 +7,16 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_REFERENCE_LIST = "references";
 	String BPMN_EXECUTION_VARIABLE_IDENTIFIER = "identifier";
 	String BPMN_EXECUTION_VARIABLE_ABSOLUTE_URL = "absoluteUrl";
+	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE = "patientReference";
 	String BPMN_EXECUTION_VARIABLE_PSEUDONYM = "pseudonym";
-	String BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET = "pseudonymIsSet";
-	String BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE = "patientAbsoluteReference";
 	String BPMN_EXECUTION_VARIABLE_STOP_TIMER = "stopTimer";
 	String BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO = "lastExportTo";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_FROM = "exportFrom";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION = "exportFromPrecision";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_TO = "exportTo";
 	String BPMN_EXECUTION_VARIABLE_BUNDLE = "bundle";
-	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
 	String BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED = "idatMergeGranted";
+	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
 	String BPMN_EXECUTION_VARIABLE_BINARY_URL = "binaryUrl";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym";

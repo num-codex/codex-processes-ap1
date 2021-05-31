@@ -1,8 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -10,7 +8,6 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -19,6 +16,9 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues;
 
 public class ExtractPatientReference extends AbstractServiceDelegate
 {
@@ -38,17 +38,14 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		if (patient.hasIdentifier() && NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(patient.getIdentifier().getSystem())
 				&& patient.getIdentifier().hasValue())
 		{
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
-					Variables.stringValue(patient.getIdentifier().getValue()));
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET, Variables.booleanValue(true));
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
+					PatientReferenceValues.create(PatientReference.from(patient.getIdentifier())));
 			logger.info("Task contains DIC pseudonym {}", patient.getIdentifier().getValue());
 		}
 		else if (patient.hasReference())
 		{
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE,
-					Variables.stringValue(patient.getReference()));
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET, Variables.booleanValue(false));
-
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
+					PatientReferenceValues.create(PatientReference.from(patient.getReference())));
 			logger.info("Task contains absolut patient reference {}", patient.getReference());
 		}
 		else
