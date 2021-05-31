@@ -52,27 +52,24 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	{
 		String reference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE);
 
-		logger.info("Resolving DIC pseudonym for absolut patient reference {}", reference);
+		logger.info("Resolving DIC pseudonym for patient {}", reference);
 
-		Optional<Patient> optPatient = getPatient(reference);
-		optPatient.ifPresentOrElse(patient ->
+		getPatient(reference).ifPresentOrElse(patient ->
 		{
-			Optional<String> optPseudonym = getPseudonym(patient);
-			optPseudonym.ifPresentOrElse(pseudonym ->
+			getPseudonym(patient).ifPresentOrElse(pseudonym ->
 			{
-				logger.debug("Patient with absolute reference {} has DIC pseudonym {}", reference, pseudonym);
+				logger.debug("Patient {} has DIC pseudonym {}", reference, pseudonym);
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
 			}, () ->
 			{
-				logger.debug("Patient with absolute reference {} has no DIC pseudonym", reference);
-				Patient updatedPatient = resolvePseudonymAndUpdatePatient(optPatient.get());
-				String pseudonym = getPseudonym(updatedPatient).orElseThrow();
+				logger.debug("Patient {} has no DIC pseudonym", reference);
+				String pseudonym = resolvePseudonymAndUpdatePatient(patient);
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym));
 			});
 		}, () ->
 		{
-			logger.error("Patient with absolute reference {} not found", reference);
-			throw new RuntimeException("Patient with absolute reference " + reference + " not found");
+			logger.warn("Patient {} not found", reference);
+			throw new RuntimeException("Patient " + reference + " not found");
 		});
 	}
 
@@ -87,19 +84,25 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 				.findFirst().map(Identifier::getValue);
 	}
 
-	private Patient resolvePseudonymAndUpdatePatient(Patient patient)
+	private String resolvePseudonymAndUpdatePatient(Patient patient)
 	{
 		String bloomFilter = getBloomFilter(patient);
 		String pseudonym = resolveBloomFilter(bloomFilter);
-		return storePseudonym(patient, pseudonym);
+
+		patient.getIdentifier().removeIf(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem()));
+		patient.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
+
+		updatePatient(patient);
+
+		return pseudonym;
 	}
 
 	private String getBloomFilter(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
 				.filter(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem()) && i.hasValue()).findFirst()
-				.map(Identifier::getValue)
-				.orElseThrow(() -> new RuntimeException("No bloom filter present in patient"));
+				.map(Identifier::getValue).orElseThrow(() -> new RuntimeException(
+						"No bloom filter present in patient " + patient.getIdElement().getValue()));
 	}
 
 	private String resolveBloomFilter(String bloomFilter)
@@ -108,15 +111,8 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 				.orElseThrow(() -> new RuntimeException("Could not get DIC pseudonym with bloom filter"));
 	}
 
-	private Patient storePseudonym(Patient patient, String pseudonym)
+	private void updatePatient(Patient patient)
 	{
-		logger.info("Storing DIC pseudonym for patient with absolute reference {}",
-				patient.getIdElement().toVersionless().getValue());
-		patient.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
-
-		Optional<Patient> updatePatient = fhirClientFactory.getFhirClient().updatePatient(patient);
-
-		return updatePatient.orElseThrow(() -> new RuntimeException("Unable to update Patient with absolute reference "
-				+ patient.getIdElement().toVersionless().getValue()));
+		fhirClientFactory.getFhirClient().updatePatient(patient);
 	}
 }

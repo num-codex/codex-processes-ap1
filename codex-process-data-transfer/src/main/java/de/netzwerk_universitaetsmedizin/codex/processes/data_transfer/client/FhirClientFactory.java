@@ -104,11 +104,9 @@ public class FhirClientFactory
 			}
 
 			@Override
-			public Optional<Patient> updatePatient(Patient patient)
+			public void updatePatient(Patient patient)
 			{
-				String newVersion = String.valueOf(Integer.parseInt(patient.getMeta().getVersionId()) + 1);
-				patient.getMeta().setVersionId(newVersion).setLastUpdated(new Date());
-				return Optional.of(patient);
+				// Nothing to do in stub client
 			}
 		};
 	}

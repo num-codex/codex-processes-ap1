@@ -47,7 +47,6 @@ public interface FhirClient
 	 *            containing an identifier with system
 	 *            {@link de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer#NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM}
 	 *            not <code>null</code>
-	 * @return
 	 */
-	Optional<Patient> updatePatient(Patient patient);
+	void updatePatient(Patient patient);
 }

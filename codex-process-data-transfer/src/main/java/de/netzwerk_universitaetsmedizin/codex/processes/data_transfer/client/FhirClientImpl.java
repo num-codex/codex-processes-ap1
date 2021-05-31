@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
@@ -16,12 +15,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
@@ -46,7 +48,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
@@ -720,7 +725,7 @@ public class FhirClientImpl implements FhirClient
 	{
 		Objects.requireNonNull(reference, "reference");
 
-		logger.info("Requesting patient from {}", reference);
+		logger.info("Requesting patient {}", reference);
 
 		IdType idType = new IdType(reference);
 		IGenericClient client = clientFactory.getFhirStoreClient();
@@ -734,7 +739,7 @@ public class FhirClientImpl implements FhirClient
 			}
 			catch (Exception e)
 			{
-				logger.error("Patient with absolute reference " + reference + " not found", e);
+				logger.warn("Patient " + reference + " not found", e);
 				return Optional.empty();
 			}
 		}
@@ -744,51 +749,79 @@ public class FhirClientImpl implements FhirClient
 	}
 
 	@Override
-	public Optional<Patient> updatePatient(Patient patient)
+	public void updatePatient(Patient patient)
 	{
 		Objects.requireNonNull(patient, "patient");
 
-		String pseudonym = patient.getIdentifier().stream()
-				.filter(i -> i.getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)).findFirst()
-				.orElseThrow(() -> new RuntimeException("Patient does not contain DIC pseudonym")).getValue();
-
 		String reference = patient.getIdElement().toVersionless().getValue();
-		logger.info("Updating absolute patient reference {} with DIC pseudonym {}", reference, pseudonym);
+		logger.info("Updating patient {}", reference);
 
 		try
 		{
-			MethodOutcome methodOutcome = clientFactory.getFhirStoreClient().update().resource(patient).execute();
+			MethodOutcome outcome = clientFactory.getFhirStoreClient().update().resource(patient)
+					.prefer(PreferReturnEnum.OPERATION_OUTCOME).execute();
 
-			Optional.ofNullable((OperationOutcome) methodOutcome.getOperationOutcome()).ifPresent(oo ->
-			{
-				for (OperationOutcome.OperationOutcomeIssueComponent issue : oo.getIssue())
-				{
-					OperationOutcome.IssueSeverity severity = issue.getSeverity();
-					String details = issue.getDetails().getText();
+			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+				logOutcome((OperationOutcome) outcome.getOperationOutcome());
+		}
+		catch (UnprocessableEntityException e)
+		{
+			logger.warn("Could not update patient {}, message: {}, status: {}", reference, e.getMessage(),
+					e.getStatusCode());
 
-					switch (severity)
-					{
-						case INFORMATION:
-							logger.info(details);
-							break;
-						case WARNING:
-							logger.warn(details);
-							break;
-						case ERROR:
-						case FATAL:
-							logger.error(details);
-							break;
-					}
-				}
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
 
-			});
+			if (outcome != null && outcome instanceof OperationOutcome)
+				logOutcome((OperationOutcome) outcome);
 
-			return Optional.ofNullable((Patient) methodOutcome.getResource());
+			throw e;
+		}
+		catch (BaseServerResponseException e)
+		{
+			logger.warn("Could not update patient {}, message: {}, status: {}, body: {}", reference, e.getMessage(),
+					e.getStatusCode(), e.getResponseBody());
+			throw e;
 		}
 		catch (Exception e)
 		{
-			logger.error("Could not update patient with absolute reference " + reference, e);
-			return Optional.empty();
+			logger.warn("Could not update patient " + reference, e);
+			throw e;
 		}
+	}
+
+	private void logOutcome(OperationOutcome outcome)
+	{
+		outcome.getIssue().forEach(issue ->
+		{
+			String display = issue.getCode() == null ? null : issue.getCode().getDisplay();
+			String details = issue.getDetails() == null ? null : issue.getDetails().getText();
+			String diagnostics = issue.getDiagnostics();
+
+			String message = Stream.of(display, details, diagnostics).filter(s -> s != null && !s.isBlank())
+					.collect(Collectors.joining(" "));
+
+			getLoggerForSeverity(issue.getSeverity()).accept("Issue: {}", message);
+		});
+	}
+
+	private BiConsumer<String, Object> getLoggerForSeverity(IssueSeverity severity)
+	{
+		if (severity != null)
+		{
+			switch (severity)
+			{
+				case ERROR:
+				case FATAL:
+					return logger::error;
+				case WARNING:
+					return logger::warn;
+				case NULL:
+				case INFORMATION:
+				default:
+					return logger::info;
+			}
+		}
+
+		return logger::info;
 	}
 }
