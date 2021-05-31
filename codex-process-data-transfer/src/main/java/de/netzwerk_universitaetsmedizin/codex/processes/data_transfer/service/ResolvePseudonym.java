@@ -1,6 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -50,7 +50,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		String reference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
+		String reference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE);
 
 		logger.info("Resolving DIC pseudonym for absolut patient reference {}", reference);
 
@@ -110,7 +110,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 
 	private Patient storePseudonym(Patient patient, String pseudonym)
 	{
-		logger.info("Storing DIC pseudonym patient with absolute reference {}",
+		logger.info("Storing DIC pseudonym for patient with absolute reference {}",
 				patient.getIdElement().toVersionless().getValue());
 		patient.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
 

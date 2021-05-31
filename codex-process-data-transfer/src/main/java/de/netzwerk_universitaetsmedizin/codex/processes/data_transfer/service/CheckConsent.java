@@ -1,8 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 
 import java.util.List;
@@ -51,45 +52,54 @@ public class CheckConsent extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		String dicSourceAndPseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
-		String patientReference = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
-
+		boolean pseudonymIsSet = (boolean) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET);
 		ConsentClient client = consentClientFactory.getConsentClient();
-		List<String> consentOids = dicSourceAndPseudonym != null
-				? client.getConsentOidsForIdentifierReference(dicSourceAndPseudonym)
-				: client.getConsentOidsForAbsoluteReference(patientReference);
 
-		boolean idatMergeGranted = idatMergeGranted(consentOids,
-				dicSourceAndPseudonym != null ? dicSourceAndPseudonym : patientReference);
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED, Variables.booleanValue(idatMergeGranted));
+		if (pseudonymIsSet)
+		{
+			String dicSourceAndPseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+			List<String> consentOids = client.getConsentOidsForIdentifierReference(dicSourceAndPseudonym);
 
-		boolean usageAndTransferGranted = usageAndTransferGranted(consentOids,
-				dicSourceAndPseudonym != null ? dicSourceAndPseudonym : patientReference);
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
-				Variables.booleanValue(usageAndTransferGranted));
+			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, dicSourceAndPseudonym);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
+					Variables.booleanValue(usageAndTransferGranted));
+		}
+		else
+		{
+			String patientAbsoluteReference = (String) execution
+					.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE);
+			List<String> consentOids = client.getConsentOidsForIdentifierReference(patientAbsoluteReference);
+
+			boolean idatMergeGranted = idatMergeGranted(consentOids, patientAbsoluteReference);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED, Variables.booleanValue(idatMergeGranted));
+
+			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, patientAbsoluteReference);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
+					Variables.booleanValue(usageAndTransferGranted));
+		}
 	}
 
-	protected boolean usageAndTransferGranted(List<String> consentOids, String patient)
+	protected boolean usageAndTransferGranted(List<String> consentOids, String patientReference)
 	{
 		boolean usageAndTransferGranted = consentOids.contains(usageGrantedOid)
 				&& consentOids.contains(transferGrantedOid);
 
 		if (usageAndTransferGranted)
-			logger.info("Usage and transfer granted for {}", patient);
+			logger.info("Usage and transfer granted for {}", patientReference);
 		else
-			logger.warn("Usage or transfer not granted for {}", patient);
+			logger.warn("Usage or transfer not granted for {}", patientReference);
 
 		return usageAndTransferGranted;
 	}
 
-	protected boolean idatMergeGranted(List<String> consentOids, String patient)
+	protected boolean idatMergeGranted(List<String> consentOids, String patientReference)
 	{
 		boolean idatMergeGranted = consentOids.contains(idatMergeGrantedOid);
 
 		if (idatMergeGranted)
-			logger.info("IDAT merge granted for {}", patient);
+			logger.info("IDAT merge granted for {}", patientReference);
 		else
-			logger.warn("IDAT merge not granted for {}", patient);
+			logger.warn("IDAT merge not granted for {}", patientReference);
 
 		return idatMergeGranted;
 	}

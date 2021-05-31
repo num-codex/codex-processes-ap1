@@ -1,7 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -34,17 +35,19 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		Task task = getCurrentTaskFromExecutionVariables();
 		Reference patient = getPatientReference(task);
 
-		if (patient.hasIdentifier() && patient.getIdentifier().getSystem().equals(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM)
+		if (patient.hasIdentifier() && NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(patient.getIdentifier().getSystem())
 				&& patient.getIdentifier().hasValue())
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
 					Variables.stringValue(patient.getIdentifier().getValue()));
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET, Variables.booleanValue(true));
 			logger.info("Task contains DIC pseudonym {}", patient.getIdentifier().getValue());
 		}
 		else if (patient.hasReference())
 		{
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_ABSOLUTE_REFERENCE,
 					Variables.stringValue(patient.getReference()));
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM_IS_SET, Variables.booleanValue(false));
 
 			logger.info("Task contains absolut patient reference {}", patient.getReference());
 		}
