@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
 import java.io.IOException;
@@ -370,11 +371,11 @@ public class FhirClientImpl implements FhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
-		List<Patient> patients = resultBundle.getEntry().stream()
+		Stream<Patient> patients = resultBundle.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
-				.flatMap(this::getPatients).collect(Collectors.toList());
+				.flatMap(this::getPatients);
 
-		List<PatientReference> patientReferences = patients.stream()
+		List<PatientReference> patientReferences = patients
 				.map(p -> getIdentifierPatientReference(p).orElse(getAbsoluteUrlPatientReference(p))).distinct()
 				.collect(Collectors.toList());
 
@@ -383,15 +384,13 @@ public class FhirClientImpl implements FhirClient
 
 	private Optional<PatientReference> getIdentifierPatientReference(Patient patient)
 	{
-		return getPseudonym(patient, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).map(p -> PatientReference
-				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(p)));
+		return getPseudonym(patient, NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).map(i -> PatientReference.from(i));
 	}
 
-	private Optional<String> getPseudonym(Patient p, String namingSystem)
+	private Optional<Identifier> getPseudonym(Patient patient, String namingSystem)
 	{
-		return p.getIdentifier().stream()
-				.filter(i -> i.hasSystem() && i.hasValue() && namingSystem.equals(i.getSystem()))
-				.map(Identifier::getValue).findFirst();
+		return Optional.ofNullable(patient).flatMap(p -> p.getIdentifier().stream().filter(Identifier::hasValue)
+				.filter(Identifier::hasSystem).filter(i -> i.getSystem().equals(namingSystem)).findFirst());
 	}
 
 	private PatientReference getAbsoluteUrlPatientReference(Patient patient)
@@ -414,8 +413,8 @@ public class FhirClientImpl implements FhirClient
 
 	private Stream<Patient> getPatientsFromBundle(Bundle bundle)
 	{
-		return bundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Patient)
-				.map(e -> (Patient) e.getResource());
+		return bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).filter(r -> r instanceof Patient).map(r -> (Patient) r);
 	}
 
 	private Stream<Patient> doGetPatients(String nextUrl, int subTotal)
@@ -468,8 +467,9 @@ public class FhirClientImpl implements FhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
-		return resultBundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
-				.map(e -> (Bundle) e.getResource()).flatMap(this::getDomainResources);
+		return resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).filter(r -> r instanceof Bundle).map(r -> (Bundle) r)
+				.flatMap(this::getDomainResources);
 	}
 
 	private Stream<DomainResource> getNewDataWithoutIdentifierReferenceSupport(String pseudonym,
@@ -498,8 +498,9 @@ public class FhirClientImpl implements FhirClient
 			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
 		return Stream.concat(Stream.of(localPatient.get()),
-				resultBundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
-						.map(e -> (Bundle) e.getResource()).flatMap(this::getDomainResources));
+				resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+						.map(BundleEntryComponent::getResource).filter(r -> r instanceof Bundle).map(r -> (Bundle) r)
+						.flatMap(this::getDomainResources));
 	}
 
 	private Optional<Patient> findPatientInLocalFhirStore(String system, String pseudonym)
@@ -530,8 +531,9 @@ public class FhirClientImpl implements FhirClient
 
 	private Stream<DomainResource> getDomainResourcesFromBundle(Bundle bundle)
 	{
-		return bundle.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof DomainResource)
-				.map(e -> (DomainResource) e.getResource());
+		return bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
+				.map(r -> (DomainResource) r);
 	}
 
 	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
@@ -576,57 +578,45 @@ public class FhirClientImpl implements FhirClient
 		// - db has patient by pseudonym -> update references, modify conditions
 		// - error
 
-		Optional<Patient> bundlePatient = bundle.getEntry().stream()
-				.filter(e -> e.hasResource() && e.getResource() instanceof Patient).map(e -> (Patient) e.getResource())
+		Optional<Patient> bundlePatient = bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).filter(r -> r instanceof Patient).map(r -> (Patient) r)
 				.findFirst();
 
 		if (bundlePatient.isPresent())
 		{
-			Optional<String> pseudonym = getPseudonym(bundlePatient.get(),
-					ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM);
+			String pseudonym = getPseudonym(bundlePatient.get(), NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM)
+					.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
 
-			if (pseudonym.isEmpty())
-				throw new RuntimeException("Patient has no pseudonym");
-
-			Optional<Patient> localPatient = findPatientInLocalFhirStore(
-					ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym.get());
-			if (localPatient.isPresent())
+			findPatientInLocalFhirStore(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym).ifPresentOrElse(patient ->
 			{
-				String localPatientid = localPatient.get().getIdElement().getIdPart();
-				modifyBundleWithPatientId(bundle, pseudonym.get(), localPatientid);
-			}
-			else
+				String localPatientid = patient.getIdElement().getIdPart();
+				modifyBundleWithPatientId(bundle, pseudonym, localPatientid);
+			}, () ->
 			{
 				String tempId = bundlePatient.get().getIdElement().getIdPart();
-				modifyBundleWithTempPatientId(bundle, pseudonym.get(), tempId);
-			}
+				modifyBundleWithTempPatientId(bundle, pseudonym, tempId);
+			});
 		}
 		else
 		{
-			Optional<String> pseudonym = bundle.getEntry().stream().filter(e -> e.hasResource())
-					.map(e -> e.getResource()).map(this::getSubject).filter(r -> r.hasIdentifier())
-					.map(r -> r.getIdentifier())
-					.filter(i -> ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem()))
-					.map(i -> i.getValue()).findFirst();
+			String pseudonym = bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+					.map(BundleEntryComponent::getResource).map(this::getSubject).filter(Reference::hasIdentifier)
+					.map(Reference::getIdentifier)
+					.filter(i -> NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem())).map(Identifier::getValue)
+					.findFirst().orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
 
-			if (pseudonym.isEmpty())
-				throw new RuntimeException("Patient has no pseudonym");
-
-			Optional<Patient> localPatient = findPatientInLocalFhirStore(
-					ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym.get());
-			if (localPatient.isPresent())
+			findPatientInLocalFhirStore(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym).ifPresentOrElse(patient ->
 			{
-				String localPatientid = localPatient.get().getIdElement().getIdPart();
-				modifyBundleWithPatientId(bundle, pseudonym.get(), localPatientid);
-			}
-			else
+				String localPatientid = patient.getIdElement().getIdPart();
+				modifyBundleWithPatientId(bundle, pseudonym, localPatientid);
+			}, () ->
 			{
 				logger.warn(
 						"Bundle does not contain Patient, and Patient with pseudonym {} not found in local fhir store",
-						pseudonym.get());
+						pseudonym);
 				throw new RuntimeException(
-						"Bundle has no patient and local fhir store has no patient with pseudonym " + pseudonym.get());
-			}
+						"Bundle has no patient and local fhir store has no patient with pseudonym " + pseudonym);
+			});
 		}
 
 		if (logger.isDebugEnabled())
@@ -635,20 +625,22 @@ public class FhirClientImpl implements FhirClient
 
 	private void modifyBundleWithTempPatientId(Bundle bundle, String pseudonym, String tempId)
 	{
-		bundle.getEntry().stream().filter(e -> e.hasResource() && !(e.getResource() instanceof Patient)).forEach(e ->
-		{
-			setSubject(e.getResource(), new Reference(tempId));
-			modifyConditionalUpdateUrl(e, pseudonym, "");
-		});
+		bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.filter(e -> !(e.getResource() instanceof Patient)).forEach(e ->
+				{
+					setSubject(e.getResource(), new Reference(tempId));
+					modifyConditionalUpdateUrl(e, pseudonym, "");
+				});
 	}
 
 	private void modifyBundleWithPatientId(Bundle bundle, String pseudonym, String patientId)
 	{
-		bundle.getEntry().stream().filter(e -> e.hasResource() && !(e.getResource() instanceof Patient)).forEach(e ->
-		{
-			setSubject(e.getResource(), new Reference(new IdType("Patient", patientId)));
-			modifyConditionalUpdateUrl(e, pseudonym, "&patient=Patient/" + patientId);
-		});
+		bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.filter(e -> !(e.getResource() instanceof Patient)).forEach(e ->
+				{
+					setSubject(e.getResource(), new Reference(new IdType("Patient", patientId)));
+					modifyConditionalUpdateUrl(e, pseudonym, "&patient=Patient/" + patientId);
+				});
 	}
 
 	private void modifyConditionalUpdateUrl(BundleEntryComponent entry, String pseudonym, String replacement)
