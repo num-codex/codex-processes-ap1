@@ -13,6 +13,8 @@ Add entries to your hosts file
 127.0.0.1	crr
 ```
 
+*Start docker-compose commands from sub-folder:* `codex-processes-ap1/codex-processes-ap1-docker-test-setup`
+
 Console 1: Start DIC HAPI FHIR Server
 ```sh
 docker-compose up dic-fhir-store
@@ -56,7 +58,10 @@ docker-compose up -d crr-bpe-app crr-bpe-db && docker-compose logs -f crr-fhir-a
 ````
 
 Webbrowser at http://localhost:8003/: Add Demo Data to DIC HAPI FHIR Server via Transaction-Bundle at
-[dic_fhir_store_demo.json](codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo.json)
+[dic_fhir_store_demo_psn.json](codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json) or
+[dic_fhir_store_demo_bf.json](codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf.json)
+
+*Start curl command from root-folder:* `codex-processes-ap1`
 
 Console 6: Start Data Trigger Process at DIC using the following command
 ```sh
