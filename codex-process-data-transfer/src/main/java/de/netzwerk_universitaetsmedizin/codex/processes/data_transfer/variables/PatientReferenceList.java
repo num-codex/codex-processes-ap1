@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -20,6 +21,6 @@ public class PatientReferenceList
 
 	public List<PatientReference> getReferences()
 	{
-		return references;
+		return Collections.unmodifiableList(references);
 	}
 }
