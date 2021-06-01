@@ -13,7 +13,7 @@ public class PatientReferenceList
 	private final List<PatientReference> references = new ArrayList<>();
 
 	@JsonCreator
-	public PatientReferenceList(@JsonProperty("references") Collection<PatientReference> references)
+	public PatientReferenceList(@JsonProperty("references") Collection<? extends PatientReference> references)
 	{
 		if (references != null)
 			this.references.addAll(references);

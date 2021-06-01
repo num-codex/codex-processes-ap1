@@ -34,11 +34,11 @@ public class PatientReferenceSerializer extends PrimitiveValueSerializer<Patient
 	@Override
 	public void writeValue(PatientReferenceValue value, ValueFields valueFields)
 	{
-		PatientReference results = value.getValue();
+		PatientReference patientReference = value.getValue();
 		try
 		{
-			if (results != null)
-				valueFields.setByteArrayValue(objectMapper.writeValueAsBytes(results));
+			if (patientReference != null)
+				valueFields.setByteArrayValue(objectMapper.writeValueAsBytes(patientReference));
 		}
 		catch (JsonProcessingException e)
 		{
@@ -59,9 +59,9 @@ public class PatientReferenceSerializer extends PrimitiveValueSerializer<Patient
 
 		try
 		{
-			PatientReference referenceList = (bytes == null || bytes.length <= 0) ? null
+			PatientReference patientReference = (bytes == null || bytes.length <= 0) ? null
 					: objectMapper.readValue(bytes, PatientReference.class);
-			return PatientReferenceValues.create(referenceList);
+			return PatientReferenceValues.create(patientReference);
 		}
 		catch (IOException e)
 		{
