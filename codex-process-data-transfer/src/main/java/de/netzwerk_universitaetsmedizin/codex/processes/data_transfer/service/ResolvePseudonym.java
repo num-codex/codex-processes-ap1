@@ -102,8 +102,8 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	private String getBloomFilter(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem()) && i.hasValue()).findFirst()
-				.map(Identifier::getValue).orElseThrow(() -> new RuntimeException(
+				.filter(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem())).filter(Identifier::hasValue)
+				.findFirst().map(Identifier::getValue).orElseThrow(() -> new RuntimeException(
 						"No bloom filter present in patient " + patient.getIdElement().getValue()));
 	}
 
