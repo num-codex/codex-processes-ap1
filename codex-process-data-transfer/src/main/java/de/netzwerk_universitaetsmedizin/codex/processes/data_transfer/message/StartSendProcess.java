@@ -44,11 +44,11 @@ public class StartSendProcess extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		return Stream.of(getReferenceParameter(execution), exportFromParameter(execution), exportToParameter(execution))
+		return Stream.of(referenceParameter(execution), exportFromParameter(execution), exportToParameter(execution))
 				.filter(Objects::nonNull);
 	}
 
-	protected ParameterComponent getReferenceParameter(DelegateExecution execution)
+	private ParameterComponent referenceParameter(DelegateExecution execution)
 	{
 		PatientReference patientReference = (PatientReference) execution
 				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
@@ -81,7 +81,7 @@ public class StartSendProcess extends AbstractTaskMessageSend
 		return param;
 	}
 
-	protected ParameterComponent exportFromParameter(DelegateExecution execution)
+	private ParameterComponent exportFromParameter(DelegateExecution execution)
 	{
 		Date exportFrom = (Date) execution.getVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM);
 		String exportFromPrecisionStr = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION);
@@ -103,7 +103,7 @@ public class StartSendProcess extends AbstractTaskMessageSend
 		}
 	}
 
-	protected ParameterComponent exportToParameter(DelegateExecution execution)
+	private ParameterComponent exportToParameter(DelegateExecution execution)
 	{
 		Date exportTo = (Date) execution.getVariable(BPMN_EXECUTION_VARIABLE_EXPORT_TO);
 
