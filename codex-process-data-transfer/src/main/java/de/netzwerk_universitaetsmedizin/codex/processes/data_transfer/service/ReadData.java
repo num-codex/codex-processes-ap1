@@ -54,6 +54,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.
 
 public class ReadData extends AbstractServiceDelegate
 {
+	private static final String NUM_CODEX_STRUCTURE_DEFINITION_PREFIX = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition";
+
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
 	private final FhirContext fhirContext;
@@ -80,19 +82,14 @@ public class ReadData extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Optional<String> pseudonym = getPseudonym(execution);
-
-		if (pseudonym.isEmpty())
-			throw new IllegalStateException("Patient reference does not contain identifier");
+		String pseudonym = getPseudonym(execution)
+				.orElseThrow(() -> new IllegalStateException("Patient reference does not contain identifier"));
 
 		Task task = getCurrentTaskFromExecutionVariables();
-		Optional<DateTimeType> exportFrom = getExportFrom(task);
-		Optional<InstantType> exportTo = getExportTo(task);
+		DateTimeType exportFrom = getExportFrom(task).orElse(null);
+		InstantType exportTo = getExportTo(task).orElseThrow(() -> new IllegalStateException("No export-to in Task"));
 
-		if (exportTo.isEmpty())
-			throw new IllegalStateException("No export-to in Task");
-
-		Bundle bundle = readDataAndCreateBundle(pseudonym.get(), exportFrom.orElse(null), exportTo.get());
+		Bundle bundle = readDataAndCreateBundle(pseudonym, exportFrom, exportTo);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
 	}
@@ -164,8 +161,8 @@ public class ReadData extends AbstractServiceDelegate
 	private DomainResource clean(DomainResource r)
 	{
 		r.setIdElement(null);
-		List<CanonicalType> profiles = r.getMeta().getProfile().stream().filter(
-				p -> p.getValue().startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
+		List<CanonicalType> profiles = r.getMeta().getProfile().stream()
+				.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX))
 				.collect(Collectors.toList());
 		r.setMeta(new Meta().setProfile(profiles));
 
@@ -187,36 +184,43 @@ public class ReadData extends AbstractServiceDelegate
 
 			if (resource instanceof Condition)
 			{
+				((Condition) resource).setIdentifier(Collections.emptyList());
 				((Condition) resource).setSubject(patientRef);
 				return resource;
 			}
 			else if (resource instanceof Consent)
 			{
+				((Consent) resource).setIdentifier(Collections.emptyList());
 				((Consent) resource).setPatient(patientRef);
 				return resource;
 			}
 			else if (resource instanceof DiagnosticReport)
 			{
+				((DiagnosticReport) resource).setIdentifier(Collections.emptyList());
 				((DiagnosticReport) resource).setSubject(patientRef);
 				return resource;
 			}
 			else if (resource instanceof Immunization)
 			{
+				((Immunization) resource).setIdentifier(Collections.emptyList());
 				((Immunization) resource).setPatient(patientRef);
 				return resource;
 			}
 			else if (resource instanceof MedicationStatement)
 			{
+				((MedicationStatement) resource).setIdentifier(Collections.emptyList());
 				((MedicationStatement) resource).setSubject(patientRef);
 				return resource;
 			}
 			else if (resource instanceof Observation)
 			{
+				((Observation) resource).setIdentifier(Collections.emptyList());
 				((Observation) resource).setSubject(patientRef);
 				return resource;
 			}
 			else if (resource instanceof Procedure)
 			{
+				((Procedure) resource).setIdentifier(Collections.emptyList());
 				((Procedure) resource).setSubject(patientRef);
 				return resource;
 			}
@@ -234,9 +238,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			Condition c = (Condition) resource;
 			Optional<CanonicalType> profile = c.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "Condition?_profile=" + profile.get().getValue() + "&recorded-date="
@@ -251,9 +253,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			DiagnosticReport dr = (DiagnosticReport) resource;
 			Optional<CanonicalType> profile = dr.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "DiagnosticReport?_profile=" + profile.get().getValue() + "&date="
@@ -268,9 +268,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			Immunization i = (Immunization) resource;
 			Optional<CanonicalType> profile = i.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "Immunization?_profile=" + profile.get().getValue() + "&date="
@@ -285,9 +283,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			MedicationStatement ms = (MedicationStatement) resource;
 			Optional<CanonicalType> profile = ms.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "MedicationStatement?_profile=" + profile.get().getValue() + "&effective="
@@ -303,9 +299,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			Observation o = (Observation) resource;
 			Optional<CanonicalType> profile = o.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "Observation?_profile=" + profile.get().getValue() + "&date="
@@ -320,9 +314,7 @@ public class ReadData extends AbstractServiceDelegate
 		{
 			Procedure pr = (Procedure) resource;
 			Optional<CanonicalType> profile = pr.getMeta().getProfile().stream()
-					.filter(p -> p.getValue()
-							.startsWith("https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition"))
-					.findFirst();
+					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
 			if (profile.isPresent())
 			{
 				return "Procedure?_profile=" + profile.get().getValue() + "&date="
