@@ -8,13 +8,13 @@
 	<name value="NUM-CODEX_DIC_Pseudonym_Identifier"/>
 	<status value="active" />
 	<kind value="identifier"/>
-	<date value="2021-04-07"/>
+	<date value="2021-06-02"/>
 	<publisher value="NUM-Codex"/>
 	<responsible value="THS Greifswald"/>
 	<description value="DIZ specific pseudonym"/>
 	<usage value="Used withing the NUM-CODEX project for data integration center pseudonyms"/>
 	<uniqueId>
 		<type value="other"/>
-		<value value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"/>
+		<value value="http://netzwerk-universitaetsmedizin.de/sid/dic-pseudonym"/>
 	</uniqueId>
 </NamingSystem>

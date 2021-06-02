@@ -4,7 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_TO;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYMS_LIST;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
@@ -34,8 +34,8 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymList;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PseudonymListValues;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListValues;
 
 public class FindNewData extends AbstractServiceDelegate implements InitializingBean
 {
@@ -68,14 +68,16 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		Optional<DateWithPrecision> exportFrom = getExportFrom(execution);
 		Date exportTo = new Date();
 
-		PseudonymList pseudonyms = searchForPseudonymsWithNewData(exportFrom.orElse(null), exportTo);
+		PatientReferenceList patientReferenceList = searchForPatientReferencesWithNewData(exportFrom.orElse(null),
+				exportTo);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM, Variables.dateValue(exportFrom.orElse(null)));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION,
 				Variables.stringValue(exportFrom.map(DateWithPrecision::getPrecision).map(Enum::name).orElse(null)));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_EXPORT_TO, Variables.dateValue(exportTo));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO, Variables.dateValue(exportTo));
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYMS_LIST, PseudonymListValues.create(pseudonyms));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST,
+				PatientReferenceListValues.create(patientReferenceList));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
 				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue())));
 	}
@@ -105,13 +107,13 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 				.map(c -> type.cast(c.getValue()));
 	}
 
-	protected PseudonymList searchForPseudonymsWithNewData(DateWithPrecision exportFrom, Date exportTo)
+	protected PatientReferenceList searchForPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
 				exportFrom == null ? null : exportFrom.getPrecision(), exportTo);
 
 		FhirClient fhirClient = localFhirStoreClientFactory.getFhirClient();
 
-		return fhirClient.getPseudonymsWithNewData(exportFrom, exportTo);
+		return fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
 	}
 }

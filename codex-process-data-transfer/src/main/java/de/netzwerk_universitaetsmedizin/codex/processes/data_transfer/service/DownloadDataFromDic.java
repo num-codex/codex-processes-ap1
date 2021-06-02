@@ -64,7 +64,6 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 				.map(c -> type.cast(c.getValue()));
 	}
 
-
 	private InputStream readBinaryResource(FhirWebserviceClient client, String id, String version)
 	{
 		try

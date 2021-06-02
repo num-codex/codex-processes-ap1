@@ -22,13 +22,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
-public class FttpClientFactory implements InitializingBean
+public class FttpClientFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(FttpClientFactory.FttpClientStub.class);
 
@@ -63,6 +64,13 @@ public class FttpClientFactory implements InitializingBean
 		}
 
 		@Override
+		public Optional<String> getDicPseudonym(String bloomFilter)
+		{
+			logger.info("Requesting DIC pseudonym for bloom filter {} ", bloomFilter);
+			return Optional.of("source2/original2");
+		}
+
+		@Override
 		public void testConnection()
 		{
 			logger.warn("Stub implementation, no connection test performed");
@@ -72,17 +80,22 @@ public class FttpClientFactory implements InitializingBean
 	private final Path trustStorePath;
 	private final Path certificatePath;
 	private final Path privateKeyPath;
+	private final String basicAuthUsername;
+	private final String basicAuthPassword;
 	private final String fttpServerBase;
 	private final String fttpApiKey;
 	private final String fttpStudy;
 	private final String fttpTarget;
 
-	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, String fttpServerBase,
-			String fttpApiKey, String fttpStudy, String fttpTarget)
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, String basicAuthUsername,
+			String basicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
+
+		this.basicAuthUsername = basicAuthUsername;
+		this.basicAuthPassword = basicAuthPassword;
 
 		this.fttpServerBase = fttpServerBase;
 		this.fttpApiKey = fttpApiKey;
@@ -90,8 +103,8 @@ public class FttpClientFactory implements InitializingBean
 		this.fttpTarget = fttpTarget;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
 		try
 		{
@@ -131,8 +144,8 @@ public class FttpClientFactory implements InitializingBean
 		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
 		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
 
-		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, fttpServerBase, fttpApiKey, fttpStudy,
-				fttpTarget);
+		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, basicAuthUsername, basicAuthPassword,
+				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

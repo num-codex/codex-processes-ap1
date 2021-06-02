@@ -1,26 +1,33 @@
 {
     "resourceType": "Bundle",
     "type": "transaction",
-    "entry": [{
+    "entry": [
+        {
             "fullUrl": "urn:uuid:180200e1-91c2-48b0-830d-b93b5231f030",
             "resource": {
                 "resourceType": "Patient",
                 "meta": {
-                    "profile": ["https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient"]
+                    "profile": [
+                        "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient"
+                    ]
                 },
-                "extension": [{
+                "extension": [
+                    {
                         "url": "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/ethnic-group",
                         "valueCoding": {
                             "system": "http://snomed.info/sct",
                             "code": "186019001",
                             "display": "Other ethnic, mixed origin"
                         }
-                    }, {
+                    },
+                    {
                         "url": "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/age",
-                        "extension": [{
+                        "extension": [
+                            {
                                 "url": "dateTimeOfDocumentation",
                                 "valueDateTime": "2020-10-01"
-                            }, {
+                            },
+                            {
                                 "url": "age",
                                 "valueAge": {
                                     "value": 67,
@@ -32,26 +39,31 @@
                         ]
                     }
                 ],
-                "identifier": [{
-                        "system": "http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym",
-                        "value": "source/original"
+                "identifier": [
+                    {
+                        "system": "http://www.netzwerk-universitaetsmedizin.de/sid/bloom-filter",
+                        "value": "J75gYl+RiKSsxeu33tixBEEtFGCZwIEsWIKgvESaluvpSGBte/SBNZilz+sLSZdHSDKTL2J2d1yZsakqjtV5U2SMMJZ5IF3gEk1MT3sCRkxXEo1aJWKpnqndUTR+fvtSeMFj0y/O5yqrLV9zU79CNiTfZN5t1/6XGxZUXq2DovfCRrrpRxWjFwjKIDo0OkRANf7Mqp+Fsu0Un53JF57p/p1RLpWcJkC3xO+UslGbDo3mjgczdvxz0aLmWNA7/NIhk+Q50gxCX3B4QrntPfLLlBkrmIpsKRcLFVuYZik7pYZ9prd0qCLQ9tc8qiw1ry5kMfIvLnIS/FV36w=="
                     }
                 ],
-                "birthDate": "1953-09-30"
+                "birthDate": "1953-09-29"
             },
             "request": {
                 "method": "PUT",
-                "url": "Patient?identifier=http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym|source/original"
+                "url": "Patient?birthdate=1953-09-29"
             }
-        }, {
+        },
+        {
             "fullUrl": "urn:uuid:612d9577-3626-4a10-9543-50ad0b3b44a0",
             "resource": {
                 "resourceType": "Condition",
                 "meta": {
-                    "profile": ["https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases"]
+                    "profile": [
+                        "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases"
+                    ]
                 },
                 "clinicalStatus": {
-                    "coding": [{
+                    "coding": [
+                        {
                             "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
                             "code": "active",
                             "display": "Active"
@@ -59,19 +71,23 @@
                     ]
                 },
                 "verificationStatus": {
-                    "coding": [{
+                    "coding": [
+                        {
                             "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
                             "code": "confirmed",
                             "display": "Confirmed"
-                        }, {
+                        },
+                        {
                             "system": "http://snomed.info/sct",
                             "code": "410605003",
                             "display": "Confirmed present (qualifier value)"
                         }
                     ]
                 },
-                "category": [{
-                        "coding": [{
+                "category": [
+                    {
+                        "coding": [
+                            {
                                 "system": "http://snomed.info/sct",
                                 "code": "418112009",
                                 "display": "Pulmonary medicine"
@@ -80,7 +96,8 @@
                     }
                 ],
                 "code": {
-                    "coding": [{
+                    "coding": [
+                        {
                             "system": "http://snomed.info/sct",
                             "code": "413839001",
                             "display": "Chronic lung disease"
@@ -90,22 +107,27 @@
                 "subject": {
                     "reference": "urn:uuid:180200e1-91c2-48b0-830d-b93b5231f030"
                 },
-                "recordedDate": "2020-11-10T15:50:41.000+01:00"
+                "recordedDate": "2020-11-10T16:50:41.000+01:00"
             },
             "request": {
                 "method": "PUT",
-                "url": "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases&recorded-date=2020-11-10T15:50:41.000+01:00"
+                "url": "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/chronic-lung-diseases&recorded-date=2020-11-10T16:50:41.000+01:00"
             }
-        }, {
+        },
+        {
             "fullUrl": "urn:uuid:c6bb56d7-c6a2-4a72-8a1a-cd1af418d1c4",
             "resource": {
                 "resourceType": "Observation",
                 "meta": {
-                    "profile": ["https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr"]
+                    "profile": [
+                        "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr"
+                    ]
                 },
-                "identifier": [{
+                "identifier": [
+                    {
                         "type": {
-                            "coding": [{
+                            "coding": [
+                                {
                                     "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
                                     "code": "OBI"
                                 }
@@ -114,11 +136,14 @@
                     }
                 ],
                 "status": "final",
-                "category": [{
-                        "coding": [{
+                "category": [
+                    {
+                        "coding": [
+                            {
                                 "system": "http://loinc.org",
                                 "code": "26436-6"
-                            }, {
+                            },
+                            {
                                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                 "code": "laboratory"
                             }
@@ -126,7 +151,8 @@
                     }
                 ],
                 "code": {
-                    "coding": [{
+                    "coding": [
+                        {
                             "system": "http://loinc.org",
                             "code": "94500-6",
                             "display": "SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory specimen by NAA with probe detection"
@@ -137,9 +163,10 @@
                 "subject": {
                     "reference": "urn:uuid:180200e1-91c2-48b0-830d-b93b5231f030"
                 },
-                "effectiveDateTime": "2020-11-10T15:50:41.000+01:00",
+                "effectiveDateTime": "2020-11-10T16:50:41.000+01:00",
                 "valueCodeableConcept": {
-                    "coding": [{
+                    "coding": [
+                        {
                             "system": "http://snomed.info/sct",
                             "code": "260373001",
                             "display": "Detected (qualifier value)"
@@ -150,7 +177,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr&date=2020-11-10T15:50:41.000+01:00"
+                "url": "Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr&date=2020-11-10T16:50:41.000+01:00"
             }
         }
     ]

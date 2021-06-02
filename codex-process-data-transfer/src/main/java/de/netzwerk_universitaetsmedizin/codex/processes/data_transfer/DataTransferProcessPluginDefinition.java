@@ -20,7 +20,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.con
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
-	public static final String VERSION = "0.2.2";
+	public static final String VERSION = "0.3.0";
 
 	@Override
 	public String getName()
@@ -58,6 +58,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
+		var nB = NamingSystemResource.file("fhir/NamingSystem/num-codex-bloom-filter-identifier.xml");
 
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
@@ -73,7 +74,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
 				"dataTrigger/" + VERSION, Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
-				"dataSend/" + VERSION, Arrays.asList(aSen, cD, nD, sTstaDsen, vD), //
+				"dataSend/" + VERSION, Arrays.asList(aSen, cD, nD, nB, sTstaDsen, vD), //
 				"dataTranslate/" + VERSION, Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
 				"dataReceive/" + VERSION, Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
 

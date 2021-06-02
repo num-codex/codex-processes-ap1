@@ -1,44 +1,44 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger"></profile>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger"/>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.2.2"></instantiatesUri>
-   <status value="requested"></status>
-   <intent value="order"></intent>
-   <authoredOn value="2021-04-07T12:30:00+01:00"></authoredOn>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.3.0"/>
+   <status value="requested"/>
+   <intent value="order"/>
+   <authoredOn value="2021-04-07T12:30:00+01:00"/>
    <requester>
-      <type value="Organization"></type>
+      <type value="Organization"/>
       <identifier>
-         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
-         <value value="Test_DIC"></value>
+         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+         <value value="Test_DIC"/>
       </identifier>
    </requester>
    <restriction>
       <recipient>
-         <type value="Organization"></type>
+         <type value="Organization"/>
          <identifier>
-            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
-            <value value="Test_DIC"></value>
+            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+            <value value="Test_DIC"/>
          </identifier>
       </recipient>
    </restriction>
    <input>
       <type>
          <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
-            <code value="message-name"></code>
+            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+            <code value="message-name"/>
          </coding>
       </type>
-      <valueString value="stopDataTrigger"></valueString>
+      <valueString value="stopDataTrigger"/>
    </input>
    <input>
       <type>
          <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
-            <code value="business-key"></code>
+            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+            <code value="business-key"/>
          </coding>
       </type>
       <!-- same business-key UUID used to start the data trigger process -->
-      <valueString value="7f7fd1e7-f10f-4aeb-9ac5-c8be86fab21a"></valueString>
+      <valueString value="7f7fd1e7-f10f-4aeb-9ac5-c8be86fab21a"/>
    </input>
 </Task>

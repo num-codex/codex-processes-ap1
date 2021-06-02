@@ -4,6 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -176,9 +177,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskStartDataSendValid() throws Exception
+	public void testTaskStartDataSendValidWithIdentifierReference() throws Exception
 	{
-		Task task = createValidTaskStartDataSend();
+		Task task = createValidTaskStartDataSendWithIdentifierReference();
 		logTask(task);
 
 		ValidationResult result = resourceValidator.validate(task);
@@ -191,7 +192,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskStartDataSendValidWithBusinessKey() throws Exception
 	{
-		Task task = createValidTaskStartDataSend();
+		Task task = createValidTaskStartDataSendWithIdentifierReference();
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		logTask(task);
@@ -206,7 +207,7 @@ public class TaskProfileTest
 	@Test
 	public void testTaskStartDataSendValidWithExportFrom() throws Exception
 	{
-		Task task = createValidTaskStartDataSend();
+		Task task = createValidTaskStartDataSendWithIdentifierReference();
 		task.addInput().setValue(new DateTimeType(new Date(), TemporalPrecisionEnum.DAY)).getType().addCoding()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM);
@@ -219,7 +220,7 @@ public class TaskProfileTest
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskStartDataSend()
+	private Task createValidTaskStartDataSendWithIdentifierReference()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND);
@@ -237,9 +238,50 @@ public class TaskProfileTest
 		// task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 		// .setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput()
-				.setValue(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original"))
+				.setValue(new Reference().setIdentifier(
+						new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
-				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM);
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
+		task.addInput().setValue(new InstantType(new Date())).getType().addCoding()
+				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO);
+
+		return task;
+	}
+
+	@Test
+	public void testTaskStartDataSendValidWithAbsoluteReference() throws Exception
+	{
+		Task task = createValidTaskStartDataSendWithAbsoluteReference();
+		logTask(task);
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	private Task createValidTaskStartDataSendWithAbsoluteReference()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND);
+		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_SEND_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		// business-key optional
+		// task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
+		// .setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+		task.addInput().setValue(new Reference("https://localhost/fhir/Patient/1")).getType().addCoding()
+				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
 		task.addInput().setValue(new InstantType(new Date())).getType().addCoding()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO);

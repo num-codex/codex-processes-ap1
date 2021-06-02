@@ -3,6 +3,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.co
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -27,11 +28,14 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.De
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsent;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentIdatMerge;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentUsageAndTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePseudonym;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
@@ -78,17 +82,17 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.privateKey:#{null}}")
 	private String crrPrivateKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:hs-heilbronn.de}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:gth.hs-heilbronn.de}")
 	private String geccoTransferHubIdentifierValue;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crrIdentifierValue:num-codex.de}")
 	private String crrIdentifierValue;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.usageGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.1}")
-	private String usageGrantedOid;
+	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.mdatTransferGrantedOids:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
+	private List<String> mdatTransferGrantedOids;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
-	private String transferGrantedOid;
+	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.idatMergeGrantedOids:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
+	private List<String> idatMergeGrantedOids;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:#{null}}")
 	private String fttpTrustStore;
@@ -98,6 +102,12 @@ public class TransferDataConfig
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:#{null}}")
 	private String fttpPrivateKey;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicAuthUsername:#{null}}")
+	private String fttpBasicAuthUsername;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicAuthPassword:#{null}}")
+	private String fttpBasicAuthPassword;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.serverBase:#{null}}")
 	private String fttpServerBase;
@@ -134,8 +144,8 @@ public class TransferDataConfig
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpBasicAuthUsername,
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
 	}
 
 	@Bean
@@ -202,16 +212,34 @@ public class TransferDataConfig
 	// numCodexDataSend
 
 	@Bean
-	public CheckConsent checkConsent()
+	public ExtractPatientReference extractPseudonym()
 	{
-		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), usageGrantedOid,
-				transferGrantedOid);
+		return new ExtractPatientReference(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public HandleNoConsent handleNoConsent()
+	public ResolvePseudonym resolvePseudonym()
 	{
-		return new HandleNoConsent(fhirClientProvider, taskHelper);
+		return new ResolvePseudonym(fhirClientProvider, taskHelper, fhirClientFactory(), fttpClientFactory());
+	}
+
+	@Bean
+	public CheckConsent checkConsent()
+	{
+		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), idatMergeGrantedOids,
+				mdatTransferGrantedOids);
+	}
+
+	@Bean
+	public HandleNoConsentUsageAndTransfer handleNoConsentUsageAndTransfer()
+	{
+		return new HandleNoConsentUsageAndTransfer(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public HandleNoConsentIdatMerge handleNoConsentIdatMerge()
+	{
+		return new HandleNoConsentIdatMerge(fhirClientProvider, taskHelper);
 	}
 
 	@Bean

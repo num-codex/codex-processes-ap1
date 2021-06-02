@@ -11,5 +11,12 @@ public interface FttpClient
 	 */
 	Optional<String> getCrrPseudonym(String dicSourceAndPseudonym);
 
+	/**
+	 * @param bloomFilter
+	 *            not <code>null</code>
+	 * @return
+	 */
+	Optional<String> getDicPseudonym(String bloomFilter);
+
 	void testConnection();
 }

@@ -1,45 +1,47 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
 public class CheckConsent extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckConsent.class);
 
 	private final ConsentClientFactory consentClientFactory;
-	private final String usageGrantedOid;
-	private final String transferGrantedOid;
+
+	private final List<String> idatMergeGrantedOids = new ArrayList<>();
+	private final List<String> mdatTransferGrantedOids = new ArrayList<>();
 
 	public CheckConsent(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ConsentClientFactory consentClientFactory, String usageGrantedOid, String transferGrantedOid)
+			ConsentClientFactory consentClientFactory, Collection<String> idatMergeGrantedOids,
+			Collection<String> mdatTransferGrantedOids)
 	{
 		super(clientProvider, taskHelper);
 
 		this.consentClientFactory = consentClientFactory;
-		this.usageGrantedOid = usageGrantedOid;
-		this.transferGrantedOid = transferGrantedOid;
+
+		if (idatMergeGrantedOids != null)
+			this.idatMergeGrantedOids.addAll(idatMergeGrantedOids);
+		if (mdatTransferGrantedOids != null)
+			this.mdatTransferGrantedOids.addAll(mdatTransferGrantedOids);
 	}
 
 	@Override
@@ -51,51 +53,60 @@ public class CheckConsent extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		PatientReference reference = (PatientReference) execution
+				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
+		ConsentClient client = consentClientFactory.getConsentClient();
 
-		Optional<String> dicSourceAndPseudonym = getDicSourceAndPseudonym(task);
+		if (reference.hasIdentifier() && !reference.hasAbsoluteReference())
+		{
+			String dicSourceAndPseudonym = reference.getIdentifier().getValue();
+			List<String> consentOids = client.getConsentOidsForIdentifierReference(dicSourceAndPseudonym);
 
-		boolean usageAndTransferGranted = dicSourceAndPseudonym.map(this::usageAndTrransferGranted).orElse(false);
+			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, dicSourceAndPseudonym);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
+					Variables.booleanValue(usageAndTransferGranted));
+		}
+		else if (!reference.hasIdentifier() && reference.hasAbsoluteReference())
+		{
+			String patientAbsoluteReference = reference.getAbsoluteReference();
+			List<String> consentOids = client.getConsentOidsForIdentifierReference(patientAbsoluteReference);
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
-				Variables.booleanValue(usageAndTransferGranted));
+			boolean idatMergeGranted = idatMergeGranted(consentOids, patientAbsoluteReference);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED, Variables.booleanValue(idatMergeGranted));
 
-		if (usageAndTransferGranted)
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM,
-					Variables.stringValue(dicSourceAndPseudonym.get()));
-	}
-
-	protected boolean usageAndTrransferGranted(String dicSourceAndPseudonym)
-	{
-		List<String> consentOids = consentClientFactory.getConsentClient().getConsentOidsFor(dicSourceAndPseudonym);
-
-		boolean usageAndTransferGranted = consentOids.contains(usageGrantedOid)
-				&& consentOids.contains(transferGrantedOid);
-
-		if (usageAndTransferGranted)
-			logger.info("Usage and transfer granted for pseudonym {}", dicSourceAndPseudonym);
+			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, patientAbsoluteReference);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
+					Variables.booleanValue(usageAndTransferGranted));
+		}
 		else
-			logger.warn("Usage or transfer not granted for pseudonym {}", dicSourceAndPseudonym);
-
-		return usageAndTransferGranted;
+		{
+			throw new IllegalStateException("PatientReference contains identifier and absolute reference");
+		}
 	}
 
-	private Optional<String> getDicSourceAndPseudonym(Task task)
+	protected boolean usageAndTransferGranted(List<String> consentOids, String patientReference)
 	{
-		Optional<String> value = getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-						.map(Identifier::getValue);
+		boolean mdatTransferGranted = consentOids.containsAll(mdatTransferGrantedOids);
 
-		return value;
+		if (mdatTransferGranted)
+			logger.info("MDAT transfer granted for {}", patientReference);
+		else
+			logger.warn("MDAT transfer not granted for {}", patientReference);
+
+		return mdatTransferGranted;
 	}
 
-	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
+	protected boolean idatMergeGranted(List<String> consentOids, String patientReference)
 	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
-				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> type.cast(c.getValue()));
+		boolean idatMergeGranted = consentOids.containsAll(idatMergeGrantedOids);
+
+		if (idatMergeGranted)
+			logger.info("IDAT merge granted for {}", patientReference);
+		else
+			logger.warn("IDAT merge not granted for {}", patientReference);
+
+		return idatMergeGranted;
 	}
 }
