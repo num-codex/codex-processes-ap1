@@ -22,13 +22,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
-public class FttpClientFactory implements InitializingBean
+public class FttpClientFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(FttpClientFactory.FttpClientStub.class);
 
@@ -102,8 +103,8 @@ public class FttpClientFactory implements InitializingBean
 		this.fttpTarget = fttpTarget;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
 		try
 		{
