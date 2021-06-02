@@ -4,6 +4,8 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,20 +26,22 @@ public class CheckConsent extends AbstractServiceDelegate
 	private static final Logger logger = LoggerFactory.getLogger(CheckConsent.class);
 
 	private final ConsentClientFactory consentClientFactory;
-	private final String idatMergeGrantedOid;
-	private final String usageGrantedOid;
-	private final String transferGrantedOid;
+
+	private final List<String> idatMergeGrantedOids = new ArrayList<>();
+	private final List<String> mdatTransferGrantedOids = new ArrayList<>();
 
 	public CheckConsent(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ConsentClientFactory consentClientFactory, String idatMergeGrantedOid, String usageGrantedOid,
-			String transferGrantedOid)
+			ConsentClientFactory consentClientFactory, Collection<String> idatMergeGrantedOids,
+			Collection<String> mdatTransferGrantedOids)
 	{
 		super(clientProvider, taskHelper);
 
 		this.consentClientFactory = consentClientFactory;
-		this.idatMergeGrantedOid = idatMergeGrantedOid;
-		this.usageGrantedOid = usageGrantedOid;
-		this.transferGrantedOid = transferGrantedOid;
+
+		if (idatMergeGrantedOids != null)
+			this.idatMergeGrantedOids.addAll(idatMergeGrantedOids);
+		if (mdatTransferGrantedOids != null)
+			this.mdatTransferGrantedOids.addAll(mdatTransferGrantedOids);
 	}
 
 	@Override
@@ -84,20 +88,19 @@ public class CheckConsent extends AbstractServiceDelegate
 
 	protected boolean usageAndTransferGranted(List<String> consentOids, String patientReference)
 	{
-		boolean usageAndTransferGranted = consentOids.contains(usageGrantedOid)
-				&& consentOids.contains(transferGrantedOid);
+		boolean mdatTransferGranted = consentOids.containsAll(mdatTransferGrantedOids);
 
-		if (usageAndTransferGranted)
-			logger.info("Usage and transfer granted for {}", patientReference);
+		if (mdatTransferGranted)
+			logger.info("MDAT transfer granted for {}", patientReference);
 		else
-			logger.warn("Usage or transfer not granted for {}", patientReference);
+			logger.warn("MDAT transfer not granted for {}", patientReference);
 
-		return usageAndTransferGranted;
+		return mdatTransferGranted;
 	}
 
 	protected boolean idatMergeGranted(List<String> consentOids, String patientReference)
 	{
-		boolean idatMergeGranted = consentOids.contains(idatMergeGrantedOid);
+		boolean idatMergeGranted = consentOids.containsAll(idatMergeGrantedOids);
 
 		if (idatMergeGranted)
 			logger.info("IDAT merge granted for {}", patientReference);

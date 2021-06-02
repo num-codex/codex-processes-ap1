@@ -3,6 +3,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.co
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -87,14 +88,11 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crrIdentifierValue:num-codex.de}")
 	private String crrIdentifierValue;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.usageGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.1}")
-	private String usageGrantedOid;
+	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.mdatTransferGrantedOids:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
+	private List<String> mdatTransferGrantedOids;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.transferGrantedOid:2.16.840.1.113883.3.1937.777.24.5.1.34}")
-	private String transferGrantedOid;
-
-	@Value("${de.netzwerk_universitaetsmedizin.codex.consent.idatMergeGrantedOid:2.16.840.1.113883.3.1937.777.24.5.3.4}")
-	private String idatMergeGrantedOid;
+	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.idatMergeGrantedOids:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
+	private List<String> idatMergeGrantedOids;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trustStore:#{null}}")
 	private String fttpTrustStore;
@@ -228,8 +226,8 @@ public class TransferDataConfig
 	@Bean
 	public CheckConsent checkConsent()
 	{
-		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), idatMergeGrantedOid,
-				usageGrantedOid, transferGrantedOid);
+		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), idatMergeGrantedOids,
+				mdatTransferGrantedOids);
 	}
 
 	@Bean
