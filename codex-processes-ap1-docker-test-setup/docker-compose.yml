@@ -5,24 +5,24 @@ services:
     image: haproxy:2.3
     restart: on-failure
     ports:
-    - 127.0.0.1:443:443
+      - 127.0.0.1:443:443
     volumes:
-    - type: bind
-      source: ./ingress/conf
-      target: /usr/local/etc/haproxy
-      read_only: true
+      - type: bind
+        source: ./ingress/conf
+        target: /usr/local/etc/haproxy
+        read_only: true
     networks:
       internet:
         ipv4_address: 172.10.0.2
 
-  
+
   dic-fhir-proxy:
     image: ghcr.io/highmed/fhir_proxy:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./dic/fhir/proxy/ssl
-      target: /usr/local/apache2/ssl
+      - type: bind
+        source: ./dic/fhir/proxy/ssl
+        target: /usr/local/apache2/ssl
     environment:
       HTTPS_SERVER_NAME_PORT: dic:443
       APP_SERVER_IP: dic-fhir-app
@@ -30,28 +30,28 @@ services:
       internet:
         ipv4_address: 172.10.0.3
         aliases:
-        - dic
+          - dic
       dic-fhir-frontend:
     depends_on:
-    - ingress
-    - dic-fhir-app
+      - ingress
+      - dic-fhir-app
   dic-fhir-app:
     image: ghcr.io/highmed/fhir:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./dic/fhir/app/conf
-      target: /opt/fhir/conf
-    - type: bind
-      source: ./dic/fhir/app/log
-      target: /opt/fhir/log
+      - type: bind
+        source: ./dic/fhir/app/conf
+        target: /opt/fhir/conf
+      - type: bind
+        source: ./dic/fhir/app/log
+        target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
     networks:
-    - dic-fhir-frontend
-    - dic-fhir-backend
+      - dic-fhir-frontend
+      - dic-fhir-backend
     depends_on:
-    - dic-fhir-db
+      - dic-fhir-db
   dic-fhir-db:
     image: postgres:13
     restart: on-failure
@@ -65,39 +65,39 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: fhir
     networks:
-    - dic-fhir-backend
+      - dic-fhir-backend
     volumes:
-    - type: volume
-      source: dic-fhir-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: dic-fhir-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - dic-fhir-postgres_password
+      - dic-fhir-postgres_password
 
   # dic-bpe-proxy not needed
   dic-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
     ports:
-     - 127.0.0.1:5003:5003
+      - 127.0.0.1:5003:5003
     volumes:
-    - type: bind
-      source: ./dic/bpe/app/conf
-      target: /opt/bpe/conf
-      read_only: true
-    - type: bind
-      source: ./dic/bpe/app/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
-      source: ./dic/bpe/app/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./dic/bpe/app/log
-      target: /opt/bpe/log
-    - type: bind
-      source: ./dic/bpe/app/last_event
-      target: /opt/bpe/last_event
+      - type: bind
+        source: ./dic/bpe/app/conf
+        target: /opt/bpe/conf
+        read_only: true
+      - type: bind
+        source: ./dic/bpe/app/plugin
+        target: /opt/bpe/plugin
+        read_only: true
+      - type: bind
+        source: ./dic/bpe/app/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./dic/bpe/app/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./dic/bpe/app/last_event
+        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
@@ -107,9 +107,9 @@ services:
       internet:
         ipv4_address: 172.10.0.103
     depends_on:
-    - dic-bpe-db
-    - dic-fhir-proxy
-    - dic-fhir-store
+      - dic-bpe-db
+      - dic-fhir-proxy
+      - dic-fhir-store
   dic-bpe-db:
     image: postgres:13
     restart: on-failure
@@ -123,29 +123,31 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: bpe
     networks:
-    - dic-bpe-backend
+      - dic-bpe-backend
     volumes:
-    - type: volume
-      source: dic-bpe-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: dic-bpe-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - dic-bpe-postgres_password
+      - dic-bpe-postgres_password
   dic-fhir-store:
     build: ./dic/hapi
     restart: on-failure
     ports:
-     - 127.0.0.1:8003:8080
+      - 127.0.0.1:8003:8080
+    environment:
+      TZ: Europe/Berlin
     networks:
-    - dic-bpe-backend   
+      - dic-bpe-backend   
 
 
   gth-fhir-proxy:
     image: ghcr.io/highmed/fhir_proxy:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./gth/fhir/proxy/ssl
-      target: /usr/local/apache2/ssl
+      - type: bind
+        source: ./gth/fhir/proxy/ssl
+        target: /usr/local/apache2/ssl
     environment:
       HTTPS_SERVER_NAME_PORT: gth:443
       APP_SERVER_IP: gth-fhir-app
@@ -153,28 +155,28 @@ services:
       internet:
         ipv4_address: 172.10.0.4
         aliases:
-        - gth
+          - gth
       gth-fhir-frontend:
     depends_on:
-    - ingress
-    - gth-fhir-app
+      - ingress
+      - gth-fhir-app
   gth-fhir-app:
     image: ghcr.io/highmed/fhir:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./gth/fhir/app/conf
-      target: /opt/fhir/conf
-    - type: bind
-      source: ./gth/fhir/app/log
-      target: /opt/fhir/log
+      - type: bind
+        source: ./gth/fhir/app/conf
+        target: /opt/fhir/conf
+      - type: bind
+        source: ./gth/fhir/app/log
+        target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
     networks:
-    - gth-fhir-frontend
-    - gth-fhir-backend
+      - gth-fhir-frontend
+      - gth-fhir-backend
     depends_on:
-    - gth-fhir-db
+      - gth-fhir-db
   gth-fhir-db:
     image: postgres:13
     restart: on-failure
@@ -188,39 +190,39 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: fhir
     networks:
-    - gth-fhir-backend
+      - gth-fhir-backend
     volumes:
-    - type: volume
-      source: gth-fhir-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: gth-fhir-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - gth-fhir-postgres_password
+      - gth-fhir-postgres_password
 
   # gth-bpe-proxy not needed
   gth-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
     ports:
-     - 127.0.0.1:5004:5004
+      - 127.0.0.1:5004:5004
     volumes:
-    - type: bind
-      source: ./gth/bpe/app/conf
-      target: /opt/bpe/conf
-      read_only: true
-    - type: bind
-      source: ./gth/bpe/app/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
-      source: ./gth/bpe/app/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./gth/bpe/app/log
-      target: /opt/bpe/log
-    - type: bind
-      source: ./gth/bpe/app/last_event
-      target: /opt/bpe/last_event
+      - type: bind
+        source: ./gth/bpe/app/conf
+        target: /opt/bpe/conf
+        read_only: true
+      - type: bind
+        source: ./gth/bpe/app/plugin
+        target: /opt/bpe/plugin
+        read_only: true
+      - type: bind
+        source: ./gth/bpe/app/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./gth/bpe/app/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./gth/bpe/app/last_event
+        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
@@ -230,8 +232,8 @@ services:
       internet:
         ipv4_address: 172.10.0.104
     depends_on:
-    - gth-bpe-db
-    - gth-fhir-proxy
+      - gth-bpe-db
+      - gth-fhir-proxy
   gth-bpe-db:
     image: postgres:13
     restart: on-failure
@@ -245,22 +247,22 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: bpe
     networks:
-    - gth-bpe-backend
+      - gth-bpe-backend
     volumes:
-    - type: volume
-      source: gth-bpe-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: gth-bpe-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - gth-bpe-postgres_password
+      - gth-bpe-postgres_password
 
 
   crr-fhir-proxy:
     image: ghcr.io/highmed/fhir_proxy:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./crr/fhir/proxy/ssl
-      target: /usr/local/apache2/ssl
+      - type: bind
+        source: ./crr/fhir/proxy/ssl
+        target: /usr/local/apache2/ssl
     environment:
       HTTPS_SERVER_NAME_PORT: crr:443
       APP_SERVER_IP: crr-fhir-app
@@ -268,28 +270,28 @@ services:
       internet:
         ipv4_address: 172.10.0.5
         aliases:
-        - crr
+          - crr
       crr-fhir-frontend:
     depends_on:
-    - ingress
-    - crr-fhir-app
+      - ingress
+      - crr-fhir-app
   crr-fhir-app:
     image: ghcr.io/highmed/fhir:0.4.0
     restart: on-failure
     volumes:
-    - type: bind
-      source: ./crr/fhir/app/conf
-      target: /opt/fhir/conf
-    - type: bind
-      source: ./crr/fhir/app/log
-      target: /opt/fhir/log
+      - type: bind
+        source: ./crr/fhir/app/conf
+        target: /opt/fhir/conf
+      - type: bind
+        source: ./crr/fhir/app/log
+        target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
     networks:
-    - crr-fhir-frontend
-    - crr-fhir-backend
+      - crr-fhir-frontend
+      - crr-fhir-backend
     depends_on:
-    - crr-fhir-db
+      - crr-fhir-db
   crr-fhir-db:
     image: postgres:13
     restart: on-failure
@@ -303,39 +305,39 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: fhir
     networks:
-    - crr-fhir-backend
+      - crr-fhir-backend
     volumes:
-    - type: volume
-      source: crr-fhir-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: crr-fhir-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - crr-fhir-postgres_password
+      - crr-fhir-postgres_password
 
   # crr-bpe-proxy not needed
   crr-bpe-app:
     image: ghcr.io/highmed/bpe:0.4.0
     restart: on-failure
     ports:
-     - 127.0.0.1:5005:5005
+      - 127.0.0.1:5005:5005
     volumes:
-    - type: bind
-      source: ./crr/bpe/app/conf
-      target: /opt/bpe/conf
-      read_only: true
-    - type: bind
-      source: ./crr/bpe/app/plugin
-      target: /opt/bpe/plugin
-      read_only: true
-    - type: bind
-      source: ./crr/bpe/app/process
-      target: /opt/bpe/process
-      read_only: true
-    - type: bind
-      source: ./crr/bpe/app/log
-      target: /opt/bpe/log
-    - type: bind
-      source: ./crr/bpe/app/last_event
-      target: /opt/bpe/last_event
+      - type: bind
+        source: ./crr/bpe/app/conf
+        target: /opt/bpe/conf
+        read_only: true
+      - type: bind
+        source: ./crr/bpe/app/plugin
+        target: /opt/bpe/plugin
+        read_only: true
+      - type: bind
+        source: ./crr/bpe/app/process
+        target: /opt/bpe/process
+        read_only: true
+      - type: bind
+        source: ./crr/bpe/app/log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./crr/bpe/app/last_event
+        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
@@ -345,9 +347,9 @@ services:
       internet:
         ipv4_address: 172.10.0.105
     depends_on:
-    - crr-bpe-db
-    - crr-fhir-proxy
-    - crr-fhir-store
+      - crr-bpe-db
+      - crr-fhir-proxy
+      - crr-fhir-store
   crr-bpe-db:
     image: postgres:13
     restart: on-failure
@@ -361,21 +363,24 @@ services:
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: bpe
     networks:
-    - crr-bpe-backend
+      - crr-bpe-backend
     volumes:
-    - type: volume
-      source: crr-bpe-db-data
-      target: /var/lib/postgresql/data
+      - type: volume
+        source: crr-bpe-db-data
+        target: /var/lib/postgresql/data
     secrets:
-    - crr-bpe-postgres_password
+      - crr-bpe-postgres_password
   crr-fhir-store:
     build: ./crr/hapi
     restart: on-failure
     ports:
-     - 127.0.0.1:8005:8080
+      - 127.0.0.1:8005:8080
+    environment:
+      TZ: Europe/Berlin
     networks:
-    - crr-bpe-backend    
-    
+      - crr-bpe-backend
+
+
 secrets:
   dic-fhir-postgres_password:
     file: ./dic/fhir/db/conf/postgres_password
@@ -397,7 +402,7 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.10.0.0/24
+        - subnet: 172.10.0.0/24
 
   dic-fhir-frontend:
   dic-fhir-backend:
@@ -411,6 +416,7 @@ networks:
   crr-fhir-backend:
   crr-bpe-frontend:
   crr-bpe-backend:
+
 
 volumes:
   dic-fhir-db-data:
