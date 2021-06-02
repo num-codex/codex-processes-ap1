@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger"></profile>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.3.0"></instantiatesUri>
    <status value="requested"></status>

@@ -5,7 +5,7 @@
 			<code value="REMOTE"/>
 		</tag>		
 	</meta>
-	<url value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer"/>
+	<url value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer"/>
 	<!-- version managed by bpe -->
 	<version value="${version}" />
 	<name value="NumCodexDataTransfer"/>
@@ -13,13 +13,13 @@
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false"/>
-	<date value="2021-04-07"/>
+	<date value="2021-06-02"/>
 	<publisher value="NUM-CODEX"/>
 	<description value="CodeSystem with standard values for the NUM-CODEX data-transfer processes"/>
 	<immutable value="true"/>
 	<compose>
 		<include>
-			<system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+			<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
 		</include>
 	</compose>
 </ValueSet> 

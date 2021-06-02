@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.0"></instantiatesUri>
    <status value="requested"></status>
@@ -37,13 +37,13 @@
    <input>
       <type>
          <coding>
-            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
             <code value="patient"></code>
          </coding>
       </type>
       <valueReference>
          <identifier>
-            <system value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"></system>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"></system>
             <value value="source/original"></value>
          </identifier>
       </valueReference>
@@ -54,7 +54,7 @@
    <input>
       <type>
          <coding>
-            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
             <code value="export-to"></code>
          </coding>
       </type>
@@ -66,7 +66,7 @@
    <!-- <input>
       <type>
          <coding>
-            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
             <code value="export-from"></code>
          </coding>
       </type>

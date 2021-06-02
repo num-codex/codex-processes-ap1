@@ -6,12 +6,12 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate" />
+  <url value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate" />
   <version value="${version}" />
   <name value="TaskStartDataTranslate" />
   <status value="unknown" />
   <experimental value="false" />
-  <date value="2021-04-07" />
+  <date value="2021-06-02" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -56,7 +56,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
       </binding>
     </element>
     <element id="Task.input:pseudonym.type.coding">
@@ -67,7 +67,7 @@
     <element id="Task.input:pseudonym.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
     </element>
     <element id="Task.input:pseudonym.type.coding.code">
       <path value="Task.input.type.coding.code" />
@@ -83,7 +83,7 @@
     <element id="Task.input:pseudonym.value[x].system">
       <path value="Task.input.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym" />
     </element>
     <element id="Task.input:pseudonym.value[x].value">
       <path value="Task.input.value[x].value" />
@@ -99,7 +99,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
       </binding>
     </element>
     <element id="Task.input:data.type.coding">
@@ -110,7 +110,7 @@
     <element id="Task.input:data.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <min value="1" />
-      <fixedUri value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
     </element>
     <element id="Task.input:data.type.coding.code">
       <path value="Task.input.type.coding.code" />

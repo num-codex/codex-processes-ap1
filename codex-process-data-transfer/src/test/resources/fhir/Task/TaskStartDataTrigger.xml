@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger"></profile>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger"></profile>
    </meta>
    <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.3.0"></instantiatesUri>
    <status value="requested"></status>
@@ -46,7 +46,7 @@
    <!-- <input>
       <type>
          <coding>
-            <system value="http://netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
             <code value="export-from"></code>
          </coding>
       </type>
