@@ -82,7 +82,7 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.privateKey:#{null}}")
 	private String crrPrivateKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:hs-heilbronn.de}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:gth.hs-heilbronn.de}")
 	private String geccoTransferHubIdentifierValue;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crrIdentifierValue:num-codex.de}")
