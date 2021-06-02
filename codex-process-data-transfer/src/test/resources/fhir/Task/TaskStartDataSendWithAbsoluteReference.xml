@@ -1,48 +1,47 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"></profile>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"/>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.0"></instantiatesUri>
-   <status value="requested"></status>
-   <intent value="order"></intent>
-   <authoredOn value="2021-04-07T12:30:00+01:00"></authoredOn>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.0"/>
+   <status value="requested"/>
+   <intent value="order"/>
+   <authoredOn value="2021-04-07T12:30:00+01:00"/>
    <requester>
-      <type value="Organization"></type>
+      <type value="Organization"/>
       <identifier>
-         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
-         <value value="Test_DIC"></value>
+         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+         <value value="Test_DIC"/>
       </identifier>
    </requester>
    <restriction>
       <recipient>
-         <type value="Organization"></type>
+         <type value="Organization"/>
          <identifier>
-            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
-            <value value="Test_DIC"></value>
+            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+            <value value="Test_DIC"/>
          </identifier>
       </recipient>
    </restriction>
    <input>
       <type>
          <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"></system>
-            <code value="message-name"></code>
+            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+            <code value="message-name"/>
          </coding>
       </type>
-      <valueString value="startDataSend"></valueString>
+      <valueString value="startDataSend"/>
    </input>
    <!-- parameter defined the patient, for whom data should be transferred,
 		specified using an absolute reference -->
    <input>
       <type>
          <coding>
-            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
-            <code value="patient"></code>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="patient"/>
          </coding>
       </type>
       <valueReference>
-         <reference value="http://dic-fhir-store:8080/fhir/Patient/4">
-         </reference>
+         <reference value="http://dic-fhir-store:8080/fhir/Patient/4"/>
       </valueReference>
    </input>
    <!-- parameter specifying GECCO resources should be send stopping at the 
@@ -51,11 +50,11 @@
    <input>
       <type>
          <coding>
-            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
-            <code value="export-to"></code>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="export-to"/>
          </coding>
       </type>
-      <valueInstant value="2021-04-07T12:30:00+01:00"></valueInstant>
+      <valueInstant value="2021-04-07T12:30:00+01:00"/>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
@@ -63,10 +62,10 @@
    <!-- <input>
       <type>
          <coding>
-            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"></system>
-            <code value="export-from"></code>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="export-from"/>
          </coding>
       </type>
-      <valueDateTime value="2021-04-07"></valueDateTime>
+      <valueDateTime value="2021-04-07"/>
    </input> -->
 </Task>
