@@ -58,8 +58,8 @@ docker-compose up -d crr-bpe-app crr-bpe-db && docker-compose logs -f crr-fhir-a
 ````
 
 Webbrowser at http://localhost:8003/: Add Demo Data to DIC HAPI FHIR Server via Transaction-Bundle at
-[dic_fhir_store_demo_psn.json](codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json) or
-[dic_fhir_store_demo_bf.json](codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf.json)
+[dic_fhir_store_demo_psn.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json) or
+[dic_fhir_store_demo_bf.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf.json)
 
 *Start curl command from root-folder:* `codex-processes-ap1`
 
