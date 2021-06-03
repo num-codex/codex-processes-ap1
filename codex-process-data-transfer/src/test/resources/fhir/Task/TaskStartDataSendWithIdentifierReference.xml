@@ -2,10 +2,10 @@
    <meta>
       <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"/>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.0"/>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.1"/>
    <status value="requested"/>
    <intent value="order"/>
-   <authoredOn value="2021-04-07T12:30:00+01:00"/>
+   <authoredOn value="2021-06-03T23:46:00+01:00"/>
    <requester>
       <type value="Organization"/>
       <identifier>
@@ -43,7 +43,7 @@
       </type>
       <valueReference>
          <identifier>
-            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/NamingSystem/dic-pseudonym"/>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym"/>
             <value value="source/original"/>
          </identifier>
       </valueReference>
@@ -58,7 +58,7 @@
             <code value="export-to"/>
          </coding>
       </type>
-      <valueInstant value="2021-04-07T12:30:00+01:00"/>
+      <valueInstant value="2021-06-03T23:46:00+01:00"/>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
