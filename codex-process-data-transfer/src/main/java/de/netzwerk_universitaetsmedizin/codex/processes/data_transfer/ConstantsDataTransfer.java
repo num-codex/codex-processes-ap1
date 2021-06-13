@@ -21,6 +21,8 @@ public interface ConstantsDataTransfer
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/crr-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER = "http://www.netzwerk-universitaetsmedizin.de/sid/bloom-filter";
 
+	String RFC_4122_SYSTEM = "urn:ietf:rfc:4122";
+
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT = "patient";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM = "pseudonym";

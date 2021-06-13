@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListValues;
