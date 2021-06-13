@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir;
 
 import java.util.Date;
 import java.util.Optional;
@@ -33,6 +33,10 @@ public interface FhirClient
 	 */
 	Stream<DomainResource> getNewData(String pseudonym, DateWithPrecision exportFrom, Date exportTo);
 
+	/**
+	 * @param bundle
+	 *            not <code>null</code>
+	 */
 	void storeBundle(Bundle bundle);
 
 	/**

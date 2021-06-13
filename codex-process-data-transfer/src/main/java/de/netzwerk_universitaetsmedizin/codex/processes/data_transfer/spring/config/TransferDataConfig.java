@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,6 +10,8 @@ import java.util.List;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +22,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Con
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClientBuilder;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
@@ -46,6 +52,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Va
 @Configuration
 public class TransferDataConfig
 {
+	private static final Logger logger = LoggerFactory.getLogger(TransferDataConfig.class);
+
 	@Autowired
 	private FhirWebserviceClientProvider fhirClientProvider;
 
@@ -70,8 +78,8 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:#{null}}")
 	private String fhirStoreBearerToken;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.supportsIdentifierReferenceSearch:false}")
-	private boolean fhirStoreSupportsIdentifierReferenceSearch;
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.HapiClient}")
+	private String fhirStoreClientClass;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.searchBundleOverride:#{null}}")
 	private String fhirStoreSearchBundleOverride;
@@ -121,6 +129,15 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
+	private String proxySchemeHostPort;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
+	private String proxyUsername;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
+	private String proxyPassword;
+
 	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
 	private String localIdentifierValue;
 
@@ -134,7 +151,7 @@ public class TransferDataConfig
 	public HapiFhirClientFactory hapiFhirClientFactory()
 	{
 		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-				fhirStoreBearerToken, fhirStoreSupportsIdentifierReferenceSearch);
+				fhirStoreBearerToken);
 	}
 
 	@Bean
@@ -145,7 +162,8 @@ public class TransferDataConfig
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
 		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpBasicAuthUsername,
-				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort,
+				proxyUsername, proxyPassword);
 	}
 
 	@Bean
@@ -153,7 +171,31 @@ public class TransferDataConfig
 	{
 		Path searchBundleOverride = checkExists(fhirStoreSearchBundleOverride);
 
-		return new FhirClientFactory(hapiFhirClientFactory(), fhirContext, searchBundleOverride, localIdentifierValue);
+		return new FhirClientFactory(hapiFhirClientFactory(), fhirContext, searchBundleOverride, localIdentifierValue,
+				clientBuilder());
+	}
+
+	private FhirClientBuilder clientBuilder()
+	{
+		return (fhirContext, clientFactory, searchBundleOverride) ->
+		{
+			logger.info("Using {} as fhir client", fhirStoreClientClass);
+
+			try
+			{
+				@SuppressWarnings("unchecked")
+				Class<FhirClient> clientClass = (Class<FhirClient>) Class.forName(fhirStoreClientClass);
+				Constructor<FhirClient> constructor = clientClass.getConstructor(FhirContext.class,
+						HapiFhirClientFactory.class, Path.class);
+
+				return constructor.newInstance(fhirContext, clientFactory, searchBundleOverride);
+			}
+			catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+			{
+				throw new RuntimeException(e);
+			}
+		};
 	}
 
 	private Path checkExists(String file)

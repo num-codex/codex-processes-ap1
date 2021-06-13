@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClientBuilder;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
@@ -39,19 +41,23 @@ public class FhirClientFactory
 	private final Path searchBundleOverride;
 	private final String localIdentifierValue;
 
+	private final FhirClientBuilder builder;
+
 	public FhirClientFactory(HapiFhirClientFactory hapiClientFactory, FhirContext fhirContext,
-			Path searchBundleOverride, String localIdentifierValue)
+			Path searchBundleOverride, String localIdentifierValue, FhirClientBuilder builder)
 	{
 		this.hapiClientFactory = hapiClientFactory;
 		this.fhirContext = fhirContext;
 		this.searchBundleOverride = searchBundleOverride;
 		this.localIdentifierValue = localIdentifierValue;
+
+		this.builder = builder;
 	}
 
 	public FhirClient getFhirClient()
 	{
 		if (hapiClientFactory.isConfigured())
-			return new FhirClientImpl(hapiClientFactory, fhirContext, searchBundleOverride);
+			return builder.build(fhirContext, hapiClientFactory, searchBundleOverride);
 		else
 			return createFhirClientStub();
 	}

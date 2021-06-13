@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -55,6 +57,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.
 public class ReadData extends AbstractServiceDelegate
 {
 	private static final String NUM_CODEX_STRUCTURE_DEFINITION_PREFIX = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition";
+	private static final String MII_LAB_STRUCTURED_DEFINITION = "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab";
 
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
@@ -232,101 +235,88 @@ public class ReadData extends AbstractServiceDelegate
 	protected String getConditionalUpdateUrl(String pseudonym, DomainResource resource)
 	{
 		if (resource instanceof Patient)
+		{
 			return "Patient?identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
 					+ pseudonym;
+		}
 		else if (resource instanceof Condition)
 		{
 			Condition c = (Condition) resource;
-			Optional<CanonicalType> profile = c.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
-			{
-				return "Condition?_profile=" + profile.get().getValue() + "&recorded-date="
-						+ c.getRecordedDateElement().getValueAsString() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
+
+			return "Condition?_profile=" + profileUrl + "&recorded-date="
+					+ c.getRecordedDateElement().getValueAsString() + "&patient:identifier="
+					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 		}
 		else if (resource instanceof DiagnosticReport)
 		{
 			DiagnosticReport dr = (DiagnosticReport) resource;
-			Optional<CanonicalType> profile = dr.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
-			{
-				return "DiagnosticReport?_profile=" + profile.get().getValue() + "&date="
-						+ dr.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
+
+			return "DiagnosticReport?_profile=" + profileUrl + "&date="
+					+ dr.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
+					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 		}
 		else if (resource instanceof Immunization)
 		{
 			Immunization i = (Immunization) resource;
-			Optional<CanonicalType> profile = i.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
-			{
-				return "Immunization?_profile=" + profile.get().getValue() + "&date="
-						+ i.getOccurrenceDateTimeType().getValueAsString() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
+
+			return "Immunization?_profile=" + profileUrl + "&date=" + i.getOccurrenceDateTimeType().getValueAsString()
+					+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
+					+ pseudonym;
 		}
 		else if (resource instanceof MedicationStatement)
 		{
 			MedicationStatement ms = (MedicationStatement) resource;
-			Optional<CanonicalType> profile = ms.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
-			{
-				return "MedicationStatement?_profile=" + profile.get().getValue() + "&effective="
-						+ ms.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
+
+			return "MedicationStatement?_profile=" + profileUrl + "&effective="
+					+ ms.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
+					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 		}
 
 		else if (resource instanceof Observation)
 		{
 			Observation o = (Observation) resource;
-			Optional<CanonicalType> profile = o.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)
+					|| MII_LAB_STRUCTURED_DEFINITION.equals(v));
+
+			if (MII_LAB_STRUCTURED_DEFINITION.equals(profileUrl))
 			{
-				return "Observation?_profile=" + profile.get().getValue() + "&date="
-						+ o.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
+				Coding loincCode = o.getCode().getCoding().stream()
+						.filter(c -> "http://loinc.org".equals(c.getSystem())).findFirst()
+						.orElseThrow(() -> new RuntimeException("Observation (" + MII_LAB_STRUCTURED_DEFINITION
+								+ ") not supported, missing LOINC code"));
+
+				return "Observation?_profile=" + profileUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString()
+						+ "&code=" + loincCode.getSystem() + "|" + loincCode.getCode() + "&patient:identifier="
 						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
 			}
 			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
+			{
+				return "Observation?_profile=" + profileUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString()
+						+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
+						+ pseudonym;
+			}
 		}
 		else if (resource instanceof Procedure)
 		{
-			Procedure pr = (Procedure) resource;
-			Optional<CanonicalType> profile = pr.getMeta().getProfile().stream()
-					.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)).findFirst();
-			if (profile.isPresent())
-			{
-				return "Procedure?_profile=" + profile.get().getValue() + "&date="
-						+ pr.getPerformedDateTimeType().getValueAsString() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-				throw new RuntimeException("Resource of type " + resource.getResourceType().name()
-						+ " not supported, missing NUM profile");
-		}
+			Procedure p = (Procedure) resource;
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
+			return "Procedure?_profile=" + profileUrl + "&date=" + p.getPerformedDateTimeType().getValueAsString()
+					+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
+					+ pseudonym;
+		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
+	}
+
+	private String getProfileUrl(DomainResource resource, Predicate<String> filter)
+	{
+		return resource.getMeta().getProfile().stream().map(CanonicalType::getValue).filter(filter).findFirst()
+				.orElseThrow(() -> new RuntimeException("Resource of type " + resource.getResourceType().name()
+						+ " not supported, missing NUM or MII profile"));
 	}
 }
