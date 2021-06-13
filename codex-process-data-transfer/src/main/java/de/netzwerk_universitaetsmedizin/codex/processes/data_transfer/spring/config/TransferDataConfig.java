@@ -121,6 +121,15 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
+	private String proxySchemeHostPort;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
+	private String proxyUsername;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
+	private String proxyPassword;
+
 	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
 	private String localIdentifierValue;
 
@@ -145,7 +154,8 @@ public class TransferDataConfig
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
 		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpBasicAuthUsername,
-				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort,
+				proxyUsername, proxyPassword);
 	}
 
 	@Bean

@@ -2,12 +2,15 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Identifier;
@@ -34,23 +37,32 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 
 	private final IRestfulClientFactory clientFactory;
 
-	private final String basicAuthUsername;
-	private final String basicAuthPassword;
-
 	private final String fttpServerBase;
+	private final String fttpBasicAuthUsername;
+	private final String fttpBasicAuthPassword;
+
 	private final String fttpStudy;
 	private final String fttpTarget;
 	private final String fttpApiKey;
 
-	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String basicAuthUsername,
-			String basicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget)
+	private final String proxySchemeHostPort;
+	private final String proxyUsername;
+	private final String proxyPassword;
+
+	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String fttpBasicAuthUsername,
+			String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
+			String proxySchemeHostPort, String proxyUsername, String proxyPassword)
 	{
-		this.basicAuthUsername = basicAuthUsername;
-		this.basicAuthPassword = basicAuthPassword;
+		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUsername = proxyUsername;
+		this.proxyPassword = proxyPassword;
 
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword);
 
 		this.fttpServerBase = fttpServerBase;
+		this.fttpBasicAuthUsername = fttpBasicAuthUsername;
+		this.fttpBasicAuthPassword = fttpBasicAuthPassword;
+
 		this.fttpApiKey = fttpApiKey;
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
@@ -67,9 +79,30 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		ApacheRestfulClientFactoryWithTlsConfig hapiClientFactory = new ApacheRestfulClientFactoryWithTlsConfig(
 				fhirContext, trustStore, keyStore, keyStorePassword);
 		hapiClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+		configureProxy(hapiClientFactory);
 
 		fhirContext.setRestfulClientFactory(hapiClientFactory);
 		return hapiClientFactory;
+	}
+
+	private void configureProxy(ApacheRestfulClientFactoryWithTlsConfig clientFactory)
+	{
+		if (StringUtils.isNotBlank(proxySchemeHostPort))
+		{
+			try
+			{
+				URL url = new URL(proxySchemeHostPort);
+				clientFactory.setProxy(url.getHost(), url.getPort());
+				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
+
+				logger.info("Using proxy for fTTP connection with {host: {}, port: {}, username: {}}", url.getHost(),
+						url.getPort(), proxyUsername);
+			}
+			catch (MalformedURLException e)
+			{
+				logger.error("Could not configure proxy", e);
+			}
+		}
 	}
 
 	@Override
@@ -198,13 +231,13 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		client.registerInterceptor(new LoggingInterceptor());
 
 		if (configuredWithBasicAuth())
-			client.registerInterceptor(new BasicAuthInterceptor(basicAuthUsername, basicAuthPassword));
+			client.registerInterceptor(new BasicAuthInterceptor(fttpBasicAuthUsername, fttpBasicAuthPassword));
 
 		return client;
 	}
 
 	private boolean configuredWithBasicAuth()
 	{
-		return basicAuthUsername != null && basicAuthPassword != null;
+		return fttpBasicAuthUsername != null && fttpBasicAuthPassword != null;
 	}
 }

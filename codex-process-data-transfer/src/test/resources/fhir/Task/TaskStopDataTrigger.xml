@@ -2,7 +2,7 @@
    <meta>
       <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger"/>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.3.1"/>
+   <instantiatesUri value="http://highmed.org/bpe/Process/dataTrigger/0.3.2"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2021-04-07T12:30:00+01:00"/>
