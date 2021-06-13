@@ -172,7 +172,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 					.withParameters(createParametersForBfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
 					.encoded(EncodingEnum.XML).execute();
 
-			return getPseudonym(parameters);
+			return getPseudonym(parameters).map(p -> fttpTarget + "/" + p);
 		}
 		catch (Exception e)
 		{
