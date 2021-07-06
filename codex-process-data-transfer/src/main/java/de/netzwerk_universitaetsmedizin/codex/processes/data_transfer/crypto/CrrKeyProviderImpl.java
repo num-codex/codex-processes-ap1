@@ -58,7 +58,7 @@ public class CrrKeyProviderImpl implements CrrKeyProvider
 		}
 		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
 		{
-			throw new RuntimeException("Error while reading CRR private-key from " + crrPrivateKeyFile);
+			throw new RuntimeException("Error while reading CRR private-key from " + crrPrivateKeyFile, e);
 		}
 
 		try
@@ -69,18 +69,16 @@ public class CrrKeyProviderImpl implements CrrKeyProvider
 				if (!Files.isReadable(crrPublicKeyPath))
 					throw new RuntimeException("CRR public-key at " + crrPublicKeyFile + " not readable");
 
-
 				crrPublicKey = PemIo.readPublicKeyFromPem(crrPublicKeyPath);
 			}
 		}
 		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
 		{
-			throw new RuntimeException("Error while reading CRR public-key from " + crrPublicKeyFile);
+			throw new RuntimeException("Error while reading CRR public-key from " + crrPublicKeyFile, e);
 		}
 
 		return new CrrKeyProviderImpl(crrPrivateKey, crrPublicKey);
 	}
-
 
 	private final PrivateKey crrPrivateKey;
 	private final PublicKey crrPublicKey;

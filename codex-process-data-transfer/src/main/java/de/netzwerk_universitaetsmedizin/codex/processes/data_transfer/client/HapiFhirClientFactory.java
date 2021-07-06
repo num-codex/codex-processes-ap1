@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
@@ -48,6 +49,8 @@ public class HapiFhirClientFactory
 	private final String basicAuthPassword;
 	private final String bearerToken;
 
+	private final boolean hapiClientVerbose;
+
 	private final ApacheRestfulClientFactory clientFactory;
 
 	/**
@@ -61,9 +64,16 @@ public class HapiFhirClientFactory
 	 *            may be <code>null</code>
 	 * @param bearerToken
 	 *            may be <code>null</code>
+	 * @param connectTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param socketTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param connectionRequestTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
 	 */
 	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
-			String basicAuthPassword, String bearerToken)
+			String basicAuthPassword, String bearerToken, int connectTimeout, int socketTimeout,
+			int connectionRequestTimeout, boolean hapiClientVerbose)
 	{
 		if (fhirContext != null)
 			this.fhirContext = fhirContext;
@@ -75,10 +85,15 @@ public class HapiFhirClientFactory
 		this.basicAuthPassword = basicAuthPassword;
 		this.bearerToken = bearerToken;
 
+		this.hapiClientVerbose = hapiClientVerbose;
+
 		if (isConfigured())
 		{
 			clientFactory = new ApacheRestfulClientFactory(this.fhirContext);
 			clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+			clientFactory.setConnectTimeout(connectTimeout);
+			clientFactory.setSocketTimeout(socketTimeout);
+			clientFactory.setConnectionRequestTimeout(connectionRequestTimeout);
 		}
 		else
 			clientFactory = null;
@@ -96,6 +111,7 @@ public class HapiFhirClientFactory
 			IGenericClient client = clientFactory.newGenericClient(serverBase);
 			configureBasicAuthInterceptor(client);
 			configureBearerTokenAuthInterceptor(client);
+			configureLoggingInterceptor(client);
 			return client;
 		}
 		else
@@ -447,5 +463,15 @@ public class HapiFhirClientFactory
 	{
 		if (bearerToken != null)
 			client.registerInterceptor(new BearerTokenAuthInterceptor(bearerToken));
+	}
+
+	private void configureLoggingInterceptor(IGenericClient client)
+	{
+		if (hapiClientVerbose)
+		{
+			LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
+			loggingInterceptor.setLogger(new HapiClientLogger(logger));
+			client.registerInterceptor(loggingInterceptor);
+		}
 	}
 }
