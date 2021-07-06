@@ -94,7 +94,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		else
 		{
-			logger.info("Bundle has no Patient");
+			logger.debug("Bundle has no Patient");
 			return Optional.empty();
 		}
 	}
@@ -241,7 +241,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			}
 			else
 			{
-				logger.info("FHIR store has no Resource with url {}", url);
+				logger.debug("FHIR store has no Resource with url {}", url);
 				return Optional.empty();
 			}
 		}
