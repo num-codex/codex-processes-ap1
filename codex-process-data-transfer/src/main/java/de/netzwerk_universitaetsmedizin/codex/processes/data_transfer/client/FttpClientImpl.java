@@ -49,15 +49,14 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private final String proxyUsername;
 	private final String proxyPassword;
 
-	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, String fttpBasicAuthUsername,
-			String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
+	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
+			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
+			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
+
 			String proxySchemeHostPort, String proxyUsername, String proxyPassword)
 	{
-		this.proxySchemeHostPort = proxySchemeHostPort;
-		this.proxyUsername = proxyUsername;
-		this.proxyPassword = proxyPassword;
-
-		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword);
+		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
+				connectionRequestTimeout);
 
 		this.fttpServerBase = fttpServerBase;
 		this.fttpBasicAuthUsername = fttpBasicAuthUsername;
@@ -66,10 +65,14 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		this.fttpApiKey = fttpApiKey;
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
+
+		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUsername = proxyUsername;
+		this.proxyPassword = proxyPassword;
 	}
 
 	protected ApacheRestfulClientFactoryWithTlsConfig createClientFactory(KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword)
+			char[] keyStorePassword, int connectTimeout, int socketTimeout, int connectionRequestTimeout)
 	{
 		Objects.requireNonNull(trustStore, "trustStore");
 		Objects.requireNonNull(keyStore, "keyStore");
@@ -80,6 +83,10 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 				fhirContext, trustStore, keyStore, keyStorePassword);
 		hapiClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
 		configureProxy(hapiClientFactory);
+
+		hapiClientFactory.setConnectTimeout(connectTimeout);
+		hapiClientFactory.setSocketTimeout(socketTimeout);
+		hapiClientFactory.setConnectionRequestTimeout(connectionRequestTimeout);
 
 		fhirContext.setRestfulClientFactory(hapiClientFactory);
 		return hapiClientFactory;

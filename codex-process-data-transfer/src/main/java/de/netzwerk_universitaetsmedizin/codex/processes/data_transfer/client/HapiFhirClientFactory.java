@@ -61,9 +61,16 @@ public class HapiFhirClientFactory
 	 *            may be <code>null</code>
 	 * @param bearerToken
 	 *            may be <code>null</code>
+	 * @param connectTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param socketTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param connectionRequestTimeout
+	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
 	 */
 	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
-			String basicAuthPassword, String bearerToken)
+			String basicAuthPassword, String bearerToken, int connectTimeout, int socketTimeout,
+			int connectionRequestTimeout)
 	{
 		if (fhirContext != null)
 			this.fhirContext = fhirContext;
@@ -79,6 +86,9 @@ public class HapiFhirClientFactory
 		{
 			clientFactory = new ApacheRestfulClientFactory(this.fhirContext);
 			clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+			clientFactory.setConnectTimeout(connectTimeout);
+			clientFactory.setSocketTimeout(socketTimeout);
+			clientFactory.setConnectionRequestTimeout(connectionRequestTimeout);
 		}
 		else
 			clientFactory = null;
