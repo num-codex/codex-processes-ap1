@@ -78,7 +78,16 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearerToken:#{null}}")
 	private String fhirStoreBearerToken;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.HapiClient}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.connectTimeout:10000}")
+	private int fhirStoreConnectTimeout;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.socketTimeout:10000}")
+	private int fhirStoreSocketTimeout;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.connectionRequestTimeout:10000}")
+	private int fhirStoreConnectionRequestTimeout;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
 	private String fhirStoreClientClass;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.searchBundleOverride:#{null}}")
@@ -110,6 +119,15 @@ public class TransferDataConfig
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.privateKey:#{null}}")
 	private String fttpPrivateKey;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.connectTimeout:10000}")
+	private int fttpConnectTimeout;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.socketTimeout:10000}")
+	private int fttpSocketTimeout;
+
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.connectionRequestTimeout:10000}")
+	private int fttpConnectionRequestTimeout;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicAuthUsername:#{null}}")
 	private String fttpBasicAuthUsername;
@@ -151,7 +169,8 @@ public class TransferDataConfig
 	public HapiFhirClientFactory hapiFhirClientFactory()
 	{
 		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-				fhirStoreBearerToken);
+				fhirStoreBearerToken, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
+				fhirStoreConnectionRequestTimeout);
 	}
 
 	@Bean
@@ -161,9 +180,9 @@ public class TransferDataConfig
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpBasicAuthUsername,
-				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort,
-				proxyUsername, proxyPassword);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpConnectTimeout,
+				fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword,
+				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword);
 	}
 
 	@Bean
@@ -357,6 +376,6 @@ public class TransferDataConfig
 	@Bean
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
-		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, fhirClientFactory());
+		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, fhirContext, fhirClientFactory());
 	}
 }
