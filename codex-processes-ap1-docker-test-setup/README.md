@@ -104,7 +104,7 @@ https://dic/fhir/Task
 ```
 
 Console 6: Check data transfered to CRR fhir-bridge
-````sh
+```sh
 curl http://localhost:8888/fhir-bridge/fhir/Patient
 curl http://localhost:8888/fhir-bridge/fhir/Condition
 curl http://localhost:8888/fhir-bridge/fhir/Observation
