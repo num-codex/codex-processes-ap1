@@ -87,6 +87,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.connectionRequestTimeout:10000}")
 	private int fhirStoreConnectionRequestTimeout;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.hapiClientVerbose:false}")
+	private boolean fhirStoreHapiClientVerbose;
+
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
 	private String fhirStoreClientClass;
 
@@ -147,6 +150,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.hapiClientVerbose:false}")
+	private boolean fttpHapiClientVerbose;
+
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
 	private String proxySchemeHostPort;
 
@@ -170,7 +176,7 @@ public class TransferDataConfig
 	{
 		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
 				fhirStoreBearerToken, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
-				fhirStoreConnectionRequestTimeout);
+				fhirStoreConnectionRequestTimeout, fhirStoreHapiClientVerbose);
 	}
 
 	@Bean
@@ -182,7 +188,8 @@ public class TransferDataConfig
 
 		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpConnectTimeout,
 				fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword,
-				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword);
+				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword,
+				fttpHapiClientVerbose);
 	}
 
 	@Bean

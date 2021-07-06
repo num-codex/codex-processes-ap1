@@ -49,11 +49,12 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private final String proxyUsername;
 	private final String proxyPassword;
 
+	private final boolean hapiClientVerbose;
+
 	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
 			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
-
-			String proxySchemeHostPort, String proxyUsername, String proxyPassword)
+			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
+			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout);
@@ -69,6 +70,8 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		this.proxySchemeHostPort = proxySchemeHostPort;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
+
+		this.hapiClientVerbose = hapiClientVerbose;
 	}
 
 	protected ApacheRestfulClientFactoryWithTlsConfig createClientFactory(KeyStore trustStore, KeyStore keyStore,
@@ -235,16 +238,26 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private IGenericClient createGenericClient()
 	{
 		IGenericClient client = clientFactory.newGenericClient(fttpServerBase);
-		client.registerInterceptor(new LoggingInterceptor());
 
-		if (configuredWithBasicAuth())
-			client.registerInterceptor(new BasicAuthInterceptor(fttpBasicAuthUsername, fttpBasicAuthPassword));
+		configuredWithBasicAuth(client);
+		configureLoggingInterceptor(client);
 
 		return client;
 	}
 
-	private boolean configuredWithBasicAuth()
+	private void configuredWithBasicAuth(IGenericClient client)
 	{
-		return fttpBasicAuthUsername != null && fttpBasicAuthPassword != null;
+		if (fttpBasicAuthUsername != null && fttpBasicAuthPassword != null)
+			client.registerInterceptor(new BasicAuthInterceptor(fttpBasicAuthUsername, fttpBasicAuthPassword));
+	}
+
+	private void configureLoggingInterceptor(IGenericClient client)
+	{
+		if (hapiClientVerbose)
+		{
+			LoggingInterceptor loggingInterceptor = new LoggingInterceptor(true);
+			loggingInterceptor.setLogger(new HapiClientLogger(logger));
+			client.registerInterceptor(loggingInterceptor);
+		}
 	}
 }

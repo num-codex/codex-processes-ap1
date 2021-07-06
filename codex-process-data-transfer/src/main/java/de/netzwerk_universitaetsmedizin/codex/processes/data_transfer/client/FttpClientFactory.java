@@ -97,10 +97,12 @@ public class FttpClientFactory
 	private final String proxyUsername;
 	private final String proxyPassword;
 
+	private final boolean hapiClientVerbose;
+
 	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, int connectTimeout,
 			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
 			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
-			String proxyUsername, String proxyPassword)
+			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
@@ -121,6 +123,8 @@ public class FttpClientFactory
 		this.proxySchemeHostPort = proxySchemeHostPort;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
+
+		this.hapiClientVerbose = hapiClientVerbose;
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
@@ -166,7 +170,7 @@ public class FttpClientFactory
 
 		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword);
+				fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword, hapiClientVerbose);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)
