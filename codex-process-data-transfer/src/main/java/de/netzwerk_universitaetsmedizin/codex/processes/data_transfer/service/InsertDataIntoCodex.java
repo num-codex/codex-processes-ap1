@@ -13,20 +13,23 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final FhirClientFactory localFhirStoreClientFactory;
+	private final FhirClientFactory fhirClientFactory;
+	private final FhirContext fhirContext;
 
 	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			FhirClientFactory localFhirStoreClientFactory)
+			FhirContext fhirContext, FhirClientFactory fhirClientFactory)
 	{
 		super(clientProvider, taskHelper);
+		this.fhirContext = fhirContext;
 
-		this.localFhirStoreClientFactory = localFhirStoreClientFactory;
+		this.fhirClientFactory = fhirClientFactory;
 	}
 
 	@Override
@@ -34,7 +37,8 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(localFhirStoreClientFactory, "localFhirStoreClientFactory");
+		Objects.requireNonNull(fhirContext, "fhirContext");
+		Objects.requireNonNull(fhirClientFactory, "fhirClientFactory");
 	}
 
 	@Override
@@ -45,7 +49,10 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		try
 		{
 			logger.info("Executing bundle against FHIR store ...");
-			localFhirStoreClientFactory.getFhirClient().storeBundle(bundle);
+			if (logger.isDebugEnabled())
+				logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+
+			fhirClientFactory.getFhirClient().storeBundle(bundle);
 		}
 		catch (Exception e)
 		{
