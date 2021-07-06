@@ -15,17 +15,18 @@ Add entries to your hosts file
 
 *Start docker-compose commands from sub-folder:* `codex-processes-ap1/codex-processes-ap1-docker-test-setup`
 
-Console 1: Start DIC HAPI FHIR Server
+Console 1: Start DIC HAPI FHIR Server or DIC blaze FHIR Server
 ```sh
-docker-compose up dic-fhir-store
+docker-compose up dic-fhir-store-hapi
+docker-compose up dic-fhir-store-blaze
 ```
-Access at http://localhost:8003/
+Access at http://localhost:8080/fhir/
 
-Console 2: Start CRR HAPI FHIR Server
+Console 2: Start CRR fhir-bridge Server
 ```sh
-docker-compose up crr-fhir-store
+docker-compose up crr-fhir-bridge
 ```
-Access at http://localhost:8005/
+Access at http://localhost:8888/fhir-bridge/fhir/
 
 Console 3: Start DIC DSF FHIR Server and wait till startet
 ```sh
@@ -57,11 +58,40 @@ Console 5: Start CRR DSF BPE Server
 docker-compose up -d crr-bpe-app crr-bpe-db && docker-compose logs -f crr-fhir-app crr-bpe-app
 ````
 
-Webbrowser at http://localhost:8003/: Add Demo Data to DIC HAPI FHIR Server via Transaction-Bundle at
-[dic_fhir_store_demo_psn.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json) or
-[dic_fhir_store_demo_bf.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf.json)
+<!--
+Webbrowser at http://localhost:8080/fhir/: Add Demo Data to DIC HAPI FHIR Server via Transaction-Bundle at
+[dic_fhir_store_demo_psn_create.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn_create.json) or
+[dic_fhir_store_demo_bf_create.json](../codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf_create.json)
+-->
 
-*Start curl command from root-folder:* `codex-processes-ap1`
+*Start curl commands from root-folder:* `codex-processes-ap1`
+
+Console 6: Execute Demo Transaction-Bundle for HAPI
+```sh
+curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
+-d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json \
+http://localhost:8080/fhir
+```
+or
+```sh
+curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
+-d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf.json \
+http://localhost:8080/fhir
+```
+
+Console 6: Execute Demo Transaction-Bundle for blaze
+```sh
+curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
+-d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn_create.json \
+http://localhost:8080/fhir
+```
+or
+```sh
+curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
+-d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf_create.json \
+http://localhost:8080/fhir
+```
+
 
 Console 6: Start Data Trigger Process at DIC using the following command
 ```sh
@@ -73,7 +103,12 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+xml" \
 https://dic/fhir/Task
 ```
 
-Webbrowser at http://localhost:8005/: Check data transfered CRR HAPI FHIR Server
+Console 6: Check data transfered to CRR fhir-bridge
+````sh
+curl http://localhost:8888/fhir-bridge/fhir/Patient
+curl http://localhost:8888/fhir-bridge/fhir/Condition
+curl http://localhost:8888/fhir-bridge/fhir/Observation
+```
 
 Console X: Stop everything
 ```sh
