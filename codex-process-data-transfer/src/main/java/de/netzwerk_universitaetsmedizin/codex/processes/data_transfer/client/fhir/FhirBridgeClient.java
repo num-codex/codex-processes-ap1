@@ -4,17 +4,14 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +57,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 			if (isEntrySupported(entry, e -> !(e.getResource() instanceof Patient)))
 				createOrUpdateEntry(i, entry, patient);
-			else
+			else if (!entry.hasResource() || !(entry.getResource() instanceof Patient))
+				// only log for non Patients
 				logger.warn("Bundle entry at index {} not supported, ignoring entry", i);
 		}
 	}
@@ -91,25 +89,29 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			String pseudonym = getPseudonym(bundlePatient.get());
 			Optional<Patient> existingPatient = findPatientInLocalFhirStore(pseudonym);
 
-			return existingPatient.map(existing -> update(existing, bundlePatient.get()))
-					.orElseGet(() -> create(bundlePatient.get()));
+			return existingPatient.map(existing -> update(existing, bundlePatient.get(), pseudonym))
+					.orElseGet(() -> create(bundlePatient.get(), pseudonym));
 		}
 		else
+		{
+			logger.info("Bundle has no Patient");
 			return Optional.empty();
+		}
 	}
 
-	private Optional<Patient> update(Patient existingPatient, Patient newPatient)
+	private Optional<Patient> update(Patient existingPatient, Patient newPatient, String pseudonym)
 	{
-		newPatient.setIdElement(existingPatient.getIdElement().toVersionless());
+		logger.debug("Updating Patient with pseudonym {}", pseudonym);
 
-		Optional<Identifier> rfc4122Identifier = existingPatient.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(i -> RFC_4122_SYSTEM.equals(i.getSystem())).filter(Identifier::hasValue).findFirst();
-		rfc4122Identifier.ifPresent(i -> newPatient.addIdentifier(i.copy()));
+		newPatient.setIdElement(existingPatient.getIdElement().toVersionless());
 
 		try
 		{
 			MethodOutcome outcome = clientFactory.getFhirStoreClient().update().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
+
+			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
 
 			if (outcome.getResource() != null && outcome.getResource() instanceof Patient)
 				return Optional.of((Patient) outcome.getResource());
@@ -147,14 +149,17 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private Optional<Patient> create(Patient newPatient)
+	private Optional<Patient> create(Patient newPatient, String pseudonym)
 	{
-		newPatient.addIdentifier().setSystem(RFC_4122_SYSTEM).setValue(UUID.randomUUID().toString());
+		logger.debug("Creating Patient with pseudonym {}", pseudonym);
 
 		try
 		{
 			MethodOutcome outcome = clientFactory.getFhirStoreClient().create().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
+
+			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
 
 			if (Boolean.TRUE.equals(outcome.getCreated()) && outcome.getResource() != null
 					&& outcome.getResource() instanceof Patient)
@@ -195,12 +200,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private void createOrUpdateEntry(int index, BundleEntryComponent entry, Patient patient)
 	{
-		Reference subjectReference = patient.getIdentifier().stream().filter(Identifier::hasSystem)
-				.filter(i -> RFC_4122_SYSTEM.equals(i.getSystem())).filter(Identifier::hasValue).findFirst()
-				.map(i -> new Reference().setIdentifier(i))
-				.orElse(new Reference(patient.getIdElement().toVersionless()));
-		Resource resource = setSubject(entry.getResource(), subjectReference);
-
+		Resource resource = entry.getResource();
 		String url = entry.getRequest().getUrl();
 
 		Optional<Resource> existingResource = findResourceInLocalFhirStore(url, resource.getClass());
@@ -215,7 +215,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 					.descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
 			if (logger.isDebugEnabled())
-				logger.debug("Patient search-bundle result: {}",
+				logger.debug("{} search-bundle result: {}", resourceType.getAnnotation(ResourceDef.class).name(),
 						fhirContext.newJsonParser().encodeResourceToString(patientBundle));
 
 			if (patientBundle.getTotal() > 0)
@@ -272,6 +272,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private void update(Resource existingResource, Resource newResource)
 	{
+		logger.debug("Updating {}", newResource.getResourceType().name());
+
 		newResource.setIdElement(existingResource.getIdElement().toVersionless());
 
 		try
@@ -289,6 +291,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 				throw new RuntimeException("Count not update " + newResource.getResourceType().name() + " "
 						+ newResource.getIdElement().toString());
 			}
+			else if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
 		}
 		catch (UnprocessableEntityException e)
 		{
@@ -319,6 +323,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private void create(Resource newResource)
 	{
+		logger.debug("Creating {}", newResource.getResourceType().name());
+
 		try
 		{
 			MethodOutcome outcome = clientFactory.getFhirStoreClient().create().resource(newResource)
@@ -334,6 +340,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 				throw new RuntimeException("Count not create " + newResource.getResourceType().name() + " "
 						+ newResource.getIdElement().toString());
 			}
+			else if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
 		}
 		catch (UnprocessableEntityException e)
 		{
