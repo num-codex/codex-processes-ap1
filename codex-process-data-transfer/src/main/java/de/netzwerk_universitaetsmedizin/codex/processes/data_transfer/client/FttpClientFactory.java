@@ -89,17 +89,28 @@ public class FttpClientFactory
 	private final String fttpStudy;
 	private final String fttpTarget;
 
+	private final int connectTimeout;
+	private final int socketTimeout;
+	private final int connectionRequestTimeout;
+
 	private final String proxySchemeHostPort;
 	private final String proxyUsername;
 	private final String proxyPassword;
 
-	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath,
-			String fttpBasicAuthUsername, String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey,
-			String fttpStudy, String fttpTarget, String proxySchemeHostPort, String proxyUsername, String proxyPassword)
+	private final boolean hapiClientVerbose;
+
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, int connectTimeout,
+			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
+			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
+			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
+
+		this.connectTimeout = connectTimeout;
+		this.socketTimeout = socketTimeout;
+		this.connectionRequestTimeout = connectionRequestTimeout;
 
 		this.fttpBasicAuthUsername = fttpBasicAuthUsername;
 		this.fttpBasicAuthPassword = fttpBasicAuthPassword;
@@ -112,6 +123,8 @@ public class FttpClientFactory
 		this.proxySchemeHostPort = proxySchemeHostPort;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
+
+		this.hapiClientVerbose = hapiClientVerbose;
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
@@ -155,8 +168,9 @@ public class FttpClientFactory
 		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
 		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
 
-		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, fttpBasicAuthUsername, fttpBasicAuthPassword,
-				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword);
+		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
+				connectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword, fttpServerBase, fttpApiKey,
+				fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword, hapiClientVerbose);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

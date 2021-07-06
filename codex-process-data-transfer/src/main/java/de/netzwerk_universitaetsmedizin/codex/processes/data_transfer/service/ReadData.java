@@ -165,7 +165,8 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		r.setIdElement(null);
 		List<CanonicalType> profiles = r.getMeta().getProfile().stream()
-				.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX))
+				.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)
+						|| MII_LAB_STRUCTURED_DEFINITION.equals(p.getValue()))
 				.collect(Collectors.toList());
 		r.setMeta(new Meta().setProfile(profiles));
 
