@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -50,6 +53,7 @@ public class HapiFhirClientFactory
 	private final String bearerToken;
 
 	private final boolean hapiClientVerbose;
+	private final boolean useChainedParameterNotLogicalReference;
 
 	private final ApacheRestfulClientFactory clientFactory;
 
@@ -70,10 +74,14 @@ public class HapiFhirClientFactory
 	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
 	 * @param connectionRequestTimeout
 	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param hapiClientVerbose
+	 *            <code>true</code> for verbose logging
+	 * @param useChainedParameterNotLogicalReference
+	 *            <code>true</code> to enable modifying the search parameters during data storage
 	 */
 	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
 			String basicAuthPassword, String bearerToken, int connectTimeout, int socketTimeout,
-			int connectionRequestTimeout, boolean hapiClientVerbose)
+			int connectionRequestTimeout, boolean hapiClientVerbose, boolean useChainedParameterNotLogicalReference)
 	{
 		if (fhirContext != null)
 			this.fhirContext = fhirContext;
@@ -86,6 +94,7 @@ public class HapiFhirClientFactory
 		this.bearerToken = bearerToken;
 
 		this.hapiClientVerbose = hapiClientVerbose;
+		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
 
 		if (isConfigured())
 		{
@@ -97,6 +106,33 @@ public class HapiFhirClientFactory
 		}
 		else
 			clientFactory = null;
+	}
+
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	{
+		if (isConfigured())
+		{
+			try
+			{
+				logger.info(
+						"Testing connection to GECCO FHIR server with {basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}}",
+						basicAuthUsername, basicAuthPassword != null ? "***" : "null",
+						bearerToken != null ? "***" : "null", serverBase);
+
+				CapabilityStatement statement = getFhirStoreClient().capabilities().ofType(CapabilityStatement.class)
+						.execute();
+
+				logger.info("Connection test OK {} - {}", statement.getSoftware().getName(),
+						statement.getSoftware().getVersion());
+			}
+			catch (Exception e)
+			{
+				logger.error("Error while testing connection to GECCO FHIR server", e);
+			}
+		}
+		else
+			logger.warn("GECCO FHIR server Client stub implementation, no connection test performed");
 	}
 
 	protected boolean isConfigured()
@@ -473,5 +509,10 @@ public class HapiFhirClientFactory
 			loggingInterceptor.setLogger(new HapiClientLogger(logger));
 			client.registerInterceptor(loggingInterceptor);
 		}
+	}
+
+	public boolean shouldUseChainedParameterNotLogicalReference()
+	{
+		return useChainedParameterNotLogicalReference;
 	}
 }
