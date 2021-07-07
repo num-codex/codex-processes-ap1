@@ -58,6 +58,7 @@ public class ReadData extends AbstractServiceDelegate
 {
 	private static final String NUM_CODEX_STRUCTURE_DEFINITION_PREFIX = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition";
 	private static final String MII_LAB_STRUCTURED_DEFINITION = "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab";
+	private static final String NUM_CODEX_DO_NOT_RESUSCITAT_ORDER = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/do-not-resuscitate-order";
 
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
@@ -248,6 +249,35 @@ public class ReadData extends AbstractServiceDelegate
 			return "Condition?_profile=" + profileUrl + "&recorded-date="
 					+ c.getRecordedDateElement().getValueAsString() + "&patient:identifier="
 					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+		}
+		else if (resource instanceof Consent)
+		{
+			Consent c = (Consent) resource;
+			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
+
+			if (NUM_CODEX_DO_NOT_RESUSCITAT_ORDER.equals(profileUrl))
+			{
+				boolean scopePresent = c.getScope().getCoding().stream().filter(co -> co.hasSystem())
+						.filter(co -> "http://terminology.hl7.org/CodeSystem/consentscope".equals(co.getSystem()))
+						.filter(co -> co.hasCode()).filter(co -> "adr".equals(co.getCode())).findAny().isPresent();
+				boolean categoryPresent = c.getCategory().stream().flatMap(coc -> coc.getCoding().stream())
+						.filter(co -> co.hasSystem())
+						.filter(co -> "http://terminology.hl7.org/CodeSystem/consentcategorycodes"
+								.equals(co.getSystem()))
+						.filter(co -> co.hasCode()).filter(co -> "dnr".equals(co.getCode())).findAny().isPresent();
+
+				if (scopePresent && categoryPresent)
+					return "Consent?_profile=" + profileUrl
+							+ "&scope=http://terminology.hl7.org/CodeSystem/consentscope|adr"
+							+ "&category=http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr"
+							+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
+							+ pseudonym;
+				else
+					throw new RuntimeException("Resource of type Consent with profile " + profileUrl
+							+ " is missing scope: http://terminology.hl7.org/CodeSystem/consentscope|adr and/or category: http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr");
+			}
+			else
+				throw new RuntimeException("Resource of type Consent with profile " + profileUrl + " not supported");
 		}
 		else if (resource instanceof DiagnosticReport)
 		{
