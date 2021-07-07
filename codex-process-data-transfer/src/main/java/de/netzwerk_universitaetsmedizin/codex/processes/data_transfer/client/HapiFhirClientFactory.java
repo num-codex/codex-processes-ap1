@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -97,6 +100,33 @@ public class HapiFhirClientFactory
 		}
 		else
 			clientFactory = null;
+	}
+
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	{
+		if (isConfigured())
+		{
+			try
+			{
+				logger.info(
+						"Testing connection to GECCO FHIR server with {basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}}",
+						basicAuthUsername, basicAuthPassword != null ? "***" : "null",
+						bearerToken != null ? "***" : "null", serverBase);
+
+				CapabilityStatement statement = getFhirStoreClient().capabilities().ofType(CapabilityStatement.class)
+						.execute();
+
+				logger.info("Connection test OK {} - {}", statement.getSoftware().getName(),
+						statement.getSoftware().getVersion());
+			}
+			catch (Exception e)
+			{
+				logger.error("Error while testing connection to GECCO FHIR server", e);
+			}
+		}
+		else
+			logger.warn("GECCO FHIR server Client stub implementation, no connection test performed");
 	}
 
 	protected boolean isConfigured()
