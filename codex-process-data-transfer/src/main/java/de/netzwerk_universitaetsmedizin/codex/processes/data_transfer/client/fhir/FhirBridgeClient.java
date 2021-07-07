@@ -30,8 +30,6 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	private static final Logger logger = LoggerFactory.getLogger(FhirBridgeClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
 
-	public static final String RFC_4122_SYSTEM = "urn:ietf:rfc:4122";
-
 	/**
 	 * @param fhirContext
 	 *            not <code>null</code>
@@ -209,32 +207,35 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private Optional<Resource> findResourceInLocalFhirStore(String url, Class<? extends Resource> resourceType)
 	{
+		if (clientFactory.shouldUseChainedParameterNotLogicalReference())
+			url = url.replace("patient:identifier", "patient.identifier");
+
 		try
 		{
-			Bundle patientBundle = clientFactory.getFhirStoreClient().search().byUrl(url).sort()
+			Bundle resultBundle = clientFactory.getFhirStoreClient().search().byUrl(url).sort()
 					.descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
 			if (logger.isDebugEnabled())
 				logger.debug("{} search-bundle result: {}", resourceType.getAnnotation(ResourceDef.class).name(),
-						fhirContext.newJsonParser().encodeResourceToString(patientBundle));
+						fhirContext.newJsonParser().encodeResourceToString(resultBundle));
 
-			if (patientBundle.getTotal() > 0)
+			if (resultBundle.getTotal() > 0)
 			{
-				if (patientBundle.getTotal() > 1)
+				if (resultBundle.getTotal() > 1)
 					logger.warn("FHIR store has more than one Resource with url {}, using last updated", url);
 
-				if (patientBundle.getEntryFirstRep().hasResource()
-						&& resourceType.isInstance(patientBundle.getEntryFirstRep().getResource()))
-					return Optional.of((Patient) patientBundle.getEntryFirstRep().getResource());
+				if (resultBundle.getEntryFirstRep().hasResource()
+						&& resourceType.isInstance(resultBundle.getEntryFirstRep().getResource()))
+					return Optional.of(resultBundle.getEntryFirstRep().getResource());
 				else
 				{
 					logger.warn("Error while search for Resource with url {}, bundle has no {} resource", url,
 							resourceType.getAnnotation(ResourceDef.class).name());
 
-					if (patientBundle.getEntryFirstRep().getResponse().hasOutcome()
-							&& patientBundle.getEntryFirstRep().getResponse().getOutcome() instanceof OperationOutcome)
+					if (resultBundle.getEntryFirstRep().getResponse().hasOutcome()
+							&& resultBundle.getEntryFirstRep().getResponse().getOutcome() instanceof OperationOutcome)
 						outcomeLogger.logOutcome(
-								(OperationOutcome) patientBundle.getEntryFirstRep().getResponse().getOutcome());
+								(OperationOutcome) resultBundle.getEntryFirstRep().getResponse().getOutcome());
 
 					return Optional.empty();
 				}
