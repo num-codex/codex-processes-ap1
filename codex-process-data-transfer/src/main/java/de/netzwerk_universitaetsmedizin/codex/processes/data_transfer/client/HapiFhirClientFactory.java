@@ -53,6 +53,7 @@ public class HapiFhirClientFactory
 	private final String bearerToken;
 
 	private final boolean hapiClientVerbose;
+	private final boolean useChainedParameterNotLogicalReference;
 
 	private final ApacheRestfulClientFactory clientFactory;
 
@@ -73,10 +74,14 @@ public class HapiFhirClientFactory
 	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
 	 * @param connectionRequestTimeout
 	 *            >= -1, -1: system default, 0: infinity, >0: timeout in ms
+	 * @param hapiClientVerbose
+	 *            <code>true</code> for verbose logging
+	 * @param useChainedParameterNotLogicalReference
+	 *            <code>true</code> to enable modifying the search parameters during data storage
 	 */
 	public HapiFhirClientFactory(FhirContext fhirContext, String serverBase, String basicAuthUsername,
 			String basicAuthPassword, String bearerToken, int connectTimeout, int socketTimeout,
-			int connectionRequestTimeout, boolean hapiClientVerbose)
+			int connectionRequestTimeout, boolean hapiClientVerbose, boolean useChainedParameterNotLogicalReference)
 	{
 		if (fhirContext != null)
 			this.fhirContext = fhirContext;
@@ -89,6 +94,7 @@ public class HapiFhirClientFactory
 		this.bearerToken = bearerToken;
 
 		this.hapiClientVerbose = hapiClientVerbose;
+		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
 
 		if (isConfigured())
 		{
@@ -503,5 +509,10 @@ public class HapiFhirClientFactory
 			loggingInterceptor.setLogger(new HapiClientLogger(logger));
 			client.registerInterceptor(loggingInterceptor);
 		}
+	}
+
+	public boolean shouldUseChainedParameterNotLogicalReference()
+	{
+		return useChainedParameterNotLogicalReference;
 	}
 }

@@ -93,6 +93,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
 	private String fhirStoreClientClass;
 
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.useChainedParameterNotLogicalReference:true}")
+	private boolean fhirStoreUseChainedParameterNotLogicalReference;
+
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.searchBundleOverride:#{null}}")
 	private String fhirStoreSearchBundleOverride;
 
@@ -176,7 +179,8 @@ public class TransferDataConfig
 	{
 		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
 				fhirStoreBearerToken, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
-				fhirStoreConnectionRequestTimeout, fhirStoreHapiClientVerbose);
+				fhirStoreConnectionRequestTimeout, fhirStoreHapiClientVerbose,
+				fhirStoreUseChainedParameterNotLogicalReference);
 	}
 
 	@Bean
