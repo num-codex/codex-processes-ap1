@@ -45,10 +45,6 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private final String fttpTarget;
 	private final String fttpApiKey;
 
-	private final String proxySchemeHostPort;
-	private final String proxyUsername;
-	private final String proxyPassword;
-
 	private final boolean hapiClientVerbose;
 
 	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
@@ -67,9 +63,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
 
-		this.proxySchemeHostPort = proxySchemeHostPort;
-		this.proxyUsername = proxyUsername;
-		this.proxyPassword = proxyPassword;
+		configureProxy(clientFactory, proxySchemeHostPort, proxyUsername, proxyPassword);
 
 		this.hapiClientVerbose = hapiClientVerbose;
 	}
@@ -85,7 +79,6 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		ApacheRestfulClientFactoryWithTlsConfig hapiClientFactory = new ApacheRestfulClientFactoryWithTlsConfig(
 				fhirContext, trustStore, keyStore, keyStorePassword);
 		hapiClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
-		configureProxy(hapiClientFactory);
 
 		hapiClientFactory.setConnectTimeout(connectTimeout);
 		hapiClientFactory.setSocketTimeout(socketTimeout);
@@ -95,7 +88,8 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 		return hapiClientFactory;
 	}
 
-	private void configureProxy(ApacheRestfulClientFactoryWithTlsConfig clientFactory)
+	private void configureProxy(IRestfulClientFactory clientFactory, String proxySchemeHostPort, String proxyUsername,
+			String proxyPassword)
 	{
 		if (StringUtils.isNotBlank(proxySchemeHostPort))
 		{
