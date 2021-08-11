@@ -2,7 +2,10 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BINARY_URL;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_CRR;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 
 import java.util.Objects;
@@ -13,7 +16,9 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
 import org.highmed.dsf.fhir.variables.TargetValues;
@@ -30,13 +35,15 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(StoreDataForCrr.class);
 
+	private final EndpointProvider endpointProvider;
 	private final String crrIdentifierValue;
 
 	public StoreDataForCrr(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			String crrIdentifierValue)
+			ReadAccessHelper readAccessHelper, EndpointProvider endpointProvider, String crrIdentifierValue)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
+		this.endpointProvider = endpointProvider;
 		this.crrIdentifierValue = crrIdentifierValue;
 	}
 
@@ -45,6 +52,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(crrIdentifierValue, "crrIdentifierValue");
 	}
 
@@ -57,7 +65,8 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL, Variables.stringValue(downloadUrl));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
-				TargetValues.create(Target.createUniDirectionalTarget(crrIdentifierValue)));
+				TargetValues.create(Target.createUniDirectionalTarget(crrIdentifierValue,
+						getAddress(CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_CRR, crrIdentifierValue))));
 	}
 
 	protected String saveBinaryForCrr(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
@@ -82,8 +91,16 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		catch (Exception e)
 		{
 			logger.debug("Binary to create {}", FhirContext.forR4().newJsonParser().encodeResourceToString(binary));
-			logger.warn("Error while creating Binary resoruce: " + e.getMessage(), e);
+			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private String getAddress(String role, String identifier)
+	{
+		return endpointProvider
+				.getFirstConsortiumEndpointAdress(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM,
+						CODESYSTEM_HIGHMED_ORGANIZATION_TYPE, role, identifier)
+				.get();
 	}
 }

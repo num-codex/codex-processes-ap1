@@ -70,9 +70,13 @@ public class ConfigGenerator
 		Path dockerTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/docker-test-dic-fhir-config.properties");
 		dockerDicFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+
+		String certificateThumbprints = dicClient.getCertificateSha512ThumbprintHex() + ","
+				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
 		dockerDicFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				dicClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+				certificateThumbprints);
+		dockerDicFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
+				certificateThumbprints);
 
 		writeProperties(Paths.get("config/docker-test-dic-fhir-config.properties"), dockerDicFhirConfigProperties);
 	}
@@ -85,9 +89,13 @@ public class ConfigGenerator
 		Path dockerTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/docker-test-crr-fhir-config.properties");
 		dockerCrrFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+
+		String certificateThumbprints = crrClient.getCertificateSha512ThumbprintHex() + ","
+				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
 		dockerCrrFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				crrClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+				certificateThumbprints);
+		dockerCrrFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
+				certificateThumbprints);
 
 		writeProperties(Paths.get("config/docker-test-crr-fhir-config.properties"), dockerCrrFhirConfigProperties);
 	}
@@ -100,9 +108,13 @@ public class ConfigGenerator
 		Path dockerTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/docker-test-gth-fhir-config.properties");
 		dockerGthFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+
+		String certificateThumbprints = gthClient.getCertificateSha512ThumbprintHex() + ","
+				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
 		dockerGthFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				gthClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+				certificateThumbprints);
+		dockerGthFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
+				certificateThumbprints);
 
 		writeProperties(Paths.get("config/docker-test-gth-fhir-config.properties"), dockerGthFhirConfigProperties);
 	}

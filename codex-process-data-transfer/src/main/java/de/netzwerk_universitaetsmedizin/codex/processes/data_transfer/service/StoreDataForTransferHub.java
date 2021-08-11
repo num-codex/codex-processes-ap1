@@ -2,7 +2,10 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BINARY_URL;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_DTS;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 
 import java.util.Objects;
@@ -13,7 +16,9 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
 import org.highmed.dsf.fhir.variables.TargetValues;
@@ -30,13 +35,16 @@ public class StoreDataForTransferHub extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(StoreDataForTransferHub.class);
 
+	private final EndpointProvider endpointProvider;
 	private final String geccoTransferHubIdentifierValue;
 
 	public StoreDataForTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper, EndpointProvider endpointProvider,
 			String geccoTransferHubIdentifierValue)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
+		this.endpointProvider = endpointProvider;
 		this.geccoTransferHubIdentifierValue = geccoTransferHubIdentifierValue;
 	}
 
@@ -45,6 +53,7 @@ public class StoreDataForTransferHub extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(geccoTransferHubIdentifierValue, "geccoTransferHubIdentifierValue");
 	}
 
@@ -57,7 +66,8 @@ public class StoreDataForTransferHub extends AbstractServiceDelegate
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL, Variables.stringValue(downloadUrl));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
-				TargetValues.create(Target.createUniDirectionalTarget(geccoTransferHubIdentifierValue)));
+				TargetValues.create(Target.createUniDirectionalTarget(geccoTransferHubIdentifierValue,
+						getAddress(CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_DTS, geccoTransferHubIdentifierValue))));
 	}
 
 	protected String saveBinaryForGth(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
@@ -85,5 +95,13 @@ public class StoreDataForTransferHub extends AbstractServiceDelegate
 			logger.warn("Error while creating Binary resoruce: " + e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private String getAddress(String role, String identifier)
+	{
+		return endpointProvider
+				.getFirstConsortiumEndpointAdress(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM,
+						CODESYSTEM_HIGHMED_ORGANIZATION_TYPE, role, identifier)
+				.get();
 	}
 }

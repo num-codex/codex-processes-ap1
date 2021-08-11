@@ -1,9 +1,8 @@
 <ActivityDefinition xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system
-				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-			<code value="REMOTE" />
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
 		</tag>
 	</meta>
 	<extension
@@ -11,36 +10,33 @@
 		<extension url="message-name">
 			<valueString value="startDataReceive" />
 		</extension>
-		<extension url="authorization-roles">
-			<extension url="authorization-role">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-					<code value="REMOTE" />
-				</valueCoding>
-			</extension>
-		</extension>
-		<extension url="requester-organization-types">
-			<extension url="requester-organization-type">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="TTP" />
-				</valueCoding>
-			</extension>
-		</extension>
-		<extension url="recipient-organization-types">
-			<extension url="recipient-organization-type">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="MeDIC" />
-				</valueCoding>
-			</extension>
-		</extension>
 		<extension url="task-profile">
 			<valueCanonical
-				value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive" />
+					value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://highmed.org/sid/organization-identifier" />
+						<value value="${de.netzwerk_universitaetsmedizin.codex.geccoTransferHubIdentifierValue:hs-heilbronn.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ORGANIZATION" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://highmed.org/sid/organization-identifier" />
+						<value value="${de.netzwerk_universitaetsmedizin.codex.crrIdentifierValue:num-codex.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ORGANIZATION" />
+			</valueCoding>
 		</extension>
 	</extension>
 	<url
@@ -53,7 +49,7 @@
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
-	<date value="2021-07-07" />
+	<date value="2021-08-23" />
 	<publisher value="NUM-CODEX" />
 	<contact>
 		<name value="NUM-CODEX" />

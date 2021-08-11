@@ -17,7 +17,7 @@ services:
 
 
   dic-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
+    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -36,7 +36,7 @@ services:
       - ingress
       - dic-fhir-app
   dic-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
+    image: ghcr.io/highmed/fhir:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -75,7 +75,7 @@ services:
 
   # dic-bpe-proxy not needed
   dic-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+    image: ghcr.io/highmed/bpe:0.5.0-M2
     restart: on-failure
     ports:
       - 127.0.0.1:5003:5003
@@ -154,7 +154,7 @@ services:
 
 
   gth-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
+    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -173,7 +173,7 @@ services:
       - ingress
       - gth-fhir-app
   gth-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
+    image: ghcr.io/highmed/fhir:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -212,7 +212,7 @@ services:
 
   # gth-bpe-proxy not needed
   gth-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+    image: ghcr.io/highmed/bpe:0.5.0-M2
     restart: on-failure
     ports:
       - 127.0.0.1:5004:5004
@@ -269,7 +269,7 @@ services:
 
 
   crr-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
+    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -288,7 +288,7 @@ services:
       - ingress
       - crr-fhir-app
   crr-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
+    image: ghcr.io/highmed/fhir:0.5.0-M2
     restart: on-failure
     volumes:
       - type: bind
@@ -327,7 +327,7 @@ services:
 
   # crr-bpe-proxy not needed
   crr-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+    image: ghcr.io/highmed/bpe:0.5.0-M2
     restart: on-failure
     ports:
       - 127.0.0.1:5005:5005

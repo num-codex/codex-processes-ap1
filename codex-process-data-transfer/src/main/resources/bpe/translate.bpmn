@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1davgtw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
-  <bpmn:process id="dataTranslate" isExecutable="true" camunda:versionTag="0.3.4">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1davgtw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
+  <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataTranslate" isExecutable="true" camunda:versionTag="0.5.0">
     <bpmn:startEvent id="DataTranslateMessageStartEvent" name="start data translate process">
       <bpmn:outgoing>Flow_185r1m5</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0nqjzhp" messageRef="Message_1nly3ld" />
@@ -24,8 +24,7 @@
     <bpmn:endEvent id="StartReceiveProcess" name="start receive process">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">dataReceive</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">0.3.4</camunda:inputParameter>
+          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive/0.5.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataReceive</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive</camunda:inputParameter>
         </camunda:inputOutput>
@@ -37,7 +36,7 @@
   <bpmn:message id="Message_1nly3ld" name="startDataTranslate" />
   <bpmn:message id="Message_1uea12x" name="startDataReceive" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataTranslate">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="wwwnetzwerk-universitaetsmedizinde_dataTranslate">
       <bpmndi:BPMNEdge id="Flow_1c2ibtj_di" bpmnElement="Flow_1c2ibtj">
         <di:waypoint x="690" y="97" />
         <di:waypoint x="752" y="97" />

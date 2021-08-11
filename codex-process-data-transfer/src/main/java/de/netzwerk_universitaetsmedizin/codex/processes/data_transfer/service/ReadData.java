@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
@@ -65,10 +66,10 @@ public class ReadData extends AbstractServiceDelegate
 	private final FhirContext fhirContext;
 	private final FhirClientFactory fhirClientFactory;
 
-	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext,
-			FhirClientFactory fhirClientFactory)
+	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper, FhirContext fhirContext, FhirClientFactory fhirClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fhirContext = fhirContext;
 		this.fhirClientFactory = fhirClientFactory;

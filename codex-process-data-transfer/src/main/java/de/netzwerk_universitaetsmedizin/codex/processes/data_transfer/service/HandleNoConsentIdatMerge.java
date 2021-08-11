@@ -3,6 +3,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
@@ -12,9 +13,10 @@ public class HandleNoConsentIdatMerge extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(HandleNoConsentIdatMerge.class);
 
-	public HandleNoConsentIdatMerge(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public HandleNoConsentIdatMerge(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Override

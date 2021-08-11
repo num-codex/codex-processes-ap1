@@ -7,7 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
@@ -61,7 +63,13 @@ public class TransferDataConfig
 	private TaskHelper taskHelper;
 
 	@Autowired
+	private ReadAccessHelper readAccessHelper;
+
+	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private EndpointProvider endpointProvider;
 
 	@Autowired
 	private FhirContext fhirContext;
@@ -254,31 +262,33 @@ public class TransferDataConfig
 	@Bean
 	public StartTimer startTimer()
 	{
-		return new StartTimer(fhirClientProvider, taskHelper);
+		return new StartTimer(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public FindNewData findNewData()
 	{
-		return new FindNewData(fhirClientProvider, taskHelper, organizationProvider, fhirClientFactory());
+		return new FindNewData(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider, endpointProvider,
+				fhirClientFactory());
 	}
 
 	@Bean
 	public StartSendProcess startSendProcess()
 	{
-		return new StartSendProcess(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+		return new StartSendProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
+				fhirContext);
 	}
 
 	@Bean
 	public StopTimer stopTimer()
 	{
-		return new StopTimer(fhirClientProvider, taskHelper);
+		return new StopTimer(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public SaveLastExportTo saveLastExportTo()
 	{
-		return new SaveLastExportTo(fhirClientProvider, taskHelper);
+		return new SaveLastExportTo(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	// numCodexDataSend
@@ -286,62 +296,65 @@ public class TransferDataConfig
 	@Bean
 	public ExtractPatientReference extractPseudonym()
 	{
-		return new ExtractPatientReference(fhirClientProvider, taskHelper);
+		return new ExtractPatientReference(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public ResolvePseudonym resolvePseudonym()
 	{
-		return new ResolvePseudonym(fhirClientProvider, taskHelper, fhirClientFactory(), fttpClientFactory());
+		return new ResolvePseudonym(fhirClientProvider, taskHelper, readAccessHelper, fhirClientFactory(),
+				fttpClientFactory());
 	}
 
 	@Bean
 	public CheckConsent checkConsent()
 	{
-		return new CheckConsent(fhirClientProvider, taskHelper, consentClientFactory(), idatMergeGrantedOids,
-				mdatTransferGrantedOids);
+		return new CheckConsent(fhirClientProvider, taskHelper, readAccessHelper, consentClientFactory(),
+				idatMergeGrantedOids, mdatTransferGrantedOids);
 	}
 
 	@Bean
 	public HandleNoConsentUsageAndTransfer handleNoConsentUsageAndTransfer()
 	{
-		return new HandleNoConsentUsageAndTransfer(fhirClientProvider, taskHelper);
+		return new HandleNoConsentUsageAndTransfer(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public HandleNoConsentIdatMerge handleNoConsentIdatMerge()
 	{
-		return new HandleNoConsentIdatMerge(fhirClientProvider, taskHelper);
+		return new HandleNoConsentIdatMerge(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public ReadData readData()
 	{
-		return new ReadData(fhirClientProvider, taskHelper, fhirContext, fhirClientFactory());
+		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, fhirClientFactory());
 	}
 
 	@Bean
 	public ValidateData validateData()
 	{
-		return new ValidateData(fhirClientProvider, taskHelper);
+		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public EncryptData encryptData()
 	{
-		return new EncryptData(fhirClientProvider, taskHelper, fhirContext, crrKeyProvider());
+		return new EncryptData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, crrKeyProvider());
 	}
 
 	@Bean
 	public StoreDataForTransferHub storeDataForTransferHub()
 	{
-		return new StoreDataForTransferHub(fhirClientProvider, taskHelper, geccoTransferHubIdentifierValue);
+		return new StoreDataForTransferHub(fhirClientProvider, taskHelper, readAccessHelper, endpointProvider,
+				geccoTransferHubIdentifierValue);
 	}
 
 	@Bean
 	public StartTranslateProcess startTranslateProcess()
 	{
-		return new StartTranslateProcess(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+		return new StartTranslateProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
+				fhirContext);
 	}
 
 	// numCodexDataTranslate
@@ -349,25 +362,27 @@ public class TransferDataConfig
 	@Bean
 	public DownloadDataFromDic downloadDataFromDiz()
 	{
-		return new DownloadDataFromDic(fhirClientProvider, taskHelper);
+		return new DownloadDataFromDic(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public ReplacePseudonym replacePseudonym()
 	{
-		return new ReplacePseudonym(fhirClientProvider, taskHelper, fttpClientFactory());
+		return new ReplacePseudonym(fhirClientProvider, taskHelper, readAccessHelper, fttpClientFactory());
 	}
 
 	@Bean
 	public StoreDataForCrr storeDataForCodex()
 	{
-		return new StoreDataForCrr(fhirClientProvider, taskHelper, crrIdentifierValue);
+		return new StoreDataForCrr(fhirClientProvider, taskHelper, readAccessHelper, endpointProvider,
+				crrIdentifierValue);
 	}
 
 	@Bean
 	public StartReceiveProcess startReceiveProcess()
 	{
-		return new StartReceiveProcess(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+		return new StartReceiveProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
+				fhirContext);
 	}
 
 	// InsertDataIntoCodex
@@ -375,18 +390,19 @@ public class TransferDataConfig
 	@Bean
 	public DownloadDataFromTransferHub downloadDataFromTransferHub()
 	{
-		return new DownloadDataFromTransferHub(fhirClientProvider, taskHelper);
+		return new DownloadDataFromTransferHub(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
 	public DecryptData decryptData()
 	{
-		return new DecryptData(fhirClientProvider, taskHelper, fhirContext, crrKeyProvider());
+		return new DecryptData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, crrKeyProvider());
 	}
 
 	@Bean
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
-		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, fhirContext, fhirClientFactory());
+		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, readAccessHelper, fhirContext,
+				fhirClientFactory());
 	}
 }

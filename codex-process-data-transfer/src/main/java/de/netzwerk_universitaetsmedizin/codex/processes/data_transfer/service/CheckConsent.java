@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
@@ -31,10 +32,10 @@ public class CheckConsent extends AbstractServiceDelegate
 	private final List<String> mdatTransferGrantedOids = new ArrayList<>();
 
 	public CheckConsent(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ConsentClientFactory consentClientFactory, Collection<String> idatMergeGrantedOids,
-			Collection<String> mdatTransferGrantedOids)
+			ReadAccessHelper readAccessHelper, ConsentClientFactory consentClientFactory,
+			Collection<String> idatMergeGrantedOids, Collection<String> mdatTransferGrantedOids)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.consentClientFactory = consentClientFactory;
 

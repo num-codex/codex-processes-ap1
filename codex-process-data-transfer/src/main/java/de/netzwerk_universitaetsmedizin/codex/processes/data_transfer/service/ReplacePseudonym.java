@@ -12,6 +12,7 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Identifier;
@@ -25,9 +26,9 @@ public class ReplacePseudonym extends AbstractServiceDelegate
 	private final FttpClientFactory fttpClientFactory;
 
 	public ReplacePseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			FttpClientFactory fttpClientFactory)
+			ReadAccessHelper readAccessHelper, FttpClientFactory fttpClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fttpClientFactory = fttpClientFactory;
 	}

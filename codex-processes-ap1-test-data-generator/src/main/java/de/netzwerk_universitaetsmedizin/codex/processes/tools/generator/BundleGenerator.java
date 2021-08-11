@@ -103,7 +103,6 @@ public class BundleGenerator
 				clientCertificateFilesByCommonName.get("crr-client").getCertificateSha512ThumbprintHex()));
 
 		writeBundle(Paths.get("bundle/bundle.xml"), bundle);
-
 	}
 
 	public void copyDockerTestBundles()

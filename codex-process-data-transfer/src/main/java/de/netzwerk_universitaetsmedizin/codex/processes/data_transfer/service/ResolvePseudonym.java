@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Identifier;
@@ -31,9 +32,9 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	private final FttpClientFactory fttpClientFactory;
 
 	public ResolvePseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			FhirClientFactory fhirClientFactory, FttpClientFactory fttpClientFactory)
+			ReadAccessHelper readAccessHelper, FhirClientFactory fhirClientFactory, FttpClientFactory fttpClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fhirClientFactory = fhirClientFactory;
 		this.fttpClientFactory = fttpClientFactory;

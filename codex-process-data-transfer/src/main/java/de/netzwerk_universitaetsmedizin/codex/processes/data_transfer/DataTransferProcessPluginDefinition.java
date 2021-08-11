@@ -13,6 +13,7 @@ import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
 import org.highmed.dsf.fhir.resources.ValueSetResource;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
@@ -20,7 +21,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.con
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
-	public static final String VERSION = "0.3.4";
+	public static final String VERSION = "0.5.0";
 
 	@Override
 	public String getName()
@@ -47,7 +48,8 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	}
 
 	@Override
-	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
+	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader,
+			PropertyResolver propertyResolver)
 	{
 		var aTri = ActivityDefinitionResource.file("fhir/ActivityDefinition/num-codex-data-trigger.xml");
 		var aSen = ActivityDefinitionResource.file("fhir/ActivityDefinition/num-codex-data-send.xml");
@@ -73,12 +75,16 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 		var vD = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer.xml");
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
-				"dataTrigger/" + VERSION, Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
-				"dataSend/" + VERSION, Arrays.asList(aSen, cD, nD, nB, sTstaDsen, vD), //
-				"dataTranslate/" + VERSION, Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
-				"dataReceive/" + VERSION, Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
+				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
+				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
+				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
+				Arrays.asList(aSen, cD, nD, nB, sTstaDsen, vD), //
+				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
+				Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
+				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
+				Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
 
 		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
-				classLoader, resourcesByProcessKeyAndVersion);
+				classLoader, propertyResolver, resourcesByProcessKeyAndVersion);
 	}
 }

@@ -18,7 +18,9 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
@@ -42,14 +44,17 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 	private static final Logger logger = LoggerFactory.getLogger(FindNewData.class);
 
 	private final OrganizationProvider organizationProvider;
+	private final EndpointProvider endpointProvider;
 	private final FhirClientFactory localFhirStoreClientFactory;
 
 	public FindNewData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			OrganizationProvider organizationProvider, FhirClientFactory localFhirStoreClientFactory)
+			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider,
+			EndpointProvider endpointProvider, FhirClientFactory localFhirStoreClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.organizationProvider = organizationProvider;
+		this.endpointProvider = endpointProvider;
 		this.localFhirStoreClientFactory = localFhirStoreClientFactory;
 	}
 
@@ -59,6 +64,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
+		Objects.requireNonNull(endpointProvider, "endpointProvider");
 		Objects.requireNonNull(localFhirStoreClientFactory, "localFhirStoreClientFactory");
 	}
 
@@ -79,7 +85,8 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST,
 				PatientReferenceListValues.create(patientReferenceList));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
-				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue())));
+				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue(),
+						endpointProvider.getLocalEndpointAddress())));
 	}
 
 	protected Optional<DateWithPrecision> getExportFrom(DelegateExecution execution)
