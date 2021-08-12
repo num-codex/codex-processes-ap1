@@ -31,7 +31,7 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE = "data-reference";
 
 	// TODO: the following three constants should be moved into ConstantsBase of dsf-bpe-process-base
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitätsmedizin.de";
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitaetsmedizin.de";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_DTS = "DTS";
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_CRR = "CRR";
 
