@@ -411,7 +411,7 @@ services:
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:next 
+    image: ehrbase/fhir-bridge:1.2.1
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
