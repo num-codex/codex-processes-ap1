@@ -17,12 +17,14 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.slf4j.Logger;
@@ -77,7 +79,7 @@ public class StartSendProcess extends AbstractTaskMessageSend
 		Task.ParameterComponent param = new Task.ParameterComponent();
 		param.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
-		param.setValue(new Reference().setIdentifier(identifier));
+		param.setValue(new Reference().setIdentifier(identifier).setType(ResourceType.Patient.name()));
 
 		return param;
 	}

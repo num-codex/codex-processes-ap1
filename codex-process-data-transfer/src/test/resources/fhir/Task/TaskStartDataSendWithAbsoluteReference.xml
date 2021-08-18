@@ -54,7 +54,7 @@
             <code value="export-to"/>
          </coding>
       </type>
-      <valueInstant value="2021-07-07T13:40:00+01:00"/>
+      <valueInstant value="2021-08-23T13:40:00+01:00"/>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
