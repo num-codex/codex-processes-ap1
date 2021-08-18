@@ -17,7 +17,7 @@ services:
 
 
   dic-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
+    image: ghcr.io/highmed/fhir_proxy:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -36,7 +36,7 @@ services:
       - ingress
       - dic-fhir-app
   dic-fhir-app:
-    image: ghcr.io/highmed/fhir:0.5.0-M2
+    image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -48,8 +48,10 @@ services:
     environment:
       TZ: Europe/Berlin
     networks:
-      - dic-fhir-frontend
-      - dic-fhir-backend
+      dic-fhir-frontend:
+      dic-fhir-backend:
+      internet:
+          ipv4_address: 172.10.0.53
     depends_on:
       - dic-fhir-db
   dic-fhir-db:
@@ -75,7 +77,7 @@ services:
 
   # dic-bpe-proxy not needed
   dic-bpe-app:
-    image: ghcr.io/highmed/bpe:0.5.0-M2
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5003:5003
@@ -154,7 +156,7 @@ services:
 
 
   gth-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
+    image: ghcr.io/highmed/fhir_proxy:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -173,7 +175,7 @@ services:
       - ingress
       - gth-fhir-app
   gth-fhir-app:
-    image: ghcr.io/highmed/fhir:0.5.0-M2
+    image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -185,8 +187,10 @@ services:
     environment:
       TZ: Europe/Berlin
     networks:
-      - gth-fhir-frontend
-      - gth-fhir-backend
+      gth-fhir-frontend:
+      gth-fhir-backend:
+      internet:
+        ipv4_address: 172.10.0.54
     depends_on:
       - gth-fhir-db
   gth-fhir-db:
@@ -212,7 +216,7 @@ services:
 
   # gth-bpe-proxy not needed
   gth-bpe-app:
-    image: ghcr.io/highmed/bpe:0.5.0-M2
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5004:5004
@@ -269,7 +273,7 @@ services:
 
 
   crr-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.5.0-M2
+    image: ghcr.io/highmed/fhir_proxy:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -288,7 +292,7 @@ services:
       - ingress
       - crr-fhir-app
   crr-fhir-app:
-    image: ghcr.io/highmed/fhir:0.5.0-M2
+    image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
     volumes:
       - type: bind
@@ -300,8 +304,10 @@ services:
     environment:
       TZ: Europe/Berlin
     networks:
-      - crr-fhir-frontend
-      - crr-fhir-backend
+      crr-fhir-frontend:
+      crr-fhir-backend:
+      internet:
+        ipv4_address: 172.10.0.55
     depends_on:
       - crr-fhir-db
   crr-fhir-db:
@@ -327,7 +333,7 @@ services:
 
   # crr-bpe-proxy not needed
   crr-bpe-app:
-    image: ghcr.io/highmed/bpe:0.5.0-M2
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5005:5005
