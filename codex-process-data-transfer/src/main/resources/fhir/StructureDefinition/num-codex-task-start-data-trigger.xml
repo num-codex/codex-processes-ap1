@@ -21,7 +21,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/dataTrigger/${version}" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/${version}" />
     </element>
     <element id="Task.input">
       <path value="Task.input" />

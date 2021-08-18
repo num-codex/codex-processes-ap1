@@ -42,7 +42,7 @@ Console 4: Start GTH DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d gth-fhir-proxy gth-fhir-app gth-fhir-db && docker-compose logs -f gth-fhir-app
 ```
-Console 4: Dicconnect from log output (Ctrl-C) if Server started
+Console 4: Disconnect from log output (Ctrl-C) if Server started
 Console 4: Start GTH DSF BPE Server
 ```sh
 docker-compose up -d gth-bpe-app gth-bpe-db && docker-compose logs -f gth-fhir-app gth-bpe-app
