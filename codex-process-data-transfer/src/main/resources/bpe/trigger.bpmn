@@ -8,7 +8,7 @@
     <bpmn:sendTask id="StartSendProcess" name="start send process" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcess">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.5.0</camunda:inputParameter>
+          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.5.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataSend</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send</camunda:inputParameter>
         </camunda:inputOutput>
