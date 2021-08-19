@@ -119,7 +119,7 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
 	private String crrIdentifierValue;
 
-	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.mdat.trasfer:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
+	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.mdat.transfer:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
 	private List<String> mdatTransferGrantedOids;
 
 	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.idat.merge:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
