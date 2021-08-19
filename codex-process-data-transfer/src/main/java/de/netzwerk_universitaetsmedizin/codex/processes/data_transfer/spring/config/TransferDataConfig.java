@@ -131,7 +131,7 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:#{null}}")
 	private String fttpCertificate;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.private.Key:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.private.key:#{null}}")
 	private String fttpPrivateKey;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.timeout.connect:10000}")
@@ -164,13 +164,13 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.client.hapi.verbose:false}")
 	private boolean fttpHapiClientVerbose;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.scheme.host.port:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.url:#{null}}")
 	private String proxySchemeHostPort;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
 	private String proxyUsername;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private String proxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
