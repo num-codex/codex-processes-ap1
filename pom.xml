@@ -95,12 +95,12 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>log4j2-utils</artifactId>
-				<version>0.7.0</version>
+				<version>0.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>crypto-utils</artifactId>
-				<version>2.9.0</version>
+				<version>3.0.0</version>
 			</dependency>
 
 			<!-- logging -->

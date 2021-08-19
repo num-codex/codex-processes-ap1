@@ -9,8 +9,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +26,27 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS = "org.highmed.dsf.fhir.server.user.thumbprints";
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE = "org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete";
+
 	private Properties dockerDicFhirConfigProperties;
 	private Properties dockerCrrFhirConfigProperties;
 	private Properties dockerGthFhirConfigProperties;
 
 	private Properties readProperties(Path propertiesFile)
 	{
-		Properties properties = new Properties();
+		@SuppressWarnings("serial")
+		Properties properties = new Properties()
+		{
+			// making sure entries are sorted when storing properties
+			@Override
+			public Set<Map.Entry<Object, Object>> entrySet()
+			{
+				return Collections.synchronizedSet(
+						super.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().toString()))
+								.collect(Collectors.toCollection(LinkedHashSet::new)));
+			}
+		};
 		try (InputStream in = Files.newInputStream(propertiesFile);
 				InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8))
 		{
@@ -71,12 +90,13 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-dic-fhir-config.properties");
 		dockerDicFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 
-		String certificateThumbprints = dicClient.getCertificateSha512ThumbprintHex() + ","
-				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
-		dockerDicFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				certificateThumbprints);
-		dockerDicFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				certificateThumbprints);
+		dockerDicFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS,
+				dicClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerDicFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE,
+				dicClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
 		writeProperties(Paths.get("config/docker-test-dic-fhir-config.properties"), dockerDicFhirConfigProperties);
 	}
@@ -90,12 +110,13 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-crr-fhir-config.properties");
 		dockerCrrFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 
-		String certificateThumbprints = crrClient.getCertificateSha512ThumbprintHex() + ","
-				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
-		dockerCrrFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				certificateThumbprints);
-		dockerCrrFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				certificateThumbprints);
+		dockerCrrFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS,
+				crrClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerCrrFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE,
+				crrClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
 		writeProperties(Paths.get("config/docker-test-crr-fhir-config.properties"), dockerCrrFhirConfigProperties);
 	}
@@ -109,32 +130,30 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-gth-fhir-config.properties");
 		dockerGthFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 
-		String certificateThumbprints = gthClient.getCertificateSha512ThumbprintHex() + ","
-				+ webbrowserTestUser.getCertificateSha512ThumbprintHex();
-		dockerGthFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				certificateThumbprints);
-		dockerGthFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				certificateThumbprints);
+		dockerGthFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS,
+				gthClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerGthFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE,
+				gthClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
 		writeProperties(Paths.get("config/docker-test-gth-fhir-config.properties"), dockerGthFhirConfigProperties);
 	}
 
 	public void copyDockerTestFhirConfigProperties()
 	{
-		Path dockerMedic1FhirConfigPropertiesFile = Paths
-				.get("../codex-processes-ap1-docker-test-setup/dic/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic1FhirConfigPropertiesFile);
-		writeProperties(dockerMedic1FhirConfigPropertiesFile, dockerDicFhirConfigProperties);
+		Path dockerDicFhirConfigPropertiesFile = Paths.get("config/docker-test-dic-fhir-config.properties");
+		logger.info("Copying config.properties to {}", dockerDicFhirConfigPropertiesFile);
+		writeProperties(dockerDicFhirConfigPropertiesFile, dockerDicFhirConfigProperties);
 
-		Path dockerMedic2FhirConfigPropertiesFile = Paths
-				.get("../codex-processes-ap1-docker-test-setup/crr/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic2FhirConfigPropertiesFile);
-		writeProperties(dockerMedic2FhirConfigPropertiesFile, dockerCrrFhirConfigProperties);
+		Path dockerCrrFhirConfigPropertiesFile = Paths.get("config/docker-test-crr-fhir-config.properties");
+		logger.info("Copying config.properties to {}", dockerCrrFhirConfigPropertiesFile);
+		writeProperties(dockerCrrFhirConfigPropertiesFile, dockerCrrFhirConfigProperties);
 
-		Path dockerTtpFhirConfigPropertiesFile = Paths
-				.get("../codex-processes-ap1-docker-test-setup/gth/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerTtpFhirConfigPropertiesFile);
-		writeProperties(dockerTtpFhirConfigPropertiesFile, dockerGthFhirConfigProperties);
+		Path dockerGthFhirConfigPropertiesFile = Paths.get("config/docker-test-gth-fhir-config.properties");
+		logger.info("Copying config.properties to {}", dockerCrrFhirConfigPropertiesFile);
+		writeProperties(dockerCrrFhirConfigPropertiesFile, dockerGthFhirConfigProperties);
 
 	}
 }

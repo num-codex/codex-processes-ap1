@@ -59,7 +59,7 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/process</outputDirectory>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -76,7 +76,7 @@
 									<version>${hapi.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/plugin</outputDirectory>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/plugin</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -93,7 +93,7 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/process</outputDirectory>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -110,7 +110,7 @@
 									<version>${hapi.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/plugin</outputDirectory>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/plugin</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -127,7 +127,7 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/app/process</outputDirectory>
+							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -138,35 +138,35 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/process</directory>
+							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/process</directory>
 							<includes>
 								<include>${project.artifactId}-${project.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/app/plugin</directory>
+							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/plugin</directory>
 							<includes>
 								<include>hapi-fhir-client-${hapi.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/process</directory>
+							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/process</directory>
 							<includes>
 								<include>${project.artifactId}-${project.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/app/plugin</directory>
+							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/plugin</directory>
 							<includes>
 								<include>hapi-fhir-client-${hapi.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/gth/bpe/app/process</directory>
+							<directory>../codex-processes-ap1-docker-test-setup/gth/bpe/process</directory>
 							<includes>
 								<include>${project.artifactId}-${project.version}.jar</include>
 							</includes>

@@ -11,6 +11,7 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 
+import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class CrrKeyProviderImpl implements CrrKeyProvider
 					+ crrPublicKeyFile + ") set");
 		}
 
-		RSAPrivateCrtKey crrPrivateKey = null;
+		PrivateKey crrPrivateKey = null;
 		RSAPublicKey crrPublicKey = null;
 		try
 		{
@@ -56,7 +57,7 @@ public class CrrKeyProviderImpl implements CrrKeyProvider
 			}
 
 		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
+		catch (IOException | PKCSException e)
 		{
 			throw new RuntimeException("Error while reading CRR private-key from " + crrPrivateKeyFile, e);
 		}

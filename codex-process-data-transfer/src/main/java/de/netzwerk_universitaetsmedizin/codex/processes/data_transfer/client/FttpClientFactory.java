@@ -9,6 +9,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -20,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -189,14 +191,13 @@ public class FttpClientFactory
 	{
 		try
 		{
-			RSAPrivateCrtKey privateKey = PemIo.readPrivateKeyFromPem(keyPath);
+			PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath);
 			X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
 
 			return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
 					UUID.randomUUID().toString(), keyStorePassword);
 		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException | CertificateException | KeyStoreException
-				| IOException e)
+		catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | PKCSException e)
 		{
 			throw new RuntimeException(e);
 		}
