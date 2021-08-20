@@ -74,7 +74,7 @@ public class TransferDataConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.server.base:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.server.base.url:#{null}}")
 	private String fhirStoreBaseUrl;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.username:#{null}}")
@@ -125,7 +125,7 @@ public class TransferDataConfig
 	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.idat.merge:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
 	private List<String> idatMergeGrantedOids;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trust.certficates:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trust.certificates:#{null}}")
 	private String fttpTrustStore;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:#{null}}")
