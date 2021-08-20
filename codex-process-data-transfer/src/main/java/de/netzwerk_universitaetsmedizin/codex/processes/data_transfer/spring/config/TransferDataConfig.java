@@ -143,13 +143,13 @@ public class TransferDataConfig
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.timeout.connection.request:10000}")
 	private int fttpConnectionRequestTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basic.auth.username:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicauth.username:#{null}}")
 	private String fttpBasicAuthUsername;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basic.auth.password:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicauth.password:#{null}}")
 	private String fttpBasicAuthPassword;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.server.base:#{null}}")
+	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.server.base.url:#{null}}")
 	private String fttpServerBase;
 
 	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.api.key:#{null}}")
