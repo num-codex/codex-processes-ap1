@@ -30,11 +30,6 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO = "export-to";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE = "data-reference";
 
-	// TODO: the following three constants should be moved into ConstantsBase of dsf-bpe-process-base
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitaetsmedizin.de";
-	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_DTS = "DTS";
-	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_CRR = "CRR";
-
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger";
 	String PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger";
 	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/";
