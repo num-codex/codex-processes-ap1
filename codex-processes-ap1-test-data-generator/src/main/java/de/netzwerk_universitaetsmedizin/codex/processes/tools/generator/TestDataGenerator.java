@@ -15,7 +15,6 @@ public class TestDataGenerator
 
 	private static final CertificateGenerator certificateGenerator = new CertificateGenerator();
 	private static final BundleGenerator bundleGenerator = new BundleGenerator();
-	private static final ConfigGenerator configGenerator = new ConfigGenerator();
 	private static final RsaKeyPairGenerator rsaKeyPairGenerator = new RsaKeyPairGenerator();
 	private static final EnvGenerator envGenerator = new EnvGenerator();
 
@@ -29,7 +28,7 @@ public class TestDataGenerator
 		certificateGenerator.generateCertificates();
 
 		certificateGenerator.copyDockerTestClientCerts();
-		certificateGenerator.copyDockerTestServerCerts();
+		certificateGenerator.copyDockerTestServerCert();
 
 		Map<String, CertificateFiles> clientCertificateFilesByCommonName = certificateGenerator
 				.getClientCertificateFilesByCommonName();
@@ -40,12 +39,8 @@ public class TestDataGenerator
 				"Install client-certificate and CA certificate from \"{}\" into your browsers certificate store to access fhir and bpe servers with your webbrowser",
 				p12File.toAbsolutePath().toString());
 
-		bundleGenerator.createDockerTestBundles(certificateGenerator.getClientCertificateFilesByCommonName());
+		bundleGenerator.createDockerTestBundles(clientCertificateFilesByCommonName);
 		bundleGenerator.copyDockerTestBundles();
-
-		configGenerator
-				.modifyDockerTestFhirConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
-		configGenerator.copyDockerTestFhirConfigProperties();
 
 		rsaKeyPairGenerator.createRsaKeyPair();
 		rsaKeyPairGenerator.copyDockerTestRsaKeyPair();

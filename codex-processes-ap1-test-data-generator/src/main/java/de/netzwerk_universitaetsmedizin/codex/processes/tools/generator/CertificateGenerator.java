@@ -55,7 +55,7 @@ public class CertificateGenerator
 
 	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
-	private static final String[] SERVER_COMMON_NAMES = { "dic", "gth", "crr" };
+	private static final String[] SERVER_COMMON_NAMES = { "localhost", "dic", "gth", "crr" };
 	private static final String[] CLIENT_COMMON_NAMES = { "dic-client", "gth-client", "crr-client",
 			"Webbrowser Test User" };
 
@@ -101,28 +101,18 @@ public class CertificateGenerator
 	}
 
 	private CertificateAuthority ca;
-	private Map<String, CertificateFiles> serverCertificateFilesByCommonName;
+	private CertificateFiles serverCertificateFiles;
 	private Map<String, CertificateFiles> clientCertificateFilesByCommonName;
 
 	public void generateCertificates()
 	{
 		ca = initCA();
-
-		serverCertificateFilesByCommonName = Arrays.stream(SERVER_COMMON_NAMES).map(
-				commonName -> createCert(CertificateType.SERVER, commonName, Collections.singletonList(commonName)))
-				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
+		serverCertificateFiles = createCert(CertificateType.SERVER, "localhost", List.of(SERVER_COMMON_NAMES));
 		clientCertificateFilesByCommonName = Arrays.stream(CLIENT_COMMON_NAMES)
 				.map(commonName -> createCert(CertificateType.CLIENT, commonName, Collections.emptyList()))
 				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
 
 		writeThumbprints();
-	}
-
-	public Map<String, CertificateFiles> getServerCertificateFilesByCommonName()
-	{
-		return serverCertificateFilesByCommonName != null
-				? Collections.unmodifiableMap(serverCertificateFilesByCommonName)
-				: Collections.emptyMap();
 	}
 
 	public Map<String, CertificateFiles> getClientCertificateFilesByCommonName()
@@ -232,8 +222,7 @@ public class CertificateGenerator
 		Path thumbprintsFile = Paths.get("cert", "thumbprints.txt");
 
 		Stream<String> certificates = Streams
-				.concat(serverCertificateFilesByCommonName.values().stream(),
-						clientCertificateFilesByCommonName.values().stream())
+				.concat(Stream.of(serverCertificateFiles), clientCertificateFilesByCommonName.values().stream())
 				.sorted(Comparator.comparing(CertificateFiles::getCommonName))
 				.map(c -> c.getCommonName() + "\n\t" + c.getCertificateSha512ThumbprintHex() + " (SHA-512)\n");
 
@@ -523,7 +512,7 @@ public class CertificateGenerator
 		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
 	}
 
-	public void copyDockerTestServerCerts()
+	public void copyDockerTestServerCert()
 	{
 		Path baseFolder = Paths.get("../codex-processes-ap1-docker-test-setup");
 
@@ -533,22 +522,20 @@ public class CertificateGenerator
 		logger.info("Copying Test CA certificate file to {}", testCaCertificateFile.toString());
 		writeCertificate(testCaCertificateFile, testCaCertificate);
 
-		Arrays.asList(SERVER_COMMON_NAMES)
-				.forEach(cn -> copyDockerTestServerCertFiles("../codex-processes-ap1-docker-test-setup/secrets", cn));
+		copyDockerTestServerCertFiles("../codex-processes-ap1-docker-test-setup/secrets");
 	}
 
-	private void copyDockerTestServerCertFiles(String folder, String commonName)
+	private void copyDockerTestServerCertFiles(String folder)
 	{
 		X509Certificate testCaCertificate = ca.getCertificate();
-		CertificateFiles serverCertFiles = serverCertificateFilesByCommonName.get(commonName);
 
-		Path serverCertificateAndCa = Paths.get(folder, "proxy_" + commonName + "_certificate_and_int_cas.pem");
-		logger.info("Writing {} certificate and CA certificate to {}", commonName, serverCertificateAndCa.toString());
-		writeCertificates(serverCertificateAndCa, serverCertFiles.getCertificate(), testCaCertificate);
+		Path serverCertificateAndCa = Paths.get(folder, "proxy_certificate_and_int_cas.pem");
+		logger.info("Writing server certificate and CA certificate to {}", serverCertificateAndCa.toString());
+		writeCertificates(serverCertificateAndCa, serverCertificateFiles.getCertificate(), testCaCertificate);
 
-		Path serverCertificatePrivateKey = Paths.get(folder, "proxy_" + commonName + "_certificate_private_key.pem");
-		logger.info("Copying {} private-key file to {}", commonName, serverCertificatePrivateKey.toString());
-		writePrivateKeyNotEncrypted(serverCertificatePrivateKey, serverCertFiles.keyPair.getPrivate());
+		Path serverCertificatePrivateKey = Paths.get(folder, "proxy_certificate_private_key.pem");
+		logger.info("Copying server private-key file to {}", serverCertificatePrivateKey.toString());
+		writePrivateKeyNotEncrypted(serverCertificatePrivateKey, serverCertificateFiles.keyPair.getPrivate());
 	}
 
 	private void writeCertificates(Path certificateFile, X509Certificate... certificates)

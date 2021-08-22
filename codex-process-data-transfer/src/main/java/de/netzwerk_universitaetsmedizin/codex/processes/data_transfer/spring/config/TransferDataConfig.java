@@ -74,94 +74,94 @@ public class TransferDataConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.server.base.url:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.server.base.url:#{null}}")
 	private String fhirStoreBaseUrl;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.username:#{null}}")
 	private String fhirStoreUsername;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.password:#{null}}")
 	private String fhirStorePassword;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.bearer.token:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.bearer.token:#{null}}")
 	private String fhirStoreBearerToken;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.timeout.connect:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.connect:10000}")
 	private int fhirStoreConnectTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.timeout.socket:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.socket:10000}")
 	private int fhirStoreSocketTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.timeout.connection.request:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.connection.request:10000}")
 	private int fhirStoreConnectionRequestTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
 	private String fhirStoreClientClass;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.client.hapi.verbose:false}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.client.hapi.verbose:false}")
 	private boolean fhirStoreHapiClientVerbose;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.use.chained.parameter.not.logical.reference:true}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.use.chained.parameter.not.logical.reference:true}")
 	private boolean fhirStoreUseChainedParameterNotLogicalReference;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fhir.search.bundle.override:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.search.bundle.override:#{null}}")
 	private String fhirStoreSearchBundleOverride;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.public.key:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.public.key:#{null}}")
 	private String crrPublicKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.private.key:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.private.key:#{null}}")
 	private String crrPrivateKeyFile;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.gth.identifier.value:gth.hs-heilbronn.de}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gth.identifier.value:gth.hs-heilbronn.de}")
 	private String geccoTransferHubIdentifierValue;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
 	private String crrIdentifierValue;
 
-	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.mdat.transfer:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.consent.granted.oids.mdat.transfer:2.16.840.1.113883.3.1937.777.24.5.3.8,2.16.840.1.113883.3.1937.777.24.5.3.9,2.16.840.1.113883.3.1937.777.24.5.3.33,2.16.840.1.113883.3.1937.777.24.5.3.34}'.split(',')}")
 	private List<String> mdatTransferGrantedOids;
 
-	@Value("#{'${de.netzwerk_universitaetsmedizin.codex.consent.granted.oids.idat.merge:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.consent.granted.oids.idat.merge:2.16.840.1.113883.3.1937.777.24.5.3.4}'.split(',')}")
 	private List<String> idatMergeGrantedOids;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.trust.certificates:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.trust.certificates:#{null}}")
 	private String fttpTrustStore;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.certificate:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.certificate:#{null}}")
 	private String fttpCertificate;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.private.key:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.private.key:#{null}}")
 	private String fttpPrivateKey;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.timeout.connect:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.timeout.connect:10000}")
 	private int fttpConnectTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.timeout.socket:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.timeout.socket:10000}")
 	private int fttpSocketTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.timeout.connection.request:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.timeout.connection.request:10000}")
 	private int fttpConnectionRequestTimeout;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicauth.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.basicauth.username:#{null}}")
 	private String fttpBasicAuthUsername;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.basicauth.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.basicauth.password:#{null}}")
 	private String fttpBasicAuthPassword;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.server.base.url:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.server.base.url:#{null}}")
 	private String fttpServerBase;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.api.key:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.api.key:#{null}}")
 	private String fttpApiKey;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.study:num}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.study:num}")
 	private String fttpStudy;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.target:codex}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.target:codex}")
 	private String fttpTarget;
 
-	@Value("${de.netzwerk_universitaetsmedizin.codex.fttp.client.hapi.verbose:false}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.client.hapi.verbose:false}")
 	private boolean fttpHapiClientVerbose;
 
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.url:#{null}}")

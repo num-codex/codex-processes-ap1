@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -77,13 +76,6 @@ public class EnvGenerator
 				.filter(entry -> Arrays.asList(commonNames).contains(entry.getKey()))
 				.sorted(Comparator.comparing(e -> Arrays.asList(commonNames).indexOf(e.getKey()))).map(Entry::getValue)
 				.map(CertificateFiles::getCertificateSha512ThumbprintHex);
-	}
-
-	private void writeEnvFile(Path traget, Stream<String> userThumbprints,
-			Stream<String> userThumbprintsPermanentDelete)
-	{
-		writeEnvFile(traget, Collections.singletonList(new EnvEntry(USER_THUMBPRINTS, userThumbprints,
-				USER_THUMBPRINTS_PERMANENTDELETE, userThumbprintsPermanentDelete)));
 	}
 
 	private void writeEnvFile(Path target, List<? extends EnvEntry> entries)
