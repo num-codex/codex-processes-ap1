@@ -71,7 +71,7 @@
 		<name value="NUM-CODEX" />
 		<telecom>
 			<system value="email" />
-			<value value="forschungsnetzwerk-unimedizin@charite.de " />
+			<value value="forschungsnetzwerk-unimedizin@charite.de" />
 		</telecom>
 	</contact>
 	<description
