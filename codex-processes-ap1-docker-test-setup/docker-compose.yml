@@ -68,6 +68,8 @@ services:
   dic-fhir:
     image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
+    ports:
+      - 127.0.0.1:5000:5000
     secrets:
       - db_liquibase.password
       - db_dic_fhir_user.password
@@ -85,6 +87,7 @@ services:
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000
       ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_fhir_user.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic_fhir_user_permanent_delete.password
@@ -193,6 +196,8 @@ services:
   gth-fhir:
     image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
+    ports:
+      - 127.0.0.1:5001:5001
     secrets:
       - db_liquibase.password
       - db_gth_fhir_user.password
@@ -210,6 +215,7 @@ services:
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
       ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_gth_fhir_user.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_gth_fhir_user_permanent_delete.password
@@ -294,6 +300,8 @@ services:
   crr-fhir:
     image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
+    ports:
+      - 127.0.0.1:5002:5002
     secrets:
       - db_liquibase.password
       - db_crr_fhir_user.password
@@ -311,6 +319,7 @@ services:
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
       ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_fhir_user.password
       ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_crr_fhir_user_permanent_delete.password
