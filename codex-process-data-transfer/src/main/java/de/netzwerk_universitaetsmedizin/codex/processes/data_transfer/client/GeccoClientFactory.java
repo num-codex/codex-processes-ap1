@@ -198,8 +198,8 @@ public class GeccoClientFactory
 
 		return new GeccoClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, geccoServerBasicAuthUsername, geccoServerBasicAuthPassword,
-				geccoServerBearerToken, geccoServerBase, proxyUrl, proxyUsername, proxyPassword,
-				hapiClientVerbose, fhirContext, searchBundleOverride, localIdentifierValue, geccoFhirClientClass,
+				geccoServerBearerToken, geccoServerBase, proxyUrl, proxyUsername, proxyPassword, hapiClientVerbose,
+				fhirContext, searchBundleOverride, localIdentifierValue, geccoFhirClientClass,
 				useChainedParameterNotLogicalReference);
 	}
 
