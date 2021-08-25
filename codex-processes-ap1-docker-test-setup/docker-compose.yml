@@ -161,7 +161,7 @@ services:
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.4.0,wwwnetzwerk-universitaetsmedizinde_dataReceive/0.4.0
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_FHIR_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -394,7 +394,7 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PRIVATE_KEY: /run/secrets/codex_crr_private_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_FHIR_SERVER_BASE_URL: http://crr-fhir-bridge:8888/fhir-bridge/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://crr-fhir-bridge:8888/fhir-bridge/fhir
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:

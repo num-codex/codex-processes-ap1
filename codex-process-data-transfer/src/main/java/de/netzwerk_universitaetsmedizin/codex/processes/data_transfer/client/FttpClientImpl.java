@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Identifier;
@@ -18,7 +17,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -29,7 +27,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
-public class FttpClientImpl implements FttpClient, InitializingBean
+public class FttpClientImpl implements FttpClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(FttpClientImpl.class);
 
@@ -38,6 +36,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private final IRestfulClientFactory clientFactory;
 
 	private final String fttpServerBase;
+
 	private final String fttpBasicAuthUsername;
 	private final String fttpBasicAuthPassword;
 
@@ -56,6 +55,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 				connectionRequestTimeout);
 
 		this.fttpServerBase = fttpServerBase;
+
 		this.fttpBasicAuthUsername = fttpBasicAuthUsername;
 		this.fttpBasicAuthPassword = fttpBasicAuthPassword;
 
@@ -91,7 +91,7 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 	private void configureProxy(IRestfulClientFactory clientFactory, String proxySchemeHostPort, String proxyUsername,
 			String proxyPassword)
 	{
-		if (StringUtils.isNotBlank(proxySchemeHostPort))
+		if (proxySchemeHostPort != null && !proxySchemeHostPort.isBlank())
 		{
 			try
 			{
@@ -107,15 +107,6 @@ public class FttpClientImpl implements FttpClient, InitializingBean
 				logger.error("Could not configure proxy", e);
 			}
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fttpServerBase, "fttpServerBase");
-		Objects.requireNonNull(fttpApiKey, "fttpApiKey");
-		Objects.requireNonNull(fttpStudy, "fttpStudy");
-		Objects.requireNonNull(fttpTarget, "fttpTarget");
 	}
 
 	@Override

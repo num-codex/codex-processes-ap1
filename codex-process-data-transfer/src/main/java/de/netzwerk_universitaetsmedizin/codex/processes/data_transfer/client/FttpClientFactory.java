@@ -82,6 +82,10 @@ public class FttpClientFactory
 	private final Path privateKeyPath;
 	private final char[] privateKeyPassword;
 
+	private final int connectTimeout;
+	private final int socketTimeout;
+	private final int connectionRequestTimeout;
+
 	private final String fttpServerBase;
 	private final String fttpBasicAuthUsername;
 	private final String fttpBasicAuthPassword;
@@ -89,10 +93,6 @@ public class FttpClientFactory
 	private final String fttpApiKey;
 	private final String fttpStudy;
 	private final String fttpTarget;
-
-	private final int connectTimeout;
-	private final int socketTimeout;
-	private final int connectionRequestTimeout;
 
 	private final String proxySchemeHostPort;
 	private final String proxyUsername;
@@ -135,9 +135,10 @@ public class FttpClientFactory
 		try
 		{
 			logger.info(
-					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
+					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {}, fttpBasicAuthUsername {}, fttpBasicAuthPassword {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
-					fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase, fttpApiKey,
+					fttpStudy, fttpTarget);
 
 			getFttpClient().testConnection();
 		}
