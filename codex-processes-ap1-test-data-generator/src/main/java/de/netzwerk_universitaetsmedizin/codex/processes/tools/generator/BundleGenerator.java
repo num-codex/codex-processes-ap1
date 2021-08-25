@@ -103,20 +103,19 @@ public class BundleGenerator
 				clientCertificateFilesByCommonName.get("crr-client").getCertificateSha512ThumbprintHex()));
 
 		writeBundle(Paths.get("bundle/bundle.xml"), bundle);
-
 	}
 
 	public void copyDockerTestBundles()
 	{
-		Path dicBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/dic/fhir/app/conf/bundle.xml");
+		Path dicBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/dic/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", dicBundleFile);
 		writeBundle(dicBundleFile, bundle);
 
-		Path crrBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/crr/fhir/app/conf/bundle.xml");
+		Path crrBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/crr/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", crrBundleFile);
 		writeBundle(crrBundleFile, bundle);
 
-		Path gthBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/gth/fhir/app/conf/bundle.xml");
+		Path gthBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/gth/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", gthBundleFile);
 		writeBundle(gthBundleFile, bundle);
 

@@ -1,6 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -11,26 +10,21 @@ import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 
 public class HapiClient extends AbstractComplexFhirClient
 {
 	static final Logger logger = LoggerFactory.getLogger(HapiClient.class);
 
 	/**
-	 * @param fhirContext
+	 * @param geccoClient
 	 *            not <code>null</code>
-	 * @param clientFactory
-	 *            not <code>null</code>
-	 * @param searchBundleOverride
-	 *            may be <code>null</code>
 	 */
-	public HapiClient(FhirContext fhirContext, HapiFhirClientFactory clientFactory, Path searchBundleOverride)
+	public HapiClient(GeccoClient geccoClient)
 	{
-		super(fhirContext, clientFactory, searchBundleOverride);
+		super(geccoClient);
 	}
 
 	@Override
@@ -38,7 +32,7 @@ public class HapiClient extends AbstractComplexFhirClient
 	{
 		modifyBundle(bundle);
 
-		clientFactory.getFhirStoreClient().transaction().withBundle(bundle)
+		geccoClient.getGenericFhirClient().transaction().withBundle(bundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 	}
 
@@ -88,7 +82,8 @@ public class HapiClient extends AbstractComplexFhirClient
 		}
 
 		if (logger.isDebugEnabled())
-			logger.debug("Modified bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+			logger.debug("Modified bundle: {}",
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(bundle));
 	}
 
 	private void modifyBundleWithPatientId(Bundle bundle, String pseudonym, String patientId)

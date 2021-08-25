@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
@@ -14,22 +15,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final FhirClientFactory fhirClientFactory;
+	private final GeccoClientFactory geccoClientFactory;
 	private final FhirContext fhirContext;
 
 	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			FhirContext fhirContext, FhirClientFactory fhirClientFactory)
+			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 		this.fhirContext = fhirContext;
 
-		this.fhirClientFactory = fhirClientFactory;
+		this.geccoClientFactory = geccoClientFactory;
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(fhirClientFactory, "fhirClientFactory");
+		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 			if (logger.isDebugEnabled())
 				logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
-			fhirClientFactory.getFhirClient().storeBundle(bundle);
+			geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
 		}
 		catch (Exception e)
 		{

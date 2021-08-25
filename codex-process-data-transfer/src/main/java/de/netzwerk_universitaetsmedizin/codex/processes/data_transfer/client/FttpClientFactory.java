@@ -9,17 +9,17 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -80,6 +80,11 @@ public class FttpClientFactory
 	private final Path trustStorePath;
 	private final Path certificatePath;
 	private final Path privateKeyPath;
+	private final char[] privateKeyPassword;
+
+	private final int connectTimeout;
+	private final int socketTimeout;
+	private final int connectionRequestTimeout;
 
 	private final String fttpServerBase;
 	private final String fttpBasicAuthUsername;
@@ -89,24 +94,21 @@ public class FttpClientFactory
 	private final String fttpStudy;
 	private final String fttpTarget;
 
-	private final int connectTimeout;
-	private final int socketTimeout;
-	private final int connectionRequestTimeout;
-
-	private final String proxySchemeHostPort;
+	private final String proxyUrl;
 	private final String proxyUsername;
 	private final String proxyPassword;
 
 	private final boolean hapiClientVerbose;
 
-	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, int connectTimeout,
-			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
-			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, char[] privateKeyPassword,
+			int connectTimeout, int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername,
+			String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
+			String proxyUrl, String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
+		this.privateKeyPassword = privateKeyPassword;
 
 		this.connectTimeout = connectTimeout;
 		this.socketTimeout = socketTimeout;
@@ -120,7 +122,7 @@ public class FttpClientFactory
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
 
-		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUrl = proxyUrl;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
 
@@ -133,8 +135,11 @@ public class FttpClientFactory
 		try
 		{
 			logger.info(
-					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
-					trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
+					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
+					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase, fttpApiKey,
+					fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword != null ? "***" : "null");
 
 			getFttpClient().testConnection();
 		}
@@ -166,11 +171,11 @@ public class FttpClientFactory
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 
 		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
-		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
+		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, privateKeyPassword, keyStorePassword);
 
 		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword, hapiClientVerbose);
+				fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword, hapiClientVerbose);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)
@@ -185,18 +190,17 @@ public class FttpClientFactory
 		}
 	}
 
-	private KeyStore readKeyStore(Path certificatePath, Path keyPath, char[] keyStorePassword)
+	private KeyStore readKeyStore(Path certificatePath, Path keyPath, char[] keyPassword, char[] keyStorePassword)
 	{
 		try
 		{
-			RSAPrivateCrtKey privateKey = PemIo.readPrivateKeyFromPem(keyPath);
+			PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath, keyPassword);
 			X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
 
 			return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
 					UUID.randomUUID().toString(), keyStorePassword);
 		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException | CertificateException | KeyStoreException
-				| IOException e)
+		catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | PKCSException e)
 		{
 			throw new RuntimeException(e);
 		}

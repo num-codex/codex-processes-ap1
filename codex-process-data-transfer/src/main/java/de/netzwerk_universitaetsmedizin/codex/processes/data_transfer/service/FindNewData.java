@@ -18,7 +18,9 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
@@ -31,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListValues;
@@ -42,15 +44,18 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 	private static final Logger logger = LoggerFactory.getLogger(FindNewData.class);
 
 	private final OrganizationProvider organizationProvider;
-	private final FhirClientFactory localFhirStoreClientFactory;
+	private final EndpointProvider endpointProvider;
+	private final GeccoClientFactory geccoClientFactory;
 
 	public FindNewData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			OrganizationProvider organizationProvider, FhirClientFactory localFhirStoreClientFactory)
+			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider,
+			EndpointProvider endpointProvider, GeccoClientFactory geccoClientFactory)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.organizationProvider = organizationProvider;
-		this.localFhirStoreClientFactory = localFhirStoreClientFactory;
+		this.endpointProvider = endpointProvider;
+		this.geccoClientFactory = geccoClientFactory;
 	}
 
 	@Override
@@ -59,7 +64,8 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(localFhirStoreClientFactory, "localFhirStoreClientFactory");
+		Objects.requireNonNull(endpointProvider, "endpointProvider");
+		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
 	}
 
 	@Override
@@ -79,7 +85,8 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST,
 				PatientReferenceListValues.create(patientReferenceList));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
-				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue())));
+				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue(),
+						endpointProvider.getLocalEndpointAddress())));
 	}
 
 	protected Optional<DateWithPrecision> getExportFrom(DelegateExecution execution)
@@ -112,7 +119,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
 				exportFrom == null ? null : exportFrom.getPrecision(), exportTo);
 
-		FhirClient fhirClient = localFhirStoreClientFactory.getFhirClient();
+		GeccoFhirClient fhirClient = geccoClientFactory.getGeccoClient().getFhirClient();
 
 		return fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
 	}

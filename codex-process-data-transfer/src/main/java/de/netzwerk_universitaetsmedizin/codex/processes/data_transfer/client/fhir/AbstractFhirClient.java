@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -40,13 +39,13 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
-public abstract class AbstractFhirClient implements FhirClient
+public abstract class AbstractFhirClient implements GeccoFhirClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
@@ -92,39 +91,61 @@ public abstract class AbstractFhirClient implements FhirClient
 	private static final SimpleDateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-	protected final FhirContext fhirContext;
-	protected final HapiFhirClientFactory clientFactory;
-	private final Path searchBundleOverride;
+	protected final GeccoClient geccoClient;
 
 	/**
-	 * @param fhirContext
+	 * @param geccoClient
 	 *            not <code>null</code>
 	 * @param clientFactory
 	 *            not <code>null</code>
 	 * @param searchBundleOverride
 	 *            may be <code>null</code>
 	 */
-	public AbstractFhirClient(FhirContext fhirContext, HapiFhirClientFactory clientFactory, Path searchBundleOverride)
+	public AbstractFhirClient(GeccoClient geccoClient)
 	{
-		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
-		this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
-		this.searchBundleOverride = searchBundleOverride;
+		this.geccoClient = geccoClient;
 	}
 
 	@Override
 	public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		Bundle searchBundle = getSearchBundle(exportFrom, exportTo);
+		BundleType expectedResponseType = BundleType.BATCH.equals(searchBundle.getType()) ? BundleType.BATCHRESPONSE
+				: BundleType.TRANSACTIONRESPONSE;
 
 		if (logger.isDebugEnabled())
 			logger.debug("Executing Search-Bundle: {}",
-					fhirContext.newJsonParser().encodeResourceToString(searchBundle));
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(searchBundle));
 
-		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
-			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
+			logger.debug("Search-Bundle result: {}",
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
+
+		if (!resultBundle.hasType() || !expectedResponseType.equals(resultBundle.getType()) || !resultBundle.hasEntry())
+		{
+			logger.warn("Search-Bundle result not a {} or has no entries", expectedResponseType.toCode());
+			throw new RuntimeException(
+					"Search-Bundle result not a " + expectedResponseType.toCode() + " or has no entries");
+		}
+
+		for (int i = 0; i < resultBundle.getEntry().size(); i++)
+		{
+			BundleEntryComponent entry = resultBundle.getEntry().get(i);
+
+			if (!entry.hasResource() || !(entry.getResource() instanceof Bundle) || !entry.hasResponse()
+					|| !entry.getResponse().hasStatus() || !entry.getResponse().getStatus().startsWith("200"))
+			{
+				logger.warn(
+						"Error in Search-Bundle at index {}: entry has no Bundle resource or response is not 200 OK",
+						i);
+				if (entry.hasResource() && !(entry.getResource() instanceof Bundle))
+					logger.debug("Unexpected entry resource: {}",
+							geccoClient.getFhirContext().newJsonParser().encodeResourceToString(entry.getResource()));
+			}
+		}
 
 		Stream<Patient> patients = resultBundle.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof Bundle).map(e -> (Bundle) e.getResource())
@@ -148,7 +169,7 @@ public abstract class AbstractFhirClient implements FhirClient
 	private PatientReference getAbsoluteUrlPatientReference(Patient patient)
 	{
 		IdType idElement = patient.getIdElement();
-		return PatientReference.from(new IdType(clientFactory.getFhirStoreClient().getServerBase(),
+		return PatientReference.from(new IdType(geccoClient.getGenericFhirClient().getServerBase(),
 				idElement.getResourceType(), idElement.getIdPart(), null).getValue());
 	}
 
@@ -186,11 +207,12 @@ public abstract class AbstractFhirClient implements FhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Executing search: {}", url);
 
-		Bundle resultBundle = (Bundle) clientFactory.getFhirStoreClient().search().byUrl(url)
+		Bundle resultBundle = (Bundle) geccoClient.getGenericFhirClient().search().byUrl(url)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
-			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
+			logger.debug("Search-Bundle result: {}",
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
 
 		return resultBundle;
 	}
@@ -265,6 +287,8 @@ public abstract class AbstractFhirClient implements FhirClient
 	{
 		try
 		{
+			Path searchBundleOverride = geccoClient.getSearchBundleOverride();
+
 			if (searchBundleOverride != null)
 			{
 				if (!Files.isReadable(searchBundleOverride))
@@ -277,8 +301,8 @@ public abstract class AbstractFhirClient implements FhirClient
 				{
 					try (InputStream in = Files.newInputStream(searchBundleOverride))
 					{
-						logger.warn("Using Search-Bundle from {}", searchBundleOverride.toString());
-						return fhirContext.newXmlParser().parseResource(Bundle.class, in);
+						logger.warn("Using Search-Bundle override from {}", searchBundleOverride.toString());
+						return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 					}
 				}
 			}
@@ -286,8 +310,8 @@ public abstract class AbstractFhirClient implements FhirClient
 			{
 				try (InputStream in = getClass().getResourceAsStream("/fhir/Bundle/SearchBundle.xml"))
 				{
-					logger.info("Using internal Search-Bundle");
-					return fhirContext.newXmlParser().parseResource(Bundle.class, in);
+					logger.debug("Using internal Search-Bundle");
+					return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 				}
 
 			}
@@ -468,7 +492,7 @@ public abstract class AbstractFhirClient implements FhirClient
 		logger.info("Requesting patient {}", reference);
 
 		IdType idType = new IdType(reference);
-		IGenericClient client = clientFactory.getFhirStoreClient();
+		IGenericClient client = geccoClient.getGenericFhirClient();
 
 		if (client.getServerBase().equals(idType.getBaseUrl()))
 		{
@@ -498,7 +522,7 @@ public abstract class AbstractFhirClient implements FhirClient
 
 		try
 		{
-			MethodOutcome outcome = clientFactory.getFhirStoreClient().update().resource(patient)
+			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(patient)
 					.prefer(PreferReturnEnum.OPERATION_OUTCOME).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)

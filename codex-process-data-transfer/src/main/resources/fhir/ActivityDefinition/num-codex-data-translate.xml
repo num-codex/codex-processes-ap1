@@ -1,9 +1,8 @@
 <ActivityDefinition xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system
-				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-			<code value="REMOTE" />
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
 		</tag>
 	</meta>
 	<extension
@@ -11,40 +10,45 @@
 		<extension url="message-name">
 			<valueString value="startDataTranslate" />
 		</extension>
-		<extension url="authorization-roles">
-			<extension url="authorization-role">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-					<code value="REMOTE" />
-				</valueCoding>
-			</extension>
-		</extension>
-		<extension url="requester-organization-types">
-			<extension url="requester-organization-type">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="MeDIC" />
-				</valueCoding>
-			</extension>
-		</extension>
-		<extension url="recipient-organization-types">
-			<extension url="recipient-organization-type">
-				<valueCoding>
-					<system
-						value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="TTP" />
-				</valueCoding>
-			</extension>
-		</extension>
 		<extension url="task-profile">
 			<valueCanonical
-				value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate" />
+					value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate|${version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role">
+					<extension url="consortium">
+						<valueIdentifier>
+							<system value="http://highmed.org/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="role">
+						<valueCoding>
+							<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+							<code value="MeDIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ROLE" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://highmed.org/sid/organization-identifier" />
+						<value value="${de.netzwerk_universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ORGANIZATION" />
+			</valueCoding>
 		</extension>
 	</extension>
 	<url
-		value="http://highmed.org/bpe/Process/dataTranslate" />
+		value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate" />
 	<!-- version managed by bpe -->
 	<version value="${version}" />
 	<name value="dataTranslate" />
@@ -53,13 +57,13 @@
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
-	<date value="2021-07-07" />
+	<date value="2021-08-25" />
 	<publisher value="NUM-CODEX" />
 	<contact>
 		<name value="NUM-CODEX" />
 		<telecom>
 			<system value="email" />
-			<value value="forschungsnetzwerk-unimedizin@charite.de " />
+			<value value="forschungsnetzwerk-unimedizin@charite.de" />
 		</telecom>
 	</contact>
 	<description
