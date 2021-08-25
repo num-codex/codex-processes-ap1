@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
@@ -64,15 +64,15 @@ public class ReadData extends AbstractServiceDelegate
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
 	private final FhirContext fhirContext;
-	private final FhirClientFactory fhirClientFactory;
+	private final GeccoClientFactory geccoClientFactory;
 
 	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, FhirClientFactory fhirClientFactory)
+			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fhirContext = fhirContext;
-		this.fhirClientFactory = fhirClientFactory;
+		this.geccoClientFactory = geccoClientFactory;
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class ReadData extends AbstractServiceDelegate
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(fhirClientFactory, "fhirClientFactory");
+		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		logger.info("Reading data for DIC pseudonym {}", pseudonym);
 
-		Stream<DomainResource> resources = fhirClientFactory.getFhirClient().getNewData(pseudonym,
+		Stream<DomainResource> resources = geccoClientFactory.getGeccoClient().getFhirClient().getNewData(pseudonym,
 				from == null ? null : new DateWithPrecision(from.getValue(), from.getPrecision()), to.getValue());
 
 		Bundle bundle = toBundle(pseudonym, resources);

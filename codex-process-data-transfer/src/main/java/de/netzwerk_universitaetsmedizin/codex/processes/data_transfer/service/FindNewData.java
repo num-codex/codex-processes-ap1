@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceListValues;
@@ -45,17 +45,17 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 
 	private final OrganizationProvider organizationProvider;
 	private final EndpointProvider endpointProvider;
-	private final FhirClientFactory localFhirStoreClientFactory;
+	private final GeccoClientFactory geccoClientFactory;
 
 	public FindNewData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider,
-			EndpointProvider endpointProvider, FhirClientFactory localFhirStoreClientFactory)
+			EndpointProvider endpointProvider, GeccoClientFactory geccoClientFactory)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.organizationProvider = organizationProvider;
 		this.endpointProvider = endpointProvider;
-		this.localFhirStoreClientFactory = localFhirStoreClientFactory;
+		this.geccoClientFactory = geccoClientFactory;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(localFhirStoreClientFactory, "localFhirStoreClientFactory");
+		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
 				exportFrom == null ? null : exportFrom.getPrecision(), exportTo);
 
-		FhirClient fhirClient = localFhirStoreClientFactory.getFhirClient();
+		GeccoFhirClient fhirClient = geccoClientFactory.getGeccoClient().getFhirClient();
 
 		return fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
 	}

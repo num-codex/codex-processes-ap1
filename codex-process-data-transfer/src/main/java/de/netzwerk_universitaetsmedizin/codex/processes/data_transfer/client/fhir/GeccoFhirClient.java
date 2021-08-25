@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.Patient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
-public interface FhirClient
+public interface GeccoFhirClient
 {
 	/**
 	 * @param exportFrom

@@ -2,7 +2,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fh
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -16,13 +15,12 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 
 public class FhirBridgeClient extends AbstractComplexFhirClient
@@ -31,16 +29,12 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
 
 	/**
-	 * @param fhirContext
+	 * @param geccoClient
 	 *            not <code>null</code>
-	 * @param clientFactory
-	 *            not <code>null</code>
-	 * @param searchBundleOverride
-	 *            may be <code>null</code>
 	 */
-	public FhirBridgeClient(FhirContext fhirContext, HapiFhirClientFactory clientFactory, Path searchBundleOverride)
+	public FhirBridgeClient(GeccoClient geccoClient)
 	{
-		super(fhirContext, clientFactory, searchBundleOverride);
+		super(geccoClient);
 	}
 
 	@Override
@@ -105,7 +99,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = clientFactory.getFhirStoreClient().update().resource(newPatient)
+			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
@@ -153,7 +147,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = clientFactory.getFhirStoreClient().create().resource(newPatient)
+			MethodOutcome outcome = geccoClient.getGenericFhirClient().create().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
@@ -207,17 +201,17 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private Optional<Resource> findResourceInLocalFhirStore(String url, Class<? extends Resource> resourceType)
 	{
-		if (clientFactory.shouldUseChainedParameterNotLogicalReference())
+		if (geccoClient.shouldUseChainedParameterNotLogicalReference())
 			url = url.replace("patient:identifier", "patient.identifier");
 
 		try
 		{
-			Bundle resultBundle = clientFactory.getFhirStoreClient().search().byUrl(url).sort()
+			Bundle resultBundle = geccoClient.getGenericFhirClient().search().byUrl(url).sort()
 					.descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
 			if (logger.isDebugEnabled())
 				logger.debug("{} search-bundle result: {}", resourceType.getAnnotation(ResourceDef.class).name(),
-						fhirContext.newJsonParser().encodeResourceToString(resultBundle));
+						geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
 
 			if (resultBundle.getTotal() > 0)
 			{
@@ -279,7 +273,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = clientFactory.getFhirStoreClient().update().resource(newResource)
+			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(newResource)
 					.prefer(PreferReturnEnum.MINIMAL).execute();
 
 			if (outcome.getId() == null)
@@ -328,7 +322,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = clientFactory.getFhirStoreClient().create().resource(newResource)
+			MethodOutcome outcome = geccoClient.getGenericFhirClient().create().resource(newResource)
 					.prefer(PreferReturnEnum.MINIMAL).execute();
 
 			if (!Boolean.TRUE.equals(outcome.getCreated()) || outcome.getId() == null)

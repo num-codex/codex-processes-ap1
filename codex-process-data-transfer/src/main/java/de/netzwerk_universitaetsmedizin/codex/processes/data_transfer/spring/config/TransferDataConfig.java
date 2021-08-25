@@ -1,7 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,8 +10,6 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +17,9 @@ import org.springframework.context.annotation.Configuration;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClient;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirClientBuilder;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
@@ -54,8 +48,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.Va
 @Configuration
 public class TransferDataConfig
 {
-	private static final Logger logger = LoggerFactory.getLogger(TransferDataConfig.class);
-
 	@Autowired
 	private FhirWebserviceClientProvider fhirClientProvider;
 
@@ -74,37 +66,58 @@ public class TransferDataConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.server.base.url:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.trust.certificates:#{null}}")
+	private String fhirStoreTrustStore;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.certificate:#{null}}")
+	private String fhirStoreCertificate;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.private.key:#{null}}")
+	private String fhirStorePrivateKey;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.private.key.password:#{null}}")
+	private char[] fhirStorePrivateKeyPassword;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.base.url:#{null}}")
 	private String fhirStoreBaseUrl;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.basicauth.username:#{null}}")
 	private String fhirStoreUsername;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.basicauth.password:#{null}}")
 	private String fhirStorePassword;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.bearer.token:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.bearer.token:#{null}}")
 	private String fhirStoreBearerToken;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.connect:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.timeout.connect:10000}")
 	private int fhirStoreConnectTimeout;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.socket:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.timeout.socket:10000}")
 	private int fhirStoreSocketTimeout;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.timeout.connection.request:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.timeout.connection.request:10000}")
 	private int fhirStoreConnectionRequestTimeout;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.FhirBridgeClient}")
 	private String fhirStoreClientClass;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.client.hapi.verbose:false}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.client.hapi.verbose:false}")
 	private boolean fhirStoreHapiClientVerbose;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.use.chained.parameter.not.logical.reference:true}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.proxy.url:#{null}}")
+	private String fhirStoreProxyUrl;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.username:#{null}}")
+	private String fhirStoreProxyUsername;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.password:#{null}}")
+	private String fhirStoreProxyPassword;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.use.chained.parameter.not.logical.reference:true}")
 	private boolean fhirStoreUseChainedParameterNotLogicalReference;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fhir.search.bundle.override:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.search.bundle.override:#{null}}")
 	private String fhirStoreSearchBundleOverride;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.public.key:#{null}}")
@@ -133,6 +146,9 @@ public class TransferDataConfig
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.private.key:#{null}}")
 	private String fttpPrivateKey;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.private.key.password:#{null}}")
+	private char[] fttpPrivateKeyPassword;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.timeout.connect:10000}")
 	private int fttpConnectTimeout;
@@ -164,14 +180,14 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.client.hapi.verbose:false}")
 	private boolean fttpHapiClientVerbose;
 
-	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.url:#{null}}")
-	private String proxySchemeHostPort;
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.proxy.url:#{null}}")
+	private String fttpProxyUrl;
 
-	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
-	private String proxyUsername;
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.username:#{null}}")
+	private String fttpProxyUsername;
 
-	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
-	private String proxyPassword;
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.password:#{null}}")
+	private String fttpProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String localIdentifierValue;
@@ -183,57 +199,41 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public HapiFhirClientFactory hapiFhirClientFactory()
-	{
-		return new HapiFhirClientFactory(fhirContext, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-				fhirStoreBearerToken, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
-				fhirStoreConnectionRequestTimeout, fhirStoreHapiClientVerbose,
-				fhirStoreUseChainedParameterNotLogicalReference);
-	}
-
-	@Bean
 	public FttpClientFactory fttpClientFactory()
 	{
 		Path trustStorePath = checkExists(fttpTrustStore);
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpConnectTimeout,
-				fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword,
-				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword,
-				fttpHapiClientVerbose);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpPrivateKeyPassword,
+				fttpConnectTimeout, fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername,
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, fttpProxyUrl,
+				fttpProxyUsername, fttpProxyPassword, fttpHapiClientVerbose);
 	}
 
 	@Bean
-	public FhirClientFactory fhirClientFactory()
+	@SuppressWarnings("unchecked")
+	public GeccoClientFactory geccoClientFactory()
 	{
+		Path trustStorePath = checkExists(fhirStoreTrustStore);
+		Path certificatePath = checkExists(fhirStoreCertificate);
+		Path privateKeyPath = checkExists(fhirStorePrivateKey);
 		Path searchBundleOverride = checkExists(fhirStoreSearchBundleOverride);
 
-		return new FhirClientFactory(hapiFhirClientFactory(), fhirContext, searchBundleOverride, localIdentifierValue,
-				clientBuilder());
-	}
-
-	private FhirClientBuilder clientBuilder()
-	{
-		return (fhirContext, clientFactory, searchBundleOverride) ->
+		try
 		{
-			logger.info("Using {} as fhir client", fhirStoreClientClass);
-
-			try
-			{
-				@SuppressWarnings("unchecked")
-				Class<FhirClient> clientClass = (Class<FhirClient>) Class.forName(fhirStoreClientClass);
-				Constructor<FhirClient> constructor = clientClass.getConstructor(FhirContext.class,
-						HapiFhirClientFactory.class, Path.class);
-
-				return constructor.newInstance(fhirContext, clientFactory, searchBundleOverride);
-			}
-			catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-			{
-				throw new RuntimeException(e);
-			}
-		};
+			return new GeccoClientFactory(trustStorePath, certificatePath, privateKeyPath, fhirStorePrivateKeyPassword,
+					fhirStoreConnectTimeout, fhirStoreSocketTimeout, fhirStoreConnectionRequestTimeout,
+					fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword, fhirStoreBearerToken, fhirStoreProxyUrl,
+					fhirStoreProxyUsername, fhirStoreProxyPassword, fhirStoreHapiClientVerbose, fhirContext,
+					searchBundleOverride, localIdentifierValue,
+					(Class<GeccoFhirClient>) Class.forName(fhirStoreClientClass),
+					fhirStoreUseChainedParameterNotLogicalReference);
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Path checkExists(String file)
@@ -269,7 +269,7 @@ public class TransferDataConfig
 	public FindNewData findNewData()
 	{
 		return new FindNewData(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider, endpointProvider,
-				fhirClientFactory());
+				geccoClientFactory());
 	}
 
 	@Bean
@@ -302,7 +302,7 @@ public class TransferDataConfig
 	@Bean
 	public ResolvePseudonym resolvePseudonym()
 	{
-		return new ResolvePseudonym(fhirClientProvider, taskHelper, readAccessHelper, fhirClientFactory(),
+		return new ResolvePseudonym(fhirClientProvider, taskHelper, readAccessHelper, geccoClientFactory(),
 				fttpClientFactory());
 	}
 
@@ -328,7 +328,7 @@ public class TransferDataConfig
 	@Bean
 	public ReadData readData()
 	{
-		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, fhirClientFactory());
+		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, geccoClientFactory());
 	}
 
 	@Bean
@@ -403,6 +403,6 @@ public class TransferDataConfig
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
 		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, readAccessHelper, fhirContext,
-				fhirClientFactory());
+				geccoClientFactory());
 	}
 }

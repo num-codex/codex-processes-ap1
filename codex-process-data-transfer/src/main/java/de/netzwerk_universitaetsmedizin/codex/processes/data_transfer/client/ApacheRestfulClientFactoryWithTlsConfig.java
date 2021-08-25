@@ -5,6 +5,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,8 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 	private final KeyStore keyStore;
 	private final char[] keyStorePassword;
 
+	private final Map<String, ApacheHttpClient> clientByServerBase = new HashMap<>();
+
 	public ApacheRestfulClientFactoryWithTlsConfig(FhirContext fhirContext, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword)
 	{
@@ -61,11 +65,21 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 	}
 
 	@Override
-	protected synchronized ApacheHttpClient getHttpClient(String theServerBase)
+	protected synchronized ApacheHttpClient getHttpClient(String serverBase)
 	{
-		logger.info("Returning new ApacheHttpClient for ServerBase {}", theServerBase);
-
-		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
+		if (clientByServerBase.containsKey(serverBase))
+		{
+			logger.debug("Reusing ApacheHttpClient for ServerBase {}", serverBase);
+			return clientByServerBase.get(serverBase);
+		}
+		else
+		{
+			logger.debug("Returning new ApacheHttpClient for ServerBase {}", serverBase);
+			ApacheHttpClient client = new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(serverBase), null,
+					null, null, null);
+			clientByServerBase.put(serverBase, client);
+			return client;
+		}
 	}
 
 	@Override
@@ -119,8 +133,14 @@ public class ApacheRestfulClientFactoryWithTlsConfig extends RestfulClientFactor
 	{
 		try
 		{
-			return SSLContexts.custom().loadTrustMaterial(trustStore, null).loadKeyMaterial(keyStore, keyStorePassword)
-					.build();
+			SSLContextBuilder custom = SSLContexts.custom();
+
+			if (trustStore != null)
+				custom = custom.loadTrustMaterial(trustStore, null);
+			if (keyStore != null && keyStorePassword != null)
+				custom = custom.loadKeyMaterial(keyStore, keyStorePassword);
+
+			return custom.build();
 		}
 		catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException e)
 		{

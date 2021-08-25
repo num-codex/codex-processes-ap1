@@ -3,7 +3,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fh
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,11 +27,10 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.HapiFhirClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 
@@ -42,17 +40,12 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
 
 	/**
-	 * @param fhirContext
+	 * @param geccoClient
 	 *            not <code>null</code>
-	 * @param clientFactory
-	 *            not <code>null</code>
-	 * @param searchBundleOverride
-	 *            may be <code>null</code>
 	 */
-	public AbstractComplexFhirClient(FhirContext fhirContext, HapiFhirClientFactory clientFactory,
-			Path searchBundleOverride)
+	public AbstractComplexFhirClient(GeccoClient geccoClient)
 	{
-		super(fhirContext, clientFactory, searchBundleOverride);
+		super(geccoClient);
 	}
 
 	protected Resource setSubject(Resource resource, Reference patientRef)
@@ -138,14 +131,14 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 	{
 		try
 		{
-			Bundle patientBundle = clientFactory
-					.getFhirStoreClient().search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly()
+			Bundle patientBundle = geccoClient
+					.getGenericFhirClient().search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly()
 							.systemAndIdentifier(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym))
 					.sort().descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
 			if (logger.isDebugEnabled())
 				logger.debug("Patient search-bundle result: {}",
-						fhirContext.newJsonParser().encodeResourceToString(patientBundle));
+						geccoClient.getFhirContext().newJsonParser().encodeResourceToString(patientBundle));
 
 			if (patientBundle.getTotal() > 0)
 			{
@@ -219,13 +212,14 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 
 		if (logger.isDebugEnabled())
 			logger.debug("Executing Search-Bundle: {}",
-					fhirContext.newJsonParser().encodeResourceToString(searchBundle));
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(searchBundle));
 
-		Bundle resultBundle = clientFactory.getFhirStoreClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		if (logger.isDebugEnabled())
-			logger.debug("Search-Bundle result: {}", fhirContext.newJsonParser().encodeResourceToString(resultBundle));
+			logger.debug("Search-Bundle result: {}",
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
 
 		return Stream.concat(Stream.of(localPatient.get()),
 				resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
@@ -235,12 +229,12 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 
 	private Optional<Patient> findPatientInLocalFhirStore(String system, String pseudonym)
 	{
-		Bundle patientBundle = (Bundle) clientFactory.getFhirStoreClient().search().forResource(Patient.class)
+		Bundle patientBundle = (Bundle) geccoClient.getGenericFhirClient().search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier(system, pseudonym)).execute();
 
 		if (logger.isDebugEnabled())
 			logger.debug("Patient search-bundle result: {}",
-					fhirContext.newJsonParser().encodeResourceToString(patientBundle));
+					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(patientBundle));
 
 		if (patientBundle.getTotal() != 1 || !(patientBundle.getEntryFirstRep().getResource() instanceof Patient))
 			return Optional.empty();

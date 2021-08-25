@@ -18,8 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FhirClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues.PatientReferenceValue;
@@ -28,15 +28,16 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResolvePseudonym.class);
 
-	private final FhirClientFactory fhirClientFactory;
+	private final GeccoClientFactory geccoClientFactory;
 	private final FttpClientFactory fttpClientFactory;
 
 	public ResolvePseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirClientFactory fhirClientFactory, FttpClientFactory fttpClientFactory)
+			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory,
+			FttpClientFactory fttpClientFactory)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
-		this.fhirClientFactory = fhirClientFactory;
+		this.geccoClientFactory = geccoClientFactory;
 		this.fttpClientFactory = fttpClientFactory;
 	}
 
@@ -45,7 +46,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(fhirClientFactory, "fhirClientFactory");
+		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
 		Objects.requireNonNull(fttpClientFactory, "fttpClientFactory");
 	}
 
@@ -78,7 +79,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 
 	private Optional<Patient> getPatient(String reference)
 	{
-		return fhirClientFactory.getFhirClient().getPatient(reference);
+		return geccoClientFactory.getGeccoClient().getFhirClient().getPatient(reference);
 	}
 
 	private Optional<String> getPseudonym(Patient patient)
@@ -116,7 +117,7 @@ public class ResolvePseudonym extends AbstractServiceDelegate implements Initial
 
 	private void updatePatient(Patient patient)
 	{
-		fhirClientFactory.getFhirClient().updatePatient(patient);
+		geccoClientFactory.getGeccoClient().getFhirClient().updatePatient(patient);
 	}
 
 	private PatientReferenceValue getPatientReference(String pseudonym)
