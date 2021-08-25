@@ -80,6 +80,7 @@ public class FttpClientFactory
 	private final Path trustStorePath;
 	private final Path certificatePath;
 	private final Path privateKeyPath;
+	private final char[] privateKeyPassword;
 
 	private final String fttpServerBase;
 	private final String fttpBasicAuthUsername;
@@ -99,14 +100,15 @@ public class FttpClientFactory
 
 	private final boolean hapiClientVerbose;
 
-	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, int connectTimeout,
-			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
-			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
+	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, char[] privateKeyPassword,
+			int connectTimeout, int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername,
+			String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
+			String proxySchemeHostPort, String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
+		this.privateKeyPassword = privateKeyPassword;
 
 		this.connectTimeout = connectTimeout;
 		this.socketTimeout = socketTimeout;
@@ -133,8 +135,9 @@ public class FttpClientFactory
 		try
 		{
 			logger.info(
-					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
-					trustStorePath, certificatePath, privateKeyPath, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
+					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
+					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
+					fttpServerBase, fttpApiKey, fttpStudy, fttpTarget);
 
 			getFttpClient().testConnection();
 		}
@@ -166,7 +169,7 @@ public class FttpClientFactory
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 
 		logger.debug("Creating key-store from {} and {}", certificatePath.toString(), privateKeyPath.toString());
-		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, keyStorePassword);
+		KeyStore keyStore = readKeyStore(certificatePath, privateKeyPath, privateKeyPassword, keyStorePassword);
 
 		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword, fttpServerBase, fttpApiKey,
@@ -185,11 +188,11 @@ public class FttpClientFactory
 		}
 	}
 
-	private KeyStore readKeyStore(Path certificatePath, Path keyPath, char[] keyStorePassword)
+	private KeyStore readKeyStore(Path certificatePath, Path keyPath, char[] keyPassword, char[] keyStorePassword)
 	{
 		try
 		{
-			PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath);
+			PrivateKey privateKey = PemIo.readPrivateKeyFromPem(keyPath, keyPassword);
 			X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
 
 			return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },

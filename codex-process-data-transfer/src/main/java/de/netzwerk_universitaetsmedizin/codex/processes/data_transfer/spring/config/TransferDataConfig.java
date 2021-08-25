@@ -134,6 +134,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.private.key:#{null}}")
 	private String fttpPrivateKey;
 
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.private.key.password:#{null}}")
+	private char[] fttpPrivateKeyPassword;
+
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.timeout.connect:10000}")
 	private int fttpConnectTimeout;
 
@@ -198,10 +201,10 @@ public class TransferDataConfig
 		Path certificatePath = checkExists(fttpCertificate);
 		Path privateKeyPath = checkExists(fttpPrivateKey);
 
-		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpConnectTimeout,
-				fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword,
-				fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword,
-				fttpHapiClientVerbose);
+		return new FttpClientFactory(trustStorePath, certificatePath, privateKeyPath, fttpPrivateKeyPassword,
+				fttpConnectTimeout, fttpSocketTimeout, fttpConnectionRequestTimeout, fttpBasicAuthUsername,
+				fttpBasicAuthPassword, fttpServerBase, fttpApiKey, fttpStudy, fttpTarget, proxySchemeHostPort,
+				proxyUsername, proxyPassword, fttpHapiClientVerbose);
 	}
 
 	@Bean
