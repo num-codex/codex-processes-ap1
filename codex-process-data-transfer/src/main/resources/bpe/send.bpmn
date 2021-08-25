@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_008keuw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
-  <bpmn:process id="dataSend" isExecutable="true" camunda:versionTag="0.3.4">
+  <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataSend" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:startEvent id="DataSendMessageStartEvent" name="start data send process">
       <bpmn:outgoing>Flow_1km61ly</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_07sumgd" messageRef="Message_0mcjkpi" />
@@ -20,10 +20,9 @@
     <bpmn:endEvent id="StartDataTranslateProcess" name="start data translate process">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">dataTranslate</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">0.3.4</camunda:inputParameter>
+          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataTranslate</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate|0.4.0</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_109e2pt</bpmn:incoming>
@@ -110,7 +109,11 @@
   <bpmn:message id="Message_1jn7i5w" name="startDataTranslate" />
   <bpmn:message id="Message_1qr9h21" name="startDataSendWithRbf" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="dataSend">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="wwwnetzwerk-universitaetsmedizinde_dataSend">
+      <bpmndi:BPMNEdge id="Flow_06456ku_di" bpmnElement="Flow_06456ku">
+        <di:waypoint x="370" y="100" />
+        <di:waypoint x="440" y="100" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pt6h5d_di" bpmnElement="Flow_0pt6h5d">
         <di:waypoint x="635" y="265" />
         <di:waypoint x="635" y="380" />
@@ -147,10 +150,6 @@
       <bpmndi:BPMNEdge id="Flow_0g5a4jz_di" bpmnElement="Flow_0g5a4jz">
         <di:waypoint x="540" y="100" />
         <di:waypoint x="610" y="100" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_06456ku_di" bpmnElement="Flow_06456ku">
-        <di:waypoint x="370" y="100" />
-        <di:waypoint x="440" y="100" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00kpx7f_di" bpmnElement="Flow_00kpx7f">
         <di:waypoint x="1150" y="240" />

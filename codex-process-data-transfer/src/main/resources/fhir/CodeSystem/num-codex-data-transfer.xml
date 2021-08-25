@@ -1,9 +1,8 @@
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system
-				value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-			<code value="REMOTE" />
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
 		</tag>
 	</meta>
 	<url value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
@@ -14,7 +13,7 @@
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
-	<date value="2021-07-07" />
+	<date value="2021-08-23" />
 	<publisher value="NUM-CODEX" />
 	<description value="CodeSystem with standard values for the NUM-CODEX data-transfer processes" />
 	<caseSensitive value="true" />

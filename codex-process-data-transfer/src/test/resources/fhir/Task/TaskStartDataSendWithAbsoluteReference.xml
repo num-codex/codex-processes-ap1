@@ -1,15 +1,15 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.4.0"/>
    </meta>
-   <instantiatesUri value="http://highmed.org/bpe/Process/dataSend/0.3.4"/>
+   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.4.0"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2021-07-07T13:40:00+01:00"/>
    <requester>
       <type value="Organization"/>
       <identifier>
-         <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+         <system value="http://highmed.org/sid/organization-identifier"/>
          <value value="Test_DIC"/>
       </identifier>
    </requester>
@@ -17,7 +17,7 @@
       <recipient>
          <type value="Organization"/>
          <identifier>
-            <system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
+            <system value="http://highmed.org/sid/organization-identifier"/>
             <value value="Test_DIC"/>
          </identifier>
       </recipient>
@@ -41,7 +41,7 @@
          </coding>
       </type>
       <valueReference>
-         <reference value="http://dic-fhir-store:8080/fhir/Patient/4"/>
+         <reference value="http://dic-fhir-store:8080/fhir/Patient/1"/>
       </valueReference>
    </input>
    <!-- parameter specifying GECCO resources should be send stopping at the 
@@ -54,7 +54,7 @@
             <code value="export-to"/>
          </coding>
       </type>
-      <valueInstant value="2021-07-07T13:40:00+01:00"/>
+      <valueInstant value="2021-08-23T13:40:00+01:00"/>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 

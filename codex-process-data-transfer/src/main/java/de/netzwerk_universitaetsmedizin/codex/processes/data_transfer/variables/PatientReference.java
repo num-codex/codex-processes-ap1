@@ -1,6 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-//TODO remove 'implements Serializable' when https://github.com/highmed/highmed-dsf/issues/210 is fixed and released
-public class PatientReference implements Serializable
+public class PatientReference
 {
 	public static PatientReference from(Identifier identifier)
 	{

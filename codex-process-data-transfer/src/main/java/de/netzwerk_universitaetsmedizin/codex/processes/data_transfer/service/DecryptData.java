@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
@@ -31,10 +32,10 @@ public class DecryptData extends AbstractServiceDelegate
 	private final FhirContext fhirContext;
 	private final CrrKeyProvider crrKeyProvider;
 
-	public DecryptData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext,
-			CrrKeyProvider crrKeyProvider)
+	public DecryptData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper, FhirContext fhirContext, CrrKeyProvider crrKeyProvider)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fhirContext = fhirContext;
 		this.crrKeyProvider = crrKeyProvider;

@@ -1,5 +1,5 @@
 <Bundle xmlns="http://hl7.org/fhir">
-   <type value="transaction"/>
+   <type value="batch"/>
    <entry>
       <request>
          <method value="GET"/>

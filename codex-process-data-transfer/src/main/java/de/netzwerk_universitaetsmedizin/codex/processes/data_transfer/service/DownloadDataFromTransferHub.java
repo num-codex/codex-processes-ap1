@@ -14,6 +14,7 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -28,9 +29,10 @@ public class DownloadDataFromTransferHub extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(DownloadDataFromTransferHub.class);
 
-	public DownloadDataFromTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public DownloadDataFromTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(clientProvider, taskHelper);
+		super(clientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Override
@@ -40,7 +42,7 @@ public class DownloadDataFromTransferHub extends AbstractServiceDelegate
 
 		IdType id = getDataReference(task).map(ref -> new IdType(ref)).get();
 
-		FhirWebserviceClient client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(id.getBaseUrl());
+		FhirWebserviceClient client = getFhirWebserviceClientProvider().getWebserviceClient(id.getBaseUrl());
 
 		try (InputStream binary = readBinaryResource(client, id.getIdPart(), id.getVersionIdPart()))
 		{

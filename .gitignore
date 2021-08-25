@@ -26,18 +26,15 @@ codex-processes-ap1-test-data-generator/rsa/*.pem
 ###
 # codex-processes-ap1-docker-test-setup ignores
 ###
-codex-processes-ap1-docker-test-setup/**/bpe/app/conf/*.pem
-codex-processes-ap1-docker-test-setup/**/bpe/app/conf/*.p12
-codex-processes-ap1-docker-test-setup/**/bpe/app/log/*.log
-codex-processes-ap1-docker-test-setup/**/bpe/app/log/*.log.gz
-codex-processes-ap1-docker-test-setup/**/bpe/app/last_event/time.file
-codex-processes-ap1-docker-test-setup/**/bpe/app/plugin/*.jar
-codex-processes-ap1-docker-test-setup/**/bpe/app/process/*.jar
-codex-processes-ap1-docker-test-setup/**/bpe/proxy/ssl/*.pem
+codex-processes-ap1-docker-test-setup/**/bpe/log/*.log
+codex-processes-ap1-docker-test-setup/**/bpe/log/*.log.gz
+codex-processes-ap1-docker-test-setup/**/bpe/last_event/time.file
+codex-processes-ap1-docker-test-setup/**/bpe/plugin/*.jar
+codex-processes-ap1-docker-test-setup/**/bpe/process/*.jar
 
-codex-processes-ap1-docker-test-setup/**/fhir/app/conf/*.p12
-codex-processes-ap1-docker-test-setup/**/fhir/app/log/*.log
-codex-processes-ap1-docker-test-setup/**/fhir/app/log/*.log.gz
-codex-processes-ap1-docker-test-setup/**/fhir/app/conf/bundle.xml
-codex-processes-ap1-docker-test-setup/**/fhir/app/conf/config.properties
-codex-processes-ap1-docker-test-setup/**/fhir/proxy/ssl/*.pem
+codex-processes-ap1-docker-test-setup/**/fhir/conf/bundle.xml
+codex-processes-ap1-docker-test-setup/**/fhir/log/*.log
+codex-processes-ap1-docker-test-setup/**/fhir/log/*.log.gz
+
+codex-processes-ap1-docker-test-setup/secrets/*.pem
+codex-processes-ap1-docker-test-setup/.env

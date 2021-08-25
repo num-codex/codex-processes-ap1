@@ -28,34 +28,34 @@ docker-compose up crr-fhir-bridge
 ```
 Access at http://localhost:8888/fhir-bridge/fhir/
 
-Console 3: Start DIC DSF FHIR Server and wait till startet
+Console 3: Start DIC DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d dic-fhir-proxy dic-fhir-app dic-fhir-db && docker-compose logs -f dic-fhir-app
+docker-compose up -d dic-fhir && docker-compose logs -f dic-fhir
 ```
-Console 3: Dicconnect from log output (Ctrl-C) if Server startet
+Console 3: Disconnect from log output (Ctrl-C) if Server started
 Console 3: Start DIC DSF BPE Server
 ```sh
-docker-compose up -d dic-bpe-app dic-bpe-db && docker-compose logs -f dic-fhir-app dic-bpe-app
+docker-compose up -d dic-bpe && docker-compose logs -f dic-fhir dic-bpe
 ````
 
-Console 4: Start GTH DSF FHIR Server and wait till startet
+Console 4: Start GTH DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d gth-fhir-proxy gth-fhir-app gth-fhir-db && docker-compose logs -f gth-fhir-app
+docker-compose up -d gth-fhir && docker-compose logs -f gth-fhir
 ```
-Console 4: Dicconnect from log output (Ctrl-C) if Server startet
+Console 4: Disconnect from log output (Ctrl-C) if Server started
 Console 4: Start GTH DSF BPE Server
 ```sh
-docker-compose up -d gth-bpe-app gth-bpe-db && docker-compose logs -f gth-fhir-app gth-bpe-app
+docker-compose up -d gth-bpe && docker-compose logs -f gth-fhir gth-bpe
 ````
 
-Console 5: Start CRR DSF FHIR Server and wait till startet
+Console 5: Start CRR DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d crr-fhir-proxy crr-fhir-app crr-fhir-db && docker-compose logs -f crr-fhir-app
+docker-compose up -d crr-fhir && docker-compose logs -f crr-fhir
 ```
-Console 5: Dicconnect from log output (Ctrl-C) if Server startet
+Console 5: Dicconnect from log output (Ctrl-C) if Server started
 Console 5: Start CRR DSF BPE Server
 ```sh
-docker-compose up -d crr-bpe-app crr-bpe-db && docker-compose logs -f crr-fhir-app crr-bpe-app
+docker-compose up -d crr-bpe && docker-compose logs -f crr-fhir crr-bpe
 ````
 
 <!--

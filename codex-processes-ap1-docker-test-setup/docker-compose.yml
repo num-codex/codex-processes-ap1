@@ -1,135 +1,175 @@
-version: '3.7'
-
+version: '3.8'
 services:
-  ingress:
-    image: haproxy:2.3
+  proxy:
+    image: nginx:1.21
     restart: on-failure
     ports:
       - 127.0.0.1:443:443
+    secrets:
+      - proxy_certificate_and_int_cas.pem
+      - proxy_certificate_private_key.pem
+      - proxy_trusted_client_cas.pem
     volumes:
       - type: bind
-        source: ./ingress/conf
-        target: /usr/local/etc/haproxy
+        source: ./proxy/conf.d
+        target: /etc/nginx/conf.d
+        read_only: true
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/nginx.conf
         read_only: true
     networks:
+      dic-fhir-frontend:
+        ipv4_address: 172.20.0.66
+      gth-fhir-frontend:
+        ipv4_address: 172.20.0.82
+      crr-fhir-frontend:
+        ipv4_address: 172.20.0.98
       internet:
-        ipv4_address: 172.10.0.2
-
-
-  dic-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./dic/fhir/proxy/ssl
-        target: /usr/local/apache2/ssl
-    environment:
-      HTTPS_SERVER_NAME_PORT: dic:443
-      APP_SERVER_IP: dic-fhir-app
-    networks:
-      internet:
-        ipv4_address: 172.10.0.3
         aliases:
           - dic
-      dic-fhir-frontend:
-    depends_on:
-      - ingress
-      - dic-fhir-app
-  dic-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
-    restart: on-failure
-    volumes:
-      - type: bind
-        source: ./dic/fhir/app/conf
-        target: /opt/fhir/conf
-      - type: bind
-        source: ./dic/fhir/app/log
-        target: /opt/fhir/log
+          - gth
+          - crr
     environment:
       TZ: Europe/Berlin
-    networks:
-      - dic-fhir-frontend
-      - dic-fhir-backend
-    depends_on:
-      - dic-fhir-db
-  dic-fhir-db:
+
+  db:
     image: postgres:13
     restart: on-failure
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/dic-fhir-postgres_password
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
       POSTGRES_USER: liquibase_user
-      POSTGRES_DB: fhir
+      POSTGRES_DB: postgres
     networks:
       - dic-fhir-backend
+      - gth-fhir-backend
+      - crr-fhir-backend
+      - dic-bpe-backend
+      - gth-bpe-backend
+      - crr-bpe-backend
+    secrets:
+      - db_liquibase.password
     volumes:
       - type: volume
-        source: dic-fhir-db-data
+        source: db-data
         target: /var/lib/postgresql/data
-    secrets:
-      - dic-fhir-postgres_password
+      - type: bind
+        source: ./db/init-db.sh
+        target: /docker-entrypoint-initdb.d/init-db.sh
+        read_only: true
 
-  # dic-bpe-proxy not needed
-  dic-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+
+  dic-fhir:
+    image: ghcr.io/highmed/fhir:0.5.0
+    restart: on-failure
+    ports:
+      - 127.0.0.1:5000:5000
+    secrets:
+      - db_liquibase.password
+      - db_dic_fhir_user.password
+      - db_dic_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_dic_client_certificate.pem
+      - app_dic_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+    volumes:
+      - type: bind
+        source: ./dic/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
+      - type: bind
+        source: ./dic/fhir/log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: dic_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: dic_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://dic/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${DIC_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${DIC_USER_THUMBPRINTS_PERMANENT_DELETE}
+    networks:
+      dic-fhir-frontend:
+        ipv4_address: 172.20.0.67
+      dic-fhir-backend:
+      internet:
+    depends_on:
+      - db
+      - proxy
+  dic-bpe:
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5003:5003
+    secrets:
+      - db_liquibase.password
+      - db_dic_bpe_user.password
+      - db_dic_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_dic_client_certificate.pem
+      - app_dic_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+      - codex_crr_public_key.pem
     volumes:
       - type: bind
-        source: ./dic/bpe/app/conf
-        target: /opt/bpe/conf
-        read_only: true
-      - type: bind
-        source: ./dic/bpe/app/plugin
+        source: ./dic/bpe/plugin
         target: /opt/bpe/plugin
         read_only: true
       - type: bind
-        source: ./dic/bpe/app/process
+        source: ./dic/bpe/process
         target: /opt/bpe/process
         read_only: true
       - type: bind
-        source: ./dic/bpe/app/log
+        source: ./dic/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic/bpe/app/last_event
+        source: ./dic/bpe/last_event
         target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/dic_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: dic_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: dic_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.4.0,wwwnetzwerk-universitaetsmedizinde_dataReceive/0.4.0
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_FHIR_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
       internet:
-        ipv4_address: 172.10.0.103
     depends_on:
-      - dic-bpe-db
-      - dic-fhir-proxy
+      - db
+      - dic-fhir
     # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
-  dic-bpe-db:
-    image: postgres:13
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d bpe" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/dic-bpe-postgres_password
-      POSTGRES_USER: liquibase_user
-      POSTGRES_DB: bpe
-    networks:
-      - dic-bpe-backend
-    volumes:
-      - type: volume
-        source: dic-bpe-db-data
-        target: /var/lib/postgresql/data
-    secrets:
-      - dic-bpe-postgres_password
   dic-fhir-store-hapi:
     build: ./dic/hapi
     restart: on-failure
@@ -153,235 +193,216 @@ services:
           - dic-fhir-store
 
 
-  gth-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
+  gth-fhir:
+    image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
+    ports:
+      - 127.0.0.1:5001:5001
+    secrets:
+      - db_liquibase.password
+      - db_gth_fhir_user.password
+      - db_gth_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_gth_client_certificate.pem
+      - app_gth_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./gth/fhir/proxy/ssl
-        target: /usr/local/apache2/ssl
-    environment:
-      HTTPS_SERVER_NAME_PORT: gth:443
-      APP_SERVER_IP: gth-fhir-app
-    networks:
-      internet:
-        ipv4_address: 172.10.0.4
-        aliases:
-          - gth
-      gth-fhir-frontend:
-    depends_on:
-      - ingress
-      - gth-fhir-app
-  gth-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
-    restart: on-failure
-    volumes:
+        source: ./gth/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
       - type: bind
-        source: ./gth/fhir/app/conf
-        target: /opt/fhir/conf
-      - type: bind
-        source: ./gth/fhir/app/log
+        source: ./gth/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_gth_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_gth_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_gth_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_gth_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/gth_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: gth_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: gth_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: gth_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: gth_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://gth/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${GTH_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${GTH_USER_THUMBPRINTS_PERMANENT_DELETE}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
     networks:
-      - gth-fhir-frontend
-      - gth-fhir-backend
+      gth-fhir-frontend:
+        ipv4_address: 172.20.0.83
+      gth-fhir-backend:
+      internet:
     depends_on:
-      - gth-fhir-db
-  gth-fhir-db:
-    image: postgres:13
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/gth-fhir-postgres_password
-      POSTGRES_USER: liquibase_user
-      POSTGRES_DB: fhir
-    networks:
-      - gth-fhir-backend
-    volumes:
-      - type: volume
-        source: gth-fhir-db-data
-        target: /var/lib/postgresql/data
-    secrets:
-      - gth-fhir-postgres_password
-
-  # gth-bpe-proxy not needed
-  gth-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+      - db
+      - proxy
+  gth-bpe:
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5004:5004
+    secrets:
+      - db_liquibase.password
+      - db_gth_bpe_user.password
+      - db_gth_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_gth_client_certificate.pem
+      - app_gth_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./gth/bpe/app/conf
-        target: /opt/bpe/conf
-        read_only: true
-      - type: bind
-        source: ./gth/bpe/app/plugin
+        source: ./gth/bpe/plugin
         target: /opt/bpe/plugin
         read_only: true
       - type: bind
-        source: ./gth/bpe/app/process
+        source: ./gth/bpe/process
         target: /opt/bpe/process
         read_only: true
       - type: bind
-        source: ./gth/bpe/app/log
+        source: ./gth/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./gth/bpe/app/last_event
+        source: ./gth/bpe/last_event
         target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_gth_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_gth_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_gth_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_gth_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/gth_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: gth_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: gth_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: gth_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: gth_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://gth/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.4.0,wwwnetzwerk-universitaetsmedizinde_dataSend/0.4.0,wwwnetzwerk-universitaetsmedizinde_dataReceive/0.4.0
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
     networks:
       gth-bpe-frontend:
       gth-bpe-backend:
       internet:
-        ipv4_address: 172.10.0.104
     depends_on:
-      - gth-bpe-db
-      - gth-fhir-proxy
-  gth-bpe-db:
-    image: postgres:13
+      - db
+      - gth-fhir
+
+
+  crr-fhir:
+    image: ghcr.io/highmed/fhir:0.5.0
     restart: on-failure
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d bpe" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/gth-bpe-postgres_password
-      POSTGRES_USER: liquibase_user
-      POSTGRES_DB: bpe
-    networks:
-      - gth-bpe-backend
-    volumes:
-      - type: volume
-        source: gth-bpe-db-data
-        target: /var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5002:5002
     secrets:
-      - gth-bpe-postgres_password
-
-
-  crr-fhir-proxy:
-    image: ghcr.io/highmed/fhir_proxy:0.4.0
-    restart: on-failure
+      - db_liquibase.password
+      - db_crr_fhir_user.password
+      - db_crr_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_crr_client_certificate.pem
+      - app_crr_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./crr/fhir/proxy/ssl
-        target: /usr/local/apache2/ssl
-    environment:
-      HTTPS_SERVER_NAME_PORT: crr:443
-      APP_SERVER_IP: crr-fhir-app
-    networks:
-      internet:
-        ipv4_address: 172.10.0.5
-        aliases:
-          - crr
-      crr-fhir-frontend:
-    depends_on:
-      - ingress
-      - crr-fhir-app
-  crr-fhir-app:
-    image: ghcr.io/highmed/fhir:0.4.0
-    restart: on-failure
-    volumes:
+        source: ./crr/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
       - type: bind
-        source: ./crr/fhir/app/conf
-        target: /opt/fhir/conf
-      - type: bind
-        source: ./crr/fhir/app/log
+        source: ./crr/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_crr_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/crr_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: crr_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: crr_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: crr_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: crr_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://crr/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${CRR_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${CRR_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
-      - crr-fhir-frontend
-      - crr-fhir-backend
+      crr-fhir-frontend:
+        ipv4_address: 172.20.0.99
+      crr-fhir-backend:
+      internet:
     depends_on:
-      - crr-fhir-db
-  crr-fhir-db:
-    image: postgres:13
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d fhir" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/crr-fhir-postgres_password
-      POSTGRES_USER: liquibase_user
-      POSTGRES_DB: fhir
-    networks:
-      - crr-fhir-backend
-    volumes:
-      - type: volume
-        source: crr-fhir-db-data
-        target: /var/lib/postgresql/data
-    secrets:
-      - crr-fhir-postgres_password
-
-  # crr-bpe-proxy not needed
-  crr-bpe-app:
-    image: ghcr.io/highmed/bpe:0.4.0
+      - db
+      - proxy
+  crr-bpe:
+    image: ghcr.io/highmed/bpe:0.5.0
     restart: on-failure
     ports:
       - 127.0.0.1:5005:5005
+    secrets:
+      - db_liquibase.password
+      - db_crr_bpe_user.password
+      - db_crr_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_crr_client_certificate.pem
+      - app_crr_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+      - codex_crr_private_key.pem
     volumes:
       - type: bind
-        source: ./crr/bpe/app/conf
-        target: /opt/bpe/conf
-        read_only: true
-      - type: bind
-        source: ./crr/bpe/app/plugin
+        source: ./crr/bpe/plugin
         target: /opt/bpe/plugin
         read_only: true
       - type: bind
-        source: ./crr/bpe/app/process
+        source: ./crr/bpe/process
         target: /opt/bpe/process
         read_only: true
       - type: bind
-        source: ./crr/bpe/app/log
+        source: ./crr/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./crr/bpe/app/last_event
+        source: ./crr/bpe/last_event
         target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_crr_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/crr_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: crr_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: crr_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: crr_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: crr_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://crr/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.4.0,,wwwnetzwerk-universitaetsmedizinde_dataSend/0.4.0,wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.4.0
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PRIVATE_KEY: /run/secrets/codex_crr_private_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_FHIR_SERVER_BASE_URL: http://crr-fhir-bridge:8888/fhir-bridge/fhir
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
       internet:
-        ipv4_address: 172.10.0.105
     depends_on:
-      - crr-bpe-db
-      - crr-fhir-proxy
+      - db
+      - crr-fhir
     # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
-  crr-bpe-db:
-    image: postgres:13
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d bpe" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/crr-bpe-postgres_password
-      POSTGRES_USER: liquibase_user
-      POSTGRES_DB: bpe
-    networks:
-      - crr-bpe-backend
-    volumes:
-      - type: volume
-        source: crr-bpe-db-data
-        target: /var/lib/postgresql/data
-    secrets:
-      - crr-bpe-postgres_password
   crr-ehrbase-db:
     image: ehrbase/ehrbase-postgres:latest
     networks:
@@ -411,7 +432,7 @@ services:
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:next 
+    image: ehrbase/fhir-bridge:1.2.1
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
@@ -429,37 +450,94 @@ services:
 
 
 secrets:
-  dic-fhir-postgres_password:
-    file: ./dic/fhir/db/conf/postgres_password
-  dic-bpe-postgres_password:
-    file: ./dic/bpe/db/conf/postgres_password
-  gth-fhir-postgres_password:
-    file: ./gth/fhir/db/conf/postgres_password
-  gth-bpe-postgres_password:
-    file: ./gth/bpe/db/conf/postgres_password
-  crr-fhir-postgres_password:
-    file: ./crr/fhir/db/conf/postgres_password
-  crr-bpe-postgres_password:
-    file: ./crr/bpe/db/conf/postgres_password
+  proxy_certificate_and_int_cas.pem:
+    file: ./secrets/proxy_certificate_and_int_cas.pem
+  proxy_certificate_private_key.pem:
+    file: ./secrets/proxy_certificate_private_key.pem
+  proxy_trusted_client_cas.pem:
+    file: ./secrets/proxy_trusted_client_cas.pem
 
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
+    
+  db_dic_fhir_user.password:
+    file: ./secrets/db_dic_fhir_user.password
+  db_dic_fhir_user_permanent_delete.password:
+    file: ./secrets/db_dic_fhir_user_permanent_delete.password
+  db_dic_bpe_user.password:
+    file: ./secrets/db_dic_bpe_user.password
+  db_dic_bpe_user_camunda.password:
+    file: ./secrets/db_dic_bpe_user_camunda.password
+
+  db_gth_fhir_user.password:
+    file: ./secrets/db_gth_fhir_user.password
+  db_gth_fhir_user_permanent_delete.password:
+    file: ./secrets/db_gth_fhir_user_permanent_delete.password
+  db_gth_bpe_user.password:
+    file: ./secrets/db_gth_bpe_user.password
+  db_gth_bpe_user_camunda.password:
+    file: ./secrets/db_gth_bpe_user_camunda.password
+
+  db_crr_fhir_user.password:
+    file: ./secrets/db_crr_fhir_user.password
+  db_crr_fhir_user_permanent_delete.password:
+    file: ./secrets/db_crr_fhir_user_permanent_delete.password
+  db_crr_bpe_user.password:
+    file: ./secrets/db_crr_bpe_user.password
+  db_crr_bpe_user_camunda.password:
+    file: ./secrets/db_crr_bpe_user_camunda.password
+
+  app_client_trust_certificates.pem:
+    file: ./secrets/app_client_trust_certificates.pem
+  app_client_certificate_private_key.pem.password:
+    file: ./secrets/app_client_certificate_private_key.pem.password
+
+  app_dic_client_certificate.pem:
+    file: ./secrets/app_dic_client_certificate.pem
+  app_dic_client_certificate_private_key.pem:
+    file: ./secrets/app_dic_client_certificate_private_key.pem
+
+  app_gth_client_certificate.pem:
+    file: ./secrets/app_gth_client_certificate.pem
+  app_gth_client_certificate_private_key.pem:
+    file: ./secrets/app_gth_client_certificate_private_key.pem
+
+  app_crr_client_certificate.pem:
+    file: ./secrets/app_crr_client_certificate.pem
+  app_crr_client_certificate_private_key.pem:
+    file: ./secrets/app_crr_client_certificate_private_key.pem
+
+  codex_crr_public_key.pem:
+    file: ./secrets/codex_crr_public_key.pem
+  codex_crr_private_key.pem:
+    file: ./secrets/codex_crr_private_key.pem
 
 networks:
   internet:
+  dic-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.10.0.0/24
-
-  dic-fhir-frontend:
+      - subnet: 172.20.0.64/28
   dic-fhir-backend:
   dic-bpe-frontend:
   dic-bpe-backend:
   gth-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.80/28
   gth-fhir-backend:
   gth-bpe-frontend:
   gth-bpe-backend:
   crr-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.96/28
   crr-fhir-backend:
   crr-bpe-frontend:
   crr-bpe-backend:
@@ -467,15 +545,5 @@ networks:
 
 
 volumes:
-  dic-fhir-db-data:
-    name: dic-fhir-db-data
-  dic-bpe-db-data:
-    name: dic-bpe-db-data
-  gth-fhir-db-data:
-    name: gth-fhir-db-data
-  gth-bpe-db-data:
-    name: gth-bpe-db-data
-  crr-fhir-db-data:
-    name: crr-fhir-db-data
-  crr-bpe-db-data:
-    name: crr-bpe-db-data
+  db-data:
+    name: db-data

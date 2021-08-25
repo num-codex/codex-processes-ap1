@@ -1,1 +1,0 @@
-Empty folder for last-event time.file
