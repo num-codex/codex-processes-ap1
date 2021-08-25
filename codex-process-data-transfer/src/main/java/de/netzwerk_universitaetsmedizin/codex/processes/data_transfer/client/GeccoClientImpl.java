@@ -42,10 +42,10 @@ public class GeccoClientImpl implements GeccoClient
 
 	public GeccoClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
 			int socketTimeout, int connectionRequestTimeout, String geccoServerBasicAuthUsername,
-			String geccoServerBasicAuthPassword, String geccoServerBearerToken, String geccoServerBase,
-			String proxySchemeHostPort, String proxyUsername, String proxyPassword, boolean hapiClientVerbose,
-			FhirContext fhirContext, Path searchBundleOverride, String localIdentifierValue,
-			Class<GeccoFhirClient> geccoFhirClientClass, boolean useChainedParameterNotLogicalReference)
+			String geccoServerBasicAuthPassword, String geccoServerBearerToken, String geccoServerBase, String proxyUrl,
+			String proxyUsername, String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext,
+			Path searchBundleOverride, String localIdentifierValue, Class<GeccoFhirClient> geccoFhirClientClass,
+			boolean useChainedParameterNotLogicalReference)
 	{
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout);
@@ -56,7 +56,7 @@ public class GeccoClientImpl implements GeccoClient
 		this.geccoServerBasicAuthPassword = geccoServerBasicAuthPassword;
 		this.geccoServerBearerToken = geccoServerBearerToken;
 
-		configureProxy(clientFactory, proxySchemeHostPort, proxyUsername, proxyPassword);
+		configureProxy(clientFactory, proxyUrl, proxyUsername, proxyPassword);
 
 		this.hapiClientVerbose = hapiClientVerbose;
 
@@ -67,19 +67,19 @@ public class GeccoClientImpl implements GeccoClient
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
 	}
 
-	private void configureProxy(IRestfulClientFactory clientFactory, String proxySchemeHostPort, String proxyUsername,
+	private void configureProxy(IRestfulClientFactory clientFactory, String proxyUrl, String proxyUsername,
 			String proxyPassword)
 	{
-		if (proxySchemeHostPort != null && !proxySchemeHostPort.isBlank())
+		if (proxyUrl != null && !proxyUrl.isBlank())
 		{
 			try
 			{
-				URL url = new URL(proxySchemeHostPort);
+				URL url = new URL(proxyUrl);
 				clientFactory.setProxy(url.getHost(), url.getPort());
 				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
 
-				logger.info("Using proxy for GECCO connection with {host: {}, port: {}, username: {}}", url.getHost(),
-						url.getPort(), proxyUsername);
+				logger.info("Using proxy for GECCO FHIR server connection with {host: {}, port: {}, username: {}}",
+						url.getHost(), url.getPort(), proxyUsername);
 			}
 			catch (MalformedURLException e)
 			{

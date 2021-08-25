@@ -48,7 +48,7 @@ public class FttpClientImpl implements FttpClient
 
 	public FttpClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
 			int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername, String fttpBasicAuthPassword,
-			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxySchemeHostPort,
+			String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget, String proxyUrl,
 			String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
@@ -63,7 +63,7 @@ public class FttpClientImpl implements FttpClient
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
 
-		configureProxy(clientFactory, proxySchemeHostPort, proxyUsername, proxyPassword);
+		configureProxy(clientFactory, proxyUrl, proxyUsername, proxyPassword);
 
 		this.hapiClientVerbose = hapiClientVerbose;
 	}
@@ -88,14 +88,14 @@ public class FttpClientImpl implements FttpClient
 		return hapiClientFactory;
 	}
 
-	private void configureProxy(IRestfulClientFactory clientFactory, String proxySchemeHostPort, String proxyUsername,
+	private void configureProxy(IRestfulClientFactory clientFactory, String proxyUrl, String proxyUsername,
 			String proxyPassword)
 	{
-		if (proxySchemeHostPort != null && !proxySchemeHostPort.isBlank())
+		if (proxyUrl != null && !proxyUrl.isBlank())
 		{
 			try
 			{
-				URL url = new URL(proxySchemeHostPort);
+				URL url = new URL(proxyUrl);
 				clientFactory.setProxy(url.getHost(), url.getPort());
 				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
 

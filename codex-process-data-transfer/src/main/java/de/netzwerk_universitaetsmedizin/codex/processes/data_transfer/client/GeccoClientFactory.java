@@ -97,7 +97,7 @@ public class GeccoClientFactory
 	private final String geccoServerBasicAuthPassword;
 	private final String geccoServerBearerToken;
 
-	private final String proxySchemeHostPort;
+	private final String proxyUrl;
 	private final String proxyUsername;
 	private final String proxyPassword;
 
@@ -112,7 +112,7 @@ public class GeccoClientFactory
 	public GeccoClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, char[] privateKeyPassword,
 			int connectTimeout, int socketTimeout, int connectionRequestTimeout, String geccoServerBase,
 			String geccoServerBasicAuthUsername, String geccoServerBasicAuthPassword, String geccoServerBearerToken,
-			String proxySchemeHostPort, String proxyUsername, String proxyPassword, boolean hapiClientVerbose,
+			String proxyUrl, String proxyUsername, String proxyPassword, boolean hapiClientVerbose,
 			FhirContext fhirContext, Path searchBundleOverride, String localIdentifierValue,
 			Class<GeccoFhirClient> geccoFhirClientClass, boolean useChainedParameterNotLogicalReference)
 	{
@@ -131,7 +131,7 @@ public class GeccoClientFactory
 		this.geccoServerBasicAuthPassword = geccoServerBasicAuthPassword;
 		this.geccoServerBearerToken = geccoServerBearerToken;
 
-		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUrl = proxyUrl;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
 		this.hapiClientVerbose = hapiClientVerbose;
@@ -150,10 +150,11 @@ public class GeccoClientFactory
 		{
 			logger.info(
 					"Testing connection to GECCO FHIR server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " geccoServerBasicAuthUsername {}, geccoServerBasicAuthPassword {}, geccoServerBearerToken {}, geccoServerBase: {}}",
+							+ " basicAuthUsername {}, basicAuthPassword {}, bearerToken {}, serverBase: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
 					geccoServerBasicAuthUsername, geccoServerBasicAuthPassword != null ? "***" : "null",
-					geccoServerBearerToken != null ? "***" : "null", geccoServerBase);
+					geccoServerBearerToken != null ? "***" : "null", geccoServerBase, proxyUrl, proxyUsername,
+					proxyPassword != null ? "***" : "null");
 
 			getGeccoClient().testConnection();
 		}
@@ -197,7 +198,7 @@ public class GeccoClientFactory
 
 		return new GeccoClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, geccoServerBasicAuthUsername, geccoServerBasicAuthPassword,
-				geccoServerBearerToken, geccoServerBase, proxySchemeHostPort, proxyUsername, proxyPassword,
+				geccoServerBearerToken, geccoServerBase, proxyUrl, proxyUsername, proxyPassword,
 				hapiClientVerbose, fhirContext, searchBundleOverride, localIdentifierValue, geccoFhirClientClass,
 				useChainedParameterNotLogicalReference);
 	}

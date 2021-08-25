@@ -94,7 +94,7 @@ public class FttpClientFactory
 	private final String fttpStudy;
 	private final String fttpTarget;
 
-	private final String proxySchemeHostPort;
+	private final String proxyUrl;
 	private final String proxyUsername;
 	private final String proxyPassword;
 
@@ -103,7 +103,7 @@ public class FttpClientFactory
 	public FttpClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, char[] privateKeyPassword,
 			int connectTimeout, int socketTimeout, int connectionRequestTimeout, String fttpBasicAuthUsername,
 			String fttpBasicAuthPassword, String fttpServerBase, String fttpApiKey, String fttpStudy, String fttpTarget,
-			String proxySchemeHostPort, String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
+			String proxyUrl, String proxyUsername, String proxyPassword, boolean hapiClientVerbose)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
@@ -122,7 +122,7 @@ public class FttpClientFactory
 		this.fttpStudy = fttpStudy;
 		this.fttpTarget = fttpTarget;
 
-		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUrl = proxyUrl;
 		this.proxyUsername = proxyUsername;
 		this.proxyPassword = proxyPassword;
 
@@ -135,10 +135,11 @@ public class FttpClientFactory
 		try
 		{
 			logger.info(
-					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {}, fttpBasicAuthUsername {}, fttpBasicAuthPassword {}, fttpServerBase: {}, fttpApiKey: {}, fttpStudy: {}, fttpTarget: {}}",
+					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
 					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase, fttpApiKey,
-					fttpStudy, fttpTarget);
+					fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword != null ? "***" : "null");
 
 			getFttpClient().testConnection();
 		}
@@ -174,7 +175,7 @@ public class FttpClientFactory
 
 		return new FttpClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout, fttpBasicAuthUsername, fttpBasicAuthPassword, fttpServerBase, fttpApiKey,
-				fttpStudy, fttpTarget, proxySchemeHostPort, proxyUsername, proxyPassword, hapiClientVerbose);
+				fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword, hapiClientVerbose);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)
