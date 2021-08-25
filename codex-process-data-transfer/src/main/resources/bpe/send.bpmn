@@ -22,7 +22,7 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataTranslate</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate|0.4.0</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_109e2pt</bpmn:incoming>

@@ -1,6 +1,6 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.4.0"/>
    </meta>
    <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.4.0"/>
    <status value="requested"/>

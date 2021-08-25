@@ -10,7 +10,7 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataSend</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.4.0</camunda:inputParameter>
         </camunda:inputOutput>
         <camunda:properties>
           <camunda:property name="dsf.end.listener" value="false" />

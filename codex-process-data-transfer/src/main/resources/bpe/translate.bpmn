@@ -26,7 +26,7 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive/0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataReceive</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive|0.4.0</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1c2ibtj</bpmn:incoming>
