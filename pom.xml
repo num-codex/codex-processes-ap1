@@ -6,7 +6,7 @@
 
 	<groupId>de.netzwerk-universitaetsmedizin.codex</groupId>
 	<artifactId>codex-processes-ap1</artifactId>
-	<version>0.4.0-SNAPSHOT</version>
+	<version>0.4.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -21,7 +21,7 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 		<hapi.version>5.1.0</hapi.version>
-		<dsf.version>0.5.0-SNAPSHOT</dsf.version>
+		<dsf.version>0.5.0</dsf.version>
 	</properties>
 
 	<description>Business processes for the NUM CODEX project (AP1) as plugins for the HiGHmed Data Sharing Framework.</description>
@@ -125,7 +125,7 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
-				<version>0.4.0</version>
+				<version>${dsf.version}</version>
 				<scope>test</scope>
 				<type>test-jar</type>
 			</dependency>
