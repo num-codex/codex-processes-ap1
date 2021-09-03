@@ -108,10 +108,10 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.proxy.url:#{null}}")
 	private String fhirStoreProxyUrl;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.proxy.username:#{null}}")
 	private String fhirStoreProxyUsername;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.proxy.password:#{null}}")
 	private String fhirStoreProxyPassword;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.use.chained.parameter.not.logical.reference:true}")
@@ -126,7 +126,7 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.private.key:#{null}}")
 	private String crrPrivateKeyFile;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gth.identifier.value:gth.hs-heilbronn.de}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}")
 	private String geccoTransferHubIdentifierValue;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
@@ -183,10 +183,10 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.proxy.url:#{null}}")
 	private String fttpProxyUrl;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.proxy.username:#{null}}")
 	private String fttpProxyUsername;
 
-	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.proxy.password:#{null}}")
 	private String fttpProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
