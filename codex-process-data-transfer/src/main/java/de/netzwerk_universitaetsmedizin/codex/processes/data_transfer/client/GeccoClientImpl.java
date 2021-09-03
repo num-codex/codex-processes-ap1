@@ -104,17 +104,6 @@ public class GeccoClientImpl implements GeccoClient
 		return hapiClientFactory;
 	}
 
-	private IGenericClient createGenericClient()
-	{
-		IGenericClient client = clientFactory.newGenericClient(geccoServerBase);
-
-		configuredWithBasicAuth(client);
-		configureBearerTokenAuthInterceptor(client);
-		configureLoggingInterceptor(client);
-
-		return client;
-	}
-
 	private void configuredWithBasicAuth(IGenericClient client)
 	{
 		if (geccoServerBasicAuthUsername != null && geccoServerBasicAuthPassword != null)
@@ -141,9 +130,8 @@ public class GeccoClientImpl implements GeccoClient
 	@Override
 	public void testConnection()
 	{
-		IGenericClient client = createGenericClient();
-
-		CapabilityStatement statement = client.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement statement = getGenericFhirClient().capabilities().ofType(CapabilityStatement.class)
+				.execute();
 
 		logger.info("Connection test OK {} - {}", statement.getSoftware().getName(),
 				statement.getSoftware().getVersion());
@@ -181,7 +169,13 @@ public class GeccoClientImpl implements GeccoClient
 	@Override
 	public IGenericClient getGenericFhirClient()
 	{
-		return clientFactory.newGenericClient(geccoServerBase);
+		IGenericClient client = clientFactory.newGenericClient(geccoServerBase);
+
+		configuredWithBasicAuth(client);
+		configureBearerTokenAuthInterceptor(client);
+		configureLoggingInterceptor(client);
+
+		return client;
 	}
 
 	@Override
