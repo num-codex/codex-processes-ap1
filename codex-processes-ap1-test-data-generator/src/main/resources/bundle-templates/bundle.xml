@@ -19,12 +19,6 @@
 					<value value="Test_GTH"/>
 				</identifier>
 				<active value="true"/>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-						<code value="DTS"/>
-					</coding>
-				</type>
 				<name value="Test GTH"/>
 				<endpoint>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
@@ -56,12 +50,6 @@
 					<value value="Test_DIC"/>
 				</identifier>
 				<active value="true"/>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-						<code value="MeDIC"/>
-					</coding>
-				</type>
 				<name value="Test DIC"/>
 				<endpoint>
 					<reference value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1"/>
@@ -93,12 +81,6 @@
 					<value value="Test_CRR"/>
 				</identifier>
 				<active value="true"/>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-						<code value="CRR"/>
-					</coding>
-				</type>
 				<name value="Test CRR"/>
 				<endpoint>
 					<reference value="urn:uuid:1712b523-1783-40fa-a317-375415686457"/>
@@ -280,7 +262,7 @@
 				</participatingOrganization>
 				<code>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
 						<code value="DTS"/>
 					</coding>
 				</code>
@@ -317,7 +299,7 @@
 				</participatingOrganization>
 				<code>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
 						<code value="MeDIC"/>
 					</coding>
 				</code>
@@ -354,7 +336,7 @@
 				</participatingOrganization>
 				<code>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
 						<code value="CRR"/>
 					</coding>
 				</code>
