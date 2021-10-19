@@ -28,6 +28,12 @@ docker-compose up crr-fhir-bridge
 ```
 Access at http://localhost:8888/fhir-bridge/fhir/
 
+Console 3: Start proxy and db
+```sh
+docker-compose up -d proxy db && docker-compose logs -f proxy db
+```
+Console 3: Disconnect from log output (Ctrl-C) if proxy and db started
+
 Console 3: Start DIC DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d dic-fhir && docker-compose logs -f dic-fhir
