@@ -440,7 +440,7 @@ services:
       - crr-ehrbase-network
       - crr-bpe-backend
     environment:
-      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/rest/openehr/v1/
+      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/rest
       FHIR_BRIDGE_FHIR_VALIDATION_OPTIONAL_IDENTIFIER: 'true'
       TZ: Europe/Berlin
 #     SPRING_PROFILES_ACTIVE: dev
