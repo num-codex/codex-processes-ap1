@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
@@ -118,13 +120,24 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 				.orElseThrow(() -> new RuntimeException("No resource in Bundle has subject with pseudonym"));
 	}
 
-	protected String getPseudonym(Patient patient)
+	protected Identifier getPseudonymIdentifier(Patient patient)
 	{
 		Objects.requireNonNull(patient, "patient");
 
 		return patient.getIdentifier().stream().filter(Identifier::hasValue).filter(Identifier::hasSystem)
 				.filter(i -> NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem())).findFirst()
-				.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
+				.orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
+	}
+
+	protected void addPseudonymTypeToIdentifierIfMissing(Identifier identifier)
+	{
+		if (identifier.getType().getCoding().stream()
+				.noneMatch(coding -> IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM.equals(coding.getSystem())
+						&& IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE.equals(coding.getCode())))
+		{
+			identifier.getType().addCoding().setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+					.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
+		}
 	}
 
 	protected Optional<Patient> findPatientInLocalFhirStore(String pseudonym)

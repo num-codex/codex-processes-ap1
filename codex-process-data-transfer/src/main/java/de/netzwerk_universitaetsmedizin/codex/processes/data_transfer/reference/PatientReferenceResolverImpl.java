@@ -1,5 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.reference;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -20,8 +24,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
-
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 
 public class PatientReferenceResolverImpl implements PatientReferenceResolver
 {
@@ -85,8 +87,8 @@ public class PatientReferenceResolverImpl implements PatientReferenceResolver
 		if (pseudonym == null || pseudonym.isBlank())
 			return Optional.empty();
 
-		Reference ref = new Reference().setIdentifier(new Identifier()
-				.setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym))
+		Reference ref = new Reference()
+				.setIdentifier(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym))
 				.setType("Patient");
 
 		return Optional.of(setPatientRef.apply(ref));
@@ -99,7 +101,7 @@ public class PatientReferenceResolverImpl implements PatientReferenceResolver
 			return null;
 
 		Identifier id = ref.getIdentifier();
-		if (id != null && ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(id.getSystem()))
+		if (id != null && NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(id.getSystem()))
 			return id.getValue();
 
 		return null;
@@ -125,7 +127,7 @@ public class PatientReferenceResolverImpl implements PatientReferenceResolver
 			{
 				for (Identifier identifier : p.getIdentifier())
 				{
-					if (ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(identifier.getSystem()))
+					if (NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(identifier.getSystem()))
 						return identifier.getValue();
 				}
 			}
@@ -138,11 +140,13 @@ public class PatientReferenceResolverImpl implements PatientReferenceResolver
 	{
 		Patient p = new Patient();
 		p.setIdElement(new IdType(null, "Patient", UUID.randomUUID().toString(), null));
-		p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/bar");
+		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/bar").getType()
+				.getCodingFirstRep().setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
 
 		Procedure c = new Procedure();
-		c.setSubject(new Reference().setIdentifier(new Identifier()
-				.setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/baz")));
+		c.setSubject(new Reference()
+				.setIdentifier(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/baz")));
 
 		Optional<Procedure> cond = new PatientReferenceResolverImpl().convertLiteralTologicalReference(c,
 				Arrays.asList(p));
