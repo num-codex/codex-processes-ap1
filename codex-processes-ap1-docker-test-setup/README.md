@@ -28,12 +28,6 @@ docker-compose up crr-fhir-bridge
 ```
 Access at http://localhost:8888/fhir-bridge/fhir/
 
-Console 3: Start proxy and db
-```sh
-docker-compose up -d proxy db && docker-compose logs -f proxy db
-```
-Console 3: Disconnect from log output (Ctrl-C) if proxy and db started
-
 Console 3: Start DIC DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d dic-fhir && docker-compose logs -f dic-fhir
@@ -97,7 +91,6 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" 
 -d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_bf_create.json \
 http://localhost:8080/fhir
 ```
-
 
 Console 6: Start Data Trigger Process at DIC using the following command
 ```sh
