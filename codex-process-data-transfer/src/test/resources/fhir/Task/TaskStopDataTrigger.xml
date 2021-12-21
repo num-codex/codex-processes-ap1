@@ -1,8 +1,8 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger|0.4.1"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger|0.5.0"/>
    </meta>
-   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/0.4.1"/>
+   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/0.5.0"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2021-09-06T01:00:00+01:00"/>
