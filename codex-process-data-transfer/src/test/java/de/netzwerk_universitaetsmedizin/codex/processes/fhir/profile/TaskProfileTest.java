@@ -22,6 +22,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER_MESSAGE_NAME;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.DATE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
@@ -60,7 +61,7 @@ public class TaskProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(TaskProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION,
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION, DATE,
 			Arrays.asList("highmed-task-base-0.5.0.xml", "num-codex-task-start-data-receive.xml",
 					"num-codex-task-start-data-send.xml", "num-codex-task-start-data-translate.xml",
 					"num-codex-task-start-data-trigger.xml", "num-codex-task-stop-data-trigger.xml"),
