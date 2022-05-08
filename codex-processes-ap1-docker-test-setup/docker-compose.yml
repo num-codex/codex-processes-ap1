@@ -428,11 +428,12 @@ services:
       SECURITY_AUTHADMINPASSWORD: mySuperAwesomePassword123
       SYSTEM_NAME: local.ehrbase.org
       ADMIN_API_ACTIVE: 'true'
+#      SERVER_DISABLESTRICTVALIDATION: 'true'
       TZ: Europe/Berlin
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:1.4.2
+    image: ehrbase/fhir-bridge:latest
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
@@ -440,10 +441,10 @@ services:
       - crr-ehrbase-network
       - crr-bpe-backend
     environment:
-      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/rest
+      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/
       FHIR_BRIDGE_FHIR_VALIDATION_OPTIONAL_IDENTIFIER: 'true'
       TZ: Europe/Berlin
-#     SPRING_PROFILES_ACTIVE: dev
+#      SPRING_PROFILES_ACTIVE: dev
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase
