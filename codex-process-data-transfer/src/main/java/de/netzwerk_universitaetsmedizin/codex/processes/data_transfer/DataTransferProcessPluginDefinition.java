@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +14,19 @@ import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
 import org.highmed.dsf.fhir.resources.ValueSetResource;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
-	public static final String VERSION = "0.4.1";
+	public static final String VERSION = "0.5.0";
+	public static final LocalDate DATE = LocalDate.of(2021, 9, 6);
 
 	@Override
 	public String getName()
@@ -33,6 +38,12 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	public String getVersion()
 	{
 		return VERSION;
+	}
+
+	@Override
+	public LocalDate getReleaseDate()
+	{
+		return DATE;
 	}
 
 	@Override
@@ -84,7 +95,24 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
 				Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
 
-		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
-				classLoader, propertyResolver, resourcesByProcessKeyAndVersion);
+		return ResourceProvider.read(VERSION, DATE,
+				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader, propertyResolver,
+				resourcesByProcessKeyAndVersion);
+	}
+
+	@Override
+	public void onProcessesDeployed(ApplicationContext pluginApplicationContext, List<String> activeProcesses)
+	{
+		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend")
+				|| activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataReceive"))
+		{
+			pluginApplicationContext.getBean(GeccoClientFactory.class).testConnection();
+		}
+
+		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend")
+				|| activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataTranslate"))
+		{
+			pluginApplicationContext.getBean(FttpClientFactory.class).testConnection();
+		}
 	}
 }

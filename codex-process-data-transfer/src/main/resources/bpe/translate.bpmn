@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1davgtw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
-  <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataTranslate" isExecutable="true" camunda:versionTag="0.4.1">
+  <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataTranslate" isExecutable="true" camunda:versionTag="#{version}">
     <bpmn:startEvent id="DataTranslateMessageStartEvent" name="start data translate process">
       <bpmn:outgoing>Flow_185r1m5</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0nqjzhp" messageRef="Message_1nly3ld" />
@@ -24,9 +24,9 @@
     <bpmn:endEvent id="StartReceiveProcess" name="start receive process">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive/0.4.1</camunda:inputParameter>
+          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive/#{version}</camunda:inputParameter>
           <camunda:inputParameter name="messageName">startDataReceive</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive|0.4.1</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive|#{version}</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1c2ibtj</bpmn:incoming>

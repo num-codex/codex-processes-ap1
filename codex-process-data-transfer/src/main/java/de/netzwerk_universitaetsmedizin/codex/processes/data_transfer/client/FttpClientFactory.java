@@ -22,8 +22,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
@@ -129,8 +127,7 @@ public class FttpClientFactory
 		this.hapiClientVerbose = hapiClientVerbose;
 	}
 
-	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	public void testConnection()
 	{
 		try
 		{

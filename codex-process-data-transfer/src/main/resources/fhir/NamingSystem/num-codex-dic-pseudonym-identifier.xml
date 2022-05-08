@@ -1,14 +1,15 @@
 <NamingSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
-			<code value="ALL" />
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
 		</tag>
 	</meta>
 	<name value="NUM-CODEX_DIC_Pseudonym_Identifier"/>
-	<status value="active" />
+	<status value="active"/>
 	<kind value="identifier"/>
-	<date value="2021-09-02"/>
+	<!-- date managed by bpe -->
+	<date value="#{date}"/>
 	<publisher value="NUM-Codex"/>
 	<responsible value="THS Greifswald"/>
 	<description value="DIZ specific pseudonym"/>

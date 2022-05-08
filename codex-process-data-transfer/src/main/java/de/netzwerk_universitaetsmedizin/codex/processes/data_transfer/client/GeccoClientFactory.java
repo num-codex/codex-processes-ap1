@@ -14,8 +14,6 @@ import java.util.UUID;
 import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -143,8 +141,7 @@ public class GeccoClientFactory
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
 	}
 
-	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	public void testConnection()
 	{
 		try
 		{

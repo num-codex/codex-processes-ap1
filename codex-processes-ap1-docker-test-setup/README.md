@@ -92,7 +92,6 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" 
 http://localhost:8080/fhir
 ```
 
-
 Console 6: Start Data Trigger Process at DIC using the following command
 ```sh
 curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+xml" \
