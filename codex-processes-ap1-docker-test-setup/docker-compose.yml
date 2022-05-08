@@ -37,7 +37,7 @@ services:
     image: postgres:13
     restart: on-failure
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,7 +66,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.5.4
+    image: ghcr.io/highmed/fhir:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5000:5000
@@ -113,7 +113,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.5.4
+    image: ghcr.io/highmed/bpe:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5003:5003
@@ -194,7 +194,7 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.5.4
+    image: ghcr.io/highmed/fhir:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5001:5001
@@ -241,7 +241,7 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.5.4
+    image: ghcr.io/highmed/bpe:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5004:5004
@@ -298,7 +298,7 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.5.4
+    image: ghcr.io/highmed/fhir:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5002:5002
@@ -345,7 +345,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.5.4
+    image: ghcr.io/highmed/bpe:0.6.0-RC3
     restart: on-failure
     ports:
       - 127.0.0.1:5005:5005
@@ -459,7 +459,7 @@ secrets:
 
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
-    
+
   db_dic_fhir_user.password:
     file: ./secrets/db_dic_fhir_user.password
   db_dic_fhir_user_permanent_delete.password:
@@ -519,7 +519,7 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.64/28
+        - subnet: 172.20.0.64/28
   dic-fhir-backend:
   dic-bpe-frontend:
   dic-bpe-backend:
@@ -528,7 +528,7 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.80/28
+        - subnet: 172.20.0.80/28
   gth-fhir-backend:
   gth-bpe-frontend:
   gth-bpe-backend:
@@ -537,7 +537,7 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.20.0.96/28
+        - subnet: 172.20.0.96/28
   crr-fhir-backend:
   crr-bpe-frontend:
   crr-bpe-backend:
