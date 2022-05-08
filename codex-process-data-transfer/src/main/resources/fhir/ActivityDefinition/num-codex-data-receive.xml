@@ -12,14 +12,14 @@
 		</extension>
 		<extension url="task-profile">
 			<valueCanonical
-					value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive|${version}" />
+					value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive|#{version}" />
 		</extension>
 		<extension url="requester">
 			<valueCoding>
 				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization">
 					<valueIdentifier>
 						<system value="http://highmed.org/sid/organization-identifier" />
-						<value value="${de.netzwerk_universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}" />
+						<value value="#{de.netzwerk_universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}" />
 					</valueIdentifier>
 				</extension>
 				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
@@ -31,7 +31,7 @@
 				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization">
 					<valueIdentifier>
 						<system value="http://highmed.org/sid/organization-identifier" />
-						<value value="${de.netzwerk_universitaetsmedizin.codex.crr.identifier.value:num-codex.de}" />
+						<value value="#{de.netzwerk_universitaetsmedizin.codex.crr.identifier.value:num-codex.de}" />
 					</valueIdentifier>
 				</extension>
 				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
@@ -42,14 +42,15 @@
 	<url
 		value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive" />
 	<!-- version managed by bpe -->
-	<version value="${version}" />
+	<version value="#{version}" />
 	<name value="dataReceive" />
 	<title value="Data Receive Process" />
 	<subtitle value="NUM-CODEX Central Research Repository Data Receive Process" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
-	<date value="2021-09-06" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
 	<publisher value="NUM-CODEX" />
 	<contact>
 		<name value="NUM-CODEX" />

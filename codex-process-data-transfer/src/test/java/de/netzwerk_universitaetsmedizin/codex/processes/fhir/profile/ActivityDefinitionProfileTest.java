@@ -1,11 +1,10 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.fhir.profile;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.DATE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -28,7 +27,7 @@ public class ActivityDefinitionProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION,
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION, DATE,
 			Arrays.asList("highmed-activity-definition-0.5.0.xml", "highmed-extension-process-authorization-0.5.0.xml",
 					"highmed-extension-process-authorization-consortium-role-0.5.0.xml",
 					"highmed-extension-process-authorization-organization-0.5.0.xml",
@@ -50,80 +49,60 @@ public class ActivityDefinitionProfileTest
 	@Test
 	public void testDataTriggerValid() throws Exception
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-trigger.xml")))
-		{
-			ActivityDefinition ad = validationRule.getFhirContext().newXmlParser()
-					.parseResource(ActivityDefinition.class, in);
+		ActivityDefinition ad = validationRule.readActivityDefinition(
+				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-trigger.xml"));
 
-			ValidationResult result = resourceValidator.validate(ad);
-			ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationResult result = resourceValidator.validate(ad);
+		ValidationSupportRule.logValidationMessages(logger, result);
 
-			assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-					|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-			assertTrue(
-					processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
-		}
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
 	}
 
 	@Test
 	public void testDataSendValid() throws Exception
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-send.xml")))
-		{
-			ActivityDefinition ad = validationRule.getFhirContext().newXmlParser()
-					.parseResource(ActivityDefinition.class, in);
+		ActivityDefinition ad = validationRule.readActivityDefinition(
+				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-send.xml"));
 
-			ValidationResult result = resourceValidator.validate(ad);
-			ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationResult result = resourceValidator.validate(ad);
+		ValidationSupportRule.logValidationMessages(logger, result);
 
-			assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-					|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-			assertTrue(
-					processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
-		}
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
 	}
 
 	@Test
 	public void testDataTranslateValid() throws Exception
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-translate.xml")))
-		{
-			ActivityDefinition ad = validationRule.getFhirContext().newXmlParser()
-					.parseResource(ActivityDefinition.class, in);
+		ActivityDefinition ad = validationRule.readActivityDefinition(
+				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-translate.xml"));
 
-			ValidationResult result = resourceValidator.validate(ad);
-			ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationResult result = resourceValidator.validate(ad);
+		ValidationSupportRule.logValidationMessages(logger, result);
 
-			assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-					|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-			assertTrue(
-					processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
-		}
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
 	}
 
 	@Test
 	public void testDataReceiveValid() throws Exception
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-receive.xml")))
-		{
-			ActivityDefinition ad = validationRule.getFhirContext().newXmlParser()
-					.parseResource(ActivityDefinition.class, in);
+		ActivityDefinition ad = validationRule.readActivityDefinition(
+				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-receive.xml"));
 
-			ValidationResult result = resourceValidator.validate(ad);
-			ValidationSupportRule.logValidationMessages(logger, result);
+		ValidationResult result = resourceValidator.validate(ad);
+		ValidationSupportRule.logValidationMessages(logger, result);
 
-			assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-					|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-			assertTrue(
-					processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
-		}
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
 	}
 }
