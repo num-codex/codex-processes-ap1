@@ -1,14 +1,10 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.reference;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -16,7 +12,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
@@ -134,22 +129,5 @@ public class PatientReferenceResolverImpl implements PatientReferenceResolver
 		}
 
 		return null;
-	}
-
-	public static void main(String[] args)
-	{
-		Patient p = new Patient();
-		p.setIdElement(new IdType(null, "Patient", UUID.randomUUID().toString(), null));
-		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/bar").getType()
-				.getCodingFirstRep().setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
-				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
-
-		Procedure c = new Procedure();
-		c.setSubject(new Reference()
-				.setIdentifier(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("foo/baz")));
-
-		Optional<Procedure> cond = new PatientReferenceResolverImpl().convertLiteralTologicalReference(c,
-				Arrays.asList(p));
-		System.out.println(cond.get().getSubject().getIdentifier().getValue());
 	}
 }
