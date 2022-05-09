@@ -120,13 +120,13 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 				.orElseThrow(() -> new RuntimeException("No resource in Bundle has subject with pseudonym"));
 	}
 
-	protected Identifier getPseudonymIdentifier(Patient patient)
+	protected String getPseudonym(Patient patient)
 	{
 		Objects.requireNonNull(patient, "patient");
 
 		return patient.getIdentifier().stream().filter(Identifier::hasValue).filter(Identifier::hasSystem)
 				.filter(i -> NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem())).findFirst()
-				.orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
+				.map(Identifier::getValue).orElseThrow(() -> new RuntimeException("Patient has no pseudonym"));
 	}
 
 	protected void addPseudonymTypeToIdentifierIfMissing(Identifier identifier)

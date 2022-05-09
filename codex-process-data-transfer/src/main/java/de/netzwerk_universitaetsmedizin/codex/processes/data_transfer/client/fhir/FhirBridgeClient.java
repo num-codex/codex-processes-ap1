@@ -9,7 +9,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -79,13 +78,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		if (bundlePatient.isPresent())
 		{
-			Identifier pseudonymIdentifier = getPseudonymIdentifier(bundlePatient.get());
-
-			// TODO: Workaround for CRR, can be removed if DataSend process checks
-			// if Patient.identifier contains type information
-			addPseudonymTypeToIdentifierIfMissing(pseudonymIdentifier);
-
-			String pseudonym = pseudonymIdentifier.getValue();
+			String pseudonym = getPseudonym(bundlePatient.get());
 			Optional<Patient> existingPatient = findPatientInLocalFhirStore(pseudonym);
 
 			return existingPatient.map(existing -> update(existing, bundlePatient.get(), pseudonym))

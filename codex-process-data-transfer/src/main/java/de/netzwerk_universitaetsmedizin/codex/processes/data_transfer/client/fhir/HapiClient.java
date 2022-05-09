@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
@@ -52,13 +51,8 @@ public class HapiClient extends AbstractComplexFhirClient
 
 		if (bundlePatient.isPresent())
 		{
-			Identifier pseudonymIdentifier = getPseudonymIdentifier(bundlePatient.get());
+			String pseudonym = getPseudonym(bundlePatient.get());
 
-			// TODO: Workaround for CRR, can be removed if DataSend process
-			// checks if Patient.identifier contains type information
-			addPseudonymTypeToIdentifierIfMissing(pseudonymIdentifier);
-
-			String pseudonym = pseudonymIdentifier.getValue();
 			findPatientInLocalFhirStore(pseudonym).ifPresentOrElse(patient ->
 			{
 				String localPatientId = patient.getIdElement().getIdPart();
