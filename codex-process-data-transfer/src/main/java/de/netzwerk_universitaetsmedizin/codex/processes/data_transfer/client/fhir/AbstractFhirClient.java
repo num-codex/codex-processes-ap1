@@ -7,16 +7,20 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -31,6 +35,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponents.UriTemplateVariables;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
@@ -90,6 +97,63 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	private static final SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("yyyy-MM");
 	private static final SimpleDateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+	private static final class QueryParameters implements UriTemplateVariables
+	{
+		final List<QuerParameter> parameters = new ArrayList<>();
+
+		@Override
+		public Object getValue(String name)
+		{
+			return parameters.stream().filter(p -> p.getValue(name) != null).findFirst().map(p -> p.getValue(name))
+					.orElseThrow(() -> new IllegalArgumentException("No value for '" + name + "'"));
+		}
+
+		boolean add(QuerParameter param)
+		{
+			if (param != null)
+				return parameters.add(param);
+			else
+				return false;
+		}
+
+		void replace(UriComponentsBuilder urlBuilder)
+		{
+			parameters.forEach(p -> p.replace(urlBuilder));
+		}
+	}
+
+	private static final class QuerParameter
+	{
+		final String name;
+		final Map<String, String> valuesByTemplateParameter = new HashMap<>();
+
+		QuerParameter(String templateParameter, String name, String... values)
+		{
+			Objects.requireNonNull(templateParameter, "templateParameter");
+			Objects.requireNonNull(name, "name");
+			Objects.requireNonNull(values, "values");
+
+			this.name = name;
+			IntStream.range(0, values.length).forEach(i ->
+			{
+				if (values[i] != null)
+					valuesByTemplateParameter.put(templateParameter + "_" + i, values[i]);
+			});
+		}
+
+		void replace(UriComponentsBuilder builder)
+		{
+			builder.replaceQueryParam(name);
+			valuesByTemplateParameter.keySet()
+					.forEach(templateParam -> builder.queryParam(name, "{" + templateParam + "}"));
+		}
+
+		String getValue(String templateParameter)
+		{
+			return valuesByTemplateParameter.get(templateParameter);
+		}
+	}
 
 	protected final GeccoClient geccoClient;
 
@@ -343,71 +407,78 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 			}
 
 			String resource = queryPatternMatcher.group("resource");
-			String query = queryPatternMatcher.group("query");
+			UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl());
+			QueryParameters queryParameters = new QueryParameters();
 
 			if (RESOURCES_WITH_PATIENT_REF.contains(resource))
 			{
 				if (patientId != null)
-					query += createPatIdSearchUrlPart(patientId);
+					queryParameters.add(createPatIdSearchUrlPart(patientId));
 				else
-					query += createPatPrefixPseudonymSearchUrlPart(pseudonym);
+					queryParameters.add(createPatPrefixPseudonymSearchUrlPart(pseudonym));
 
 				if (includePatient)
-					query += createIncludeSearchUrlPart(resource);
+					queryParameters.add(createIncludeSearchUrlPart(resource));
 			}
 			else if ("Patient".equals(resource))
 			{
 				// filtering search for patient if patient id known
 				if (patientId != null)
 					return null;
-
-				query += createPseudonymSearchUrlPart(pseudonym);
+				else
+					queryParameters.add(createPseudonymSearchUrlPart(pseudonym));
 			}
 			else
 			{
 				logger.warn(
 						"Search-Bundle contains entry with invalid serach query {}, target resource {} not supported",
-						resource + query, resource);
+						entry.getRequest().getUrl(), resource);
 				throw new RuntimeException("Search-Bundle contains entry with invalid serach query, target resource "
 						+ resource + " not supported");
 			}
 
-			query += createExportFromSearchUrlPart(exportFrom);
-			query += createExportToSearchUrlPart(exportTo);
+			queryParameters.add(new QuerParameter("from_to", "_lastUpdated", createExportFromSearchUrlPart(exportFrom),
+					createExportToSearchUrlPart(exportTo)));
 
-			entry.getRequest().setUrl(resource + query);
+			queryParameters.replace(urlBuilder);
+			UriComponents url = urlBuilder.encode().build().expand(queryParameters);
 
+			entry.getRequest().setUrl(url.toString());
 			return entry;
 		};
 	}
 
-	private String createPseudonymSearchUrlPart(String pseudonym)
+	private QuerParameter createPseudonymSearchUrlPart(String pseudonym)
 	{
-		if (pseudonym != null && !pseudonym.isBlank())
-			return "&identifier=" + NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+		if (pseudonym == null || pseudonym.isBlank())
+			return null;
 		else
-			return "";
+			return new QuerParameter("pseudonym", "identifier",
+					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
-	private String createPatIdSearchUrlPart(String patientId)
+	private QuerParameter createPatIdSearchUrlPart(String patientId)
 	{
-		if (patientId != null && !patientId.isBlank())
-			return "&patient=" + patientId;
+		if (patientId == null || patientId.isBlank())
+			return null;
 		else
-			return "";
+			return new QuerParameter("patientId", "patient", patientId);
 	}
 
-	private String createPatPrefixPseudonymSearchUrlPart(String pseudonym)
+	private QuerParameter createPatPrefixPseudonymSearchUrlPart(String pseudonym)
 	{
-		if (pseudonym != null && !pseudonym.isBlank())
-			return "&patient:identifier=" + NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+		if (pseudonym == null || pseudonym.isBlank())
+			return null;
 		else
-			return "";
+			return new QuerParameter("pseudonym", "patient:identifier",
+					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
 	private String createExportFromSearchUrlPart(DateWithPrecision exportFrom)
 	{
-		if (exportFrom != null)
+		if (exportFrom == null)
+			return null;
+		else
 		{
 			String dateTime = null;
 			switch (exportFrom.getPrecision())
@@ -432,26 +503,24 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 							"TemporalPrecisionEnum value " + exportFrom.getPrecision() + " not supported");
 			}
 
-			return "&_lastUpdated=ge" + dateTime;
+			return "ge" + dateTime;
 		}
-		else
-			return "";
 	}
 
 	private String createExportToSearchUrlPart(Date exportTo)
 	{
-		if (exportTo != null)
-			return "&_lastUpdated=lt" + TIME_FORMAT.format(exportTo);
+		if (exportTo == null)
+			return null;
 		else
-			return "";
+			return "lt" + TIME_FORMAT.format(exportTo);
 	}
 
-	private String createIncludeSearchUrlPart(String resource)
+	private QuerParameter createIncludeSearchUrlPart(String resource)
 	{
-		if (resource != null)
-			return "&_include=" + resource + ":patient";
+		if (resource == null)
+			return null;
 		else
-			return "";
+			return new QuerParameter("include_resource", "_include", resource + ":patient");
 	}
 
 	protected Stream<DomainResource> getDomainResources(Bundle bundle)
