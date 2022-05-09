@@ -5,6 +5,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM;
 
@@ -23,7 +24,9 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
 import org.highmed.dsf.fhir.variables.TargetValues;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
@@ -64,9 +67,11 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		String downloadUrl = saveBinaryForCrr(encrypted, crrIdentifierValue);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL, Variables.stringValue(downloadUrl));
+
+		Endpoint targetEndpoint = getEndpoint(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR, crrIdentifierValue);
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
 				TargetValues.create(Target.createUniDirectionalTarget(crrIdentifierValue,
-						getAddress(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR, crrIdentifierValue))));
+						getEndpointIdentifier(targetEndpoint), targetEndpoint.getAddress())));
 	}
 
 	protected String saveBinaryForCrr(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
@@ -96,11 +101,18 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		}
 	}
 
-	private String getAddress(String role, String identifier)
+	private Endpoint getEndpoint(String role, String identifier)
 	{
 		return endpointProvider
-				.getFirstConsortiumEndpointAdress(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM,
+				.getFirstConsortiumEndpoint(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM,
 						CODESYSTEM_HIGHMED_ORGANIZATION_ROLE, role, identifier)
 				.get();
+	}
+
+	private String getEndpointIdentifier(Endpoint endpoint)
+	{
+		return endpoint.getIdentifier().stream()
+				.filter(i -> NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER.equals(i.getSystem())).findFirst()
+				.map(Identifier::getValue).get();
 	}
 }
