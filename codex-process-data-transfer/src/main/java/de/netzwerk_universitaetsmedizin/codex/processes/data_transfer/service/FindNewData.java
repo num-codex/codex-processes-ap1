@@ -8,6 +8,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
 
 import java.util.Date;
 import java.util.Objects;
@@ -26,6 +27,8 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
 import org.highmed.dsf.fhir.variables.TargetValues;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -84,9 +87,18 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO, Variables.dateValue(exportTo));
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST,
 				PatientReferenceListValues.create(patientReferenceList));
+
+		Endpoint targetEndpoint = endpointProvider.getLocalEndpoint();
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
 				TargetValues.create(Target.createUniDirectionalTarget(organizationProvider.getLocalIdentifierValue(),
-						endpointProvider.getLocalEndpointAddress())));
+						getEndpointIdentifier(targetEndpoint), targetEndpoint.getAddress())));
+	}
+
+	private String getEndpointIdentifier(Endpoint endpoint)
+	{
+		return endpoint.getIdentifier().stream()
+				.filter(i -> NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER.equals(i.getSystem())).findFirst()
+				.map(Identifier::getValue).get();
 	}
 
 	protected Optional<DateWithPrecision> getExportFrom(DelegateExecution execution)
