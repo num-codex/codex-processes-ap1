@@ -157,7 +157,7 @@ public class GeccoClientFactory
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while testing connection to fTTP", e);
+			logger.error("Error while testing connection to GECCO FHIR server", e);
 		}
 	}
 
