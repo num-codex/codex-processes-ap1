@@ -22,7 +22,7 @@ docker-compose up dic-fhir-store-blaze
 ```
 Access at http://localhost:8080/fhir/
 
-Console 2: Start CRR fhir-bridge Server
+Console 2: Start CRR fhir-bridge server
 ```sh
 docker-compose up crr-fhir-bridge
 ```
@@ -32,7 +32,7 @@ Console 3: Start DIC DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d dic-fhir && docker-compose logs -f dic-fhir
 ```
-Console 3: Disconnect from log output (Ctrl-C) if Server started
+Console 3: Disconnect from log output (Ctrl-C) if server started
 Console 3: Start DIC DSF BPE Server
 ```sh
 docker-compose up -d dic-bpe && docker-compose logs -f dic-fhir dic-bpe
@@ -42,7 +42,7 @@ Console 4: Start GTH DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d gth-fhir && docker-compose logs -f gth-fhir
 ```
-Console 4: Disconnect from log output (Ctrl-C) if Server started
+Console 4: Disconnect from log output (Ctrl-C) if server started
 Console 4: Start GTH DSF BPE Server
 ```sh
 docker-compose up -d gth-bpe && docker-compose logs -f gth-fhir gth-bpe
@@ -52,7 +52,7 @@ Console 5: Start CRR DSF FHIR Server and wait till started
 ```sh
 docker-compose up -d crr-fhir && docker-compose logs -f crr-fhir
 ```
-Console 5: Dicconnect from log output (Ctrl-C) if Server started
+Console 5: Dicconnect from log output (Ctrl-C) if server started
 Console 5: Start CRR DSF BPE Server
 ```sh
 docker-compose up -d crr-bpe && docker-compose logs -f crr-fhir crr-bpe

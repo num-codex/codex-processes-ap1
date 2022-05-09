@@ -42,7 +42,15 @@
                 "identifier": [
                     {
                         "system": "http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym",
-                        "value": "source/original"
+                        "value": "source/original",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "ANON"
+                                }
+                            ]
+                        }
                     }
                 ],
                 "birthDate": "1953-09-30"
