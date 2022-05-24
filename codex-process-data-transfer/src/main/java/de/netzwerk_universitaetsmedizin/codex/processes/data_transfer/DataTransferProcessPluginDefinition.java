@@ -22,6 +22,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Ftt
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
@@ -55,7 +57,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class);
+		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class);
 	}
 
 	@Override
@@ -68,28 +70,34 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 		var aRec = ActivityDefinitionResource.file("fhir/ActivityDefinition/num-codex-data-receive.xml");
 
 		var cD = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer.xml");
+		var cDeS = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error-source.xml");
+		var cDeT = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error-type.xml");
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
 		var nB = NamingSystemResource.file("fhir/NamingSystem/num-codex-bloom-filter-identifier.xml");
 
+		var sTexErMe = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-extension-error-metadata.xml");
+		var sTstaDrec = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
+		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
+		var sTstaDtra = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
 		var sTstoDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-stop-data-trigger.xml");
-		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
-		var sTstaDtra = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
-		var sTstaDrec = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
 
 		var vD = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer.xml");
+		var vDeS = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-source.xml");
+		var vDeT = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-type.xml");
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
 				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
 				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
-				Arrays.asList(aSen, cD, nD, nB, sTstaDsen, vD), //
+				Arrays.asList(aSen, cD, cDeS, cDeT, nD, nB, sTexErMe, sTstaDsen, vD, vDeS, vDeT), //
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
 				Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
@@ -113,6 +121,11 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 				|| activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataTranslate"))
 		{
 			pluginApplicationContext.getBean(FttpClientFactory.class).testConnection();
+		}
+
+		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
+		{
+			pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
 		}
 	}
 }

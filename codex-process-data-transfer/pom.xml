@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>codex-process-data-transfer</artifactId>
@@ -16,31 +14,49 @@
 	</properties>
 
 	<dependencies>
+		<!-- provided by DSF -->
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-base</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- TODO add org.highmed.dsf:dsf-fhir-validation to dsf-bpe-process-base's dependencies -->
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-fhir-validation</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- TODO add org.apache.commons:commons-compress to dsf-bpe-process-base's dependencies -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- must be added as regular DSF plugins -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-fhir-validation</artifactId>
-			<scope>test</scope>
+			<!-- <scope>test</scope> -->
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/ValidateDataLearningTest.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -109,6 +125,149 @@
 									<artifactId>hapi-fhir-client</artifactId>
 									<version>${hapi.version}</version>
 								</artifactItem>
+								
+								<!-- TODO vv remove when part of dsf-bpe-process-base dependencies -->
+								<artifactItem>
+									<groupId>commons-codec</groupId>
+									<artifactId>commons-codec</artifactId>
+									<version>1.12</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-structures-r5</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.r5</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-validation</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-converter</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.convertors</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>net.sf.saxon</groupId>
+									<artifactId>Saxon-HE</artifactId>
+									<version>9.5.1-5</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.validation</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.dstu2</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>org.hl7.fhir.dstu3</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>xpp3</groupId>
+									<artifactId>xpp3</artifactId>
+									<version>1.1.4c</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>xpp3</groupId>
+									<artifactId>xpp3_xpath</artifactId>
+									<version>1.1.4c</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.commons</groupId>
+									<artifactId>commons-compress</artifactId>
+									<version>1.21</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.fhir</groupId>
+									<artifactId>ucum</artifactId>
+									<version>1.0.2</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.thymeleaf</groupId>
+									<artifactId>thymeleaf</artifactId>
+									<version>3.0.9.RELEASE</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ognl</groupId>
+									<artifactId>ognl</artifactId>
+									<version>3.1.12</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.javassist</groupId>
+									<artifactId>javassist</artifactId>
+									<version>3.20.0-GA</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.attoparser</groupId>
+									<artifactId>attoparser</artifactId>
+									<version>2.0.4.RELEASE</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.unbescape</groupId>
+									<artifactId>unbescape</artifactId>
+									<version>1.1.5.RELEASE</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.github.ben-manes.caffeine</groupId>
+									<artifactId>caffeine</artifactId>
+									<version>2.7.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.checkerframework</groupId>
+									<artifactId>checker-qual</artifactId>
+									<version>2.6.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.google.errorprone</groupId>
+									<artifactId>error_prone_annotations</artifactId>
+									<version>2.3.3</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.google.code.gson</groupId>
+									<artifactId>gson</artifactId>
+									<version>2.8.5</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>commons-logging</groupId>
+									<artifactId>commons-logging</artifactId>
+									<version>1.2</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ca.uhn.hapi.fhir</groupId>
+									<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+									<version>${hapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.commons</groupId>
+									<artifactId>commons-compress</artifactId>
+								</artifactItem>
+								<!-- TODO ^^ remove when part of dsf-bpe-process-base dependencies -->
+								
 							</artifactItems>
 							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/plugin</outputDirectory>
 						</configuration>
@@ -145,6 +304,29 @@
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/plugin</outputDirectory>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>copy-standalone-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<includeArtifactIds>hapi-fhir-base,hapi-fhir-client,hapi-fhir-converter,hapi-fhir-structures-r4,hapi-fhir-structures-r5,hapi-fhir-validation,hapi-fhir-validation-resources-r4,
+							hapi-fhir-validation-resources-r5,org.hl7.fhir.convertors,org.hl7.fhir.dstu2,org.hl7.fhir.dstu2016may,org.hl7.fhir.dstu3,org.hl7.fhir.r4,org.hl7.fhir.r5,org.hl7.fhir.utilities,
+							org.hl7.fhir.validation,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,caffeine,guava,
+							commons-codec,commons-io,crypto-utils,log4j2-utils,
+							jakarta.annotation-api,jakarta.ws.rs-api,
+							commons-compress,commons-lang3,commons-text,
+							log4j-api,log4j-core,log4j-slf4j-impl,bcpkix-jdk15on,bcprov-jdk15on,bcutil-jdk15on,ucum,jakarta.inject,
+							jersey-client,jersey-common,
+							jersey-media-jaxb,jersey-media-json-jackson,
+							dsf-bpe-process-base,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
+							slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
+							</includeArtifactIds>
 						</configuration>
 					</execution>
 				</executions>
@@ -198,6 +380,24 @@
 						</fileset>
 					</filesets>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>src/assembly/zip.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>zip-assembly</id>
+						<phase>install</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

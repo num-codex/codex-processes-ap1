@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Config for ValidationMain class -->
+<Configuration status="INFO" monitorInterval="30" verbose="false">
+
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_ERR">
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n" />
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="de.rwh" level="TRACE" />
+		<Logger name="org.highmed" level="TRACE" />
+		<Logger name="de.netzwerk_universitaetsmedizin" level="TRACE" />
+		<Logger name="org.apache" level="WARN" />
+		<Logger name="org.springframework" level="WARN" />
+		<Logger name="jndi" level="WARN" />
+		<Logger name="org.eclipse.jetty" level="INFO" />
+		<Logger name="com.sun.jersey" level="WARN" />
+		<Logger name="liquibase" level="WARN" />
+		<Logger name="ca.uhn.hl7v2" level="WARN" />
+		<Logger name="ca.uhn.fhir" level="WARN" />
+
+		<Root level="WARN">
+			<AppenderRef ref="CONSOLE" />
+		</Root>
+	</Loggers>
+</Configuration>

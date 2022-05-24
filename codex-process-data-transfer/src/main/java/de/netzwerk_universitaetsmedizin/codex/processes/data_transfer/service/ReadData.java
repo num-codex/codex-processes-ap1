@@ -5,6 +5,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.HAPI_USER_DATA_SOURCE_ID_ELEMENT;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
@@ -67,14 +69,17 @@ public class ReadData extends AbstractServiceDelegate
 
 	private final FhirContext fhirContext;
 	private final GeccoClientFactory geccoClientFactory;
+	private final String geccoServerBase;
 
 	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory)
+			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory,
+			String geccoServerBase)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.fhirContext = fhirContext;
 		this.geccoClientFactory = geccoClientFactory;
+		this.geccoServerBase = geccoServerBase;
 	}
 
 	@Override
@@ -84,6 +89,7 @@ public class ReadData extends AbstractServiceDelegate
 
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(geccoServerBase, "geccoServerBase");
 	}
 
 	@Override
@@ -155,14 +161,28 @@ public class ReadData extends AbstractServiceDelegate
 		List<BundleEntryComponent> entries = resources.map(r ->
 		{
 			BundleEntryComponent entry = b.addEntry();
+
+			// storing original resource reference for validation error tracking
+			entry.setUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT, getAbsoluteId(r));
+
 			entry.setFullUrl("urn:uuid:" + UUID.randomUUID());
 			entry.getRequest().setMethod(HTTPVerb.PUT).setUrl(getConditionalUpdateUrl(pseudonym, r));
 			entry.setResource(setSubjectOrIdentifier(clean(r), pseudonym));
+
 			return entry;
 		}).collect(Collectors.toList());
 
 		b.setEntry(entries);
 		return b;
+	}
+
+	private IdType getAbsoluteId(DomainResource r)
+	{
+		if (r == null)
+			return null;
+
+		return r.getIdElement().isAbsolute() ? r.getIdElement()
+				: r.getIdElement().withServerBase(geccoServerBase, r.getResourceType().name());
 	}
 
 	private DomainResource clean(DomainResource r)

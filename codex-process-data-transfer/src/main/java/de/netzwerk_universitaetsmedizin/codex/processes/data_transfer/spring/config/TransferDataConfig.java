@@ -22,6 +22,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Gec
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
@@ -44,6 +46,10 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.St
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ValidateData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactoryImpl;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageIdentifier;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageManager;
 
 @Configuration
 public class TransferDataConfig
@@ -65,6 +71,12 @@ public class TransferDataConfig
 
 	@Autowired
 	private FhirContext fhirContext;
+
+	@Autowired
+	private ValidationPackageManager validationPackageManager;
+
+	@Autowired
+	private ValidationPackageIdentifier validationPackageIdentifier;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.trust.certificates:#{null}}")
 	private String fhirStoreTrustStore;
@@ -328,13 +340,33 @@ public class TransferDataConfig
 	@Bean
 	public ReadData readData()
 	{
-		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, geccoClientFactory());
+		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, geccoClientFactory(),
+				fhirStoreBaseUrl);
 	}
 
 	@Bean
 	public ValidateData validateData()
 	{
-		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper);
+		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper, bundleValidatorFactory(),
+				errorOutputParameterGenerator(), errorLogger());
+	}
+
+	@Bean
+	public ErrorOutputParameterGenerator errorOutputParameterGenerator()
+	{
+		return new ErrorOutputParameterGenerator();
+	}
+
+	@Bean
+	public ErrorLogger errorLogger()
+	{
+		return new ErrorLogger();
+	}
+
+	@Bean
+	public BundleValidatorFactory bundleValidatorFactory()
+	{
+		return new BundleValidatorFactoryImpl(validationPackageManager, validationPackageIdentifier);
 	}
 
 	@Bean
