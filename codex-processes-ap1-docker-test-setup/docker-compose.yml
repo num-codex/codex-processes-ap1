@@ -2,7 +2,7 @@ version: '3.8'
 services:
   proxy:
     image: nginx:1.21
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:443:443
     secrets:
@@ -35,7 +35,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
       interval: 10s
@@ -66,8 +66,8 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5000:5000
     secrets:
@@ -113,8 +113,8 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5003:5003
     secrets:
@@ -172,7 +172,7 @@ services:
     # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
     build: ./dic/hapi
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:8080:8080
     environment:
@@ -194,8 +194,8 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5001:5001
     secrets:
@@ -241,8 +241,8 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5004:5004
     secrets:
@@ -298,8 +298,8 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5002:5002
     secrets:
@@ -345,8 +345,8 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5005:5005
     secrets:
