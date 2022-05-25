@@ -318,9 +318,9 @@
 							<includeArtifactIds>hapi-fhir-base,hapi-fhir-client,hapi-fhir-converter,hapi-fhir-structures-r4,hapi-fhir-structures-r5,hapi-fhir-validation,hapi-fhir-validation-resources-r4,
 							hapi-fhir-validation-resources-r5,org.hl7.fhir.convertors,org.hl7.fhir.dstu2,org.hl7.fhir.dstu2016may,org.hl7.fhir.dstu3,org.hl7.fhir.r4,org.hl7.fhir.r5,org.hl7.fhir.utilities,
 							org.hl7.fhir.validation,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,caffeine,guava,
-							commons-codec,commons-io,crypto-utils,log4j2-utils,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
-							log4j-api,log4j-core,log4j-slf4j-impl,bcpkix-jdk15on,bcprov-jdk15on,bcutil-jdk15on,ucum,hk2-api,hk2-locator,hk2-utils,aopalliance-repackaged,
-							jakarta.inject,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
+							commons-codec,commons-io,crypto-utils,log4j2-utils,jakarta.activation,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
+							httpclient,httpcore,log4j-api,log4j-core,log4j-slf4j-impl,bcpkix-jdk15on,bcprov-jdk15on,bcutil-jdk15on,ucum,hk2-api,hk2-locator,hk2-utils,osgi-resource-locator,
+							aopalliance-repackaged,jakarta.inject,jersey-apache-connector,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
 							dsf-bpe-process-base,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
 							slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
 							</includeArtifactIds>
