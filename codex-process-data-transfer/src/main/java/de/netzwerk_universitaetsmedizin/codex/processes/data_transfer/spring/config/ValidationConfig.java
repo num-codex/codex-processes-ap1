@@ -58,7 +58,11 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package:de.gecco|1.0.5}")
 	private String validationPackage;
 
-	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structureDefinitionModifierClasses:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structureDefinitionModifierClasses:"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover,"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.GeccoRadiologyProceduresCodingSliceMinFixer"
+			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> structureDefinitionModifierClasses;
 
 	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.packagesToIgnore:hl7.fhir.r4.core|4.0.1}'.trim().split('(,[ ]?)|(\\n)')}")
