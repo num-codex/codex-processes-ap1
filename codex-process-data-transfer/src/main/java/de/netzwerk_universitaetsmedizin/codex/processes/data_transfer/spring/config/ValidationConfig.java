@@ -314,9 +314,9 @@ public class ValidationConfig
 				packageClientKeyStorePassword);
 
 		return new ValidationPackageClientJersey(packageServerBaseUrl, packageClientTrustStore, packageClientKeyStore,
-				packageClientKeyStorePassword, packageClientBasicAuthUsername, packageClientBasicAuthPassword,
-				packageClientProxySchemeHostPort, packageClientProxyUsername, packageClientProxyPassword,
-				packageClientConnectTimeout, packageClientReadTimeout);
+				packageClientKeyStore == null ? null : packageClientKeyStorePassword, packageClientBasicAuthUsername,
+				packageClientBasicAuthPassword, packageClientProxySchemeHostPort, packageClientProxyUsername,
+				packageClientProxyPassword, packageClientConnectTimeout, packageClientReadTimeout);
 	}
 
 	@Bean
@@ -353,7 +353,8 @@ public class ValidationConfig
 				valueSetExpansionClientCertificatePrivateKeyPassword, valueSetExpansionClientKeyStorePassword);
 
 		return new ValueSetExpansionClientJersey(valueSetExpansionServerBaseUrl, valueSetExpansionClientTrustStore,
-				valueSetExpansionClientKeyStore, valueSetExpansionClientKeyStorePassword,
+				valueSetExpansionClientKeyStore,
+				valueSetExpansionClientKeyStore == null ? null : valueSetExpansionClientKeyStorePassword,
 				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
 				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
