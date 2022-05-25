@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.ValueSet;
 
 public interface ValueSetExpansionClient
@@ -16,4 +17,6 @@ public interface ValueSetExpansionClient
 	 * @throws WebApplicationException
 	 */
 	ValueSet expand(ValueSet valueSet) throws IOException, WebApplicationException;
+
+	CapabilityStatement getMetadata() throws WebApplicationException;
 }

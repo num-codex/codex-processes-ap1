@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -99,5 +100,11 @@ public class ValueSetExpansionClientWithFileSystemCache extends AbstractFhirReso
 		else
 			// return writeToCache(expanded, Function.identity(), ValueSet::getUrl, ValueSet::getVersion);
 			return writeRsourceToCache(expanded, Function.identity(), ValueSet::getUrl, ValueSet::getVersion);
+	}
+
+	@Override
+	public CapabilityStatement getMetadata() throws WebApplicationException
+	{
+		return delegate.getMetadata();
 	}
 }

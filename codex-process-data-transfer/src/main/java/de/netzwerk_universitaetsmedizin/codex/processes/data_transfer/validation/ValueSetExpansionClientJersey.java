@@ -12,16 +12,21 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
+import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ParametersJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ParametersXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -68,13 +73,12 @@ public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 			builder = builder.register(basicAuthFeature);
 		}
 
-		if (proxySchemeHostPort != null)
-		{
-			builder = builder.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
-			if (proxyUsername != null && proxyPassword != null)
-				builder = builder.property(ClientProperties.PROXY_USERNAME, proxyUsername)
-						.property(ClientProperties.PROXY_PASSWORD, String.valueOf(proxyPassword));
-		}
+		ClientConfig config = new ClientConfig();
+		config.connectorProvider(new ApacheConnectorProvider());
+		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
+		config.property(ClientProperties.PROXY_USERNAME, proxyUsername);
+		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
+		builder = builder.withConfig(config);
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);
@@ -86,7 +90,9 @@ public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 			builder.register(p);
 		}
 
-		builder.register(new OperationOutcomeJsonFhirAdapter(fhirContext))
+		builder.register(new CapabilityStatementJsonFhirAdapter(fhirContext))
+				.register(new CapabilityStatementXmlFhirAdapter(fhirContext))
+				.register(new OperationOutcomeJsonFhirAdapter(fhirContext))
 				.register(new OperationOutcomeXmlFhirAdapter(fhirContext))
 				.register(new ParametersJsonFhirAdapter(fhirContext))
 				.register(new ParametersXmlFhirAdapter(fhirContext)).register(new ValueSetJsonFhirAdapter(fhirContext))
@@ -118,5 +124,11 @@ public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 
 		return getResource().path("ValueSet").path("$expand").request(Constants.CT_FHIR_JSON_NEW)
 				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW), ValueSet.class);
+	}
+
+	@Override
+	public CapabilityStatement getMetadata() throws WebApplicationException
+	{
+		return getResource().path("metadata").request(Constants.CT_FHIR_JSON_NEW).get(CapabilityStatement.class);
 	}
 }

@@ -13,6 +13,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
@@ -49,13 +51,12 @@ public class ValidationPackageClientJersey implements ValidationPackageClient
 			builder = builder.register(basicAuthFeature);
 		}
 
-		if (proxySchemeHostPort != null)
-		{
-			builder = builder.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
-			if (proxyUsername != null && proxyPassword != null)
-				builder = builder.property(ClientProperties.PROXY_USERNAME, proxyUsername)
-						.property(ClientProperties.PROXY_PASSWORD, String.valueOf(proxyPassword));
-		}
+		ClientConfig config = new ClientConfig();
+		config.connectorProvider(new ApacheConnectorProvider());
+		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
+		config.property(ClientProperties.PROXY_USERNAME, proxyUsername);
+		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
+		builder = builder.withConfig(config);
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);
