@@ -43,6 +43,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.GeccoRadiologyProceduresCodingSliceMinFixer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.StructureDefinitionModifier;
 
@@ -53,11 +54,9 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	public static final List<ValidationPackageIdentifier> PACKAGE_IGNORE = List
 			.of(new ValidationPackageIdentifier("hl7.fhir.r4.core", "4.0.1"));
 
-	// closed type slicings result in error from the snapshot generator
 	public static final StructureDefinitionModifier CLOSED_TYPE_SLICING_REMOVER = new ClosedTypeSlicingRemover();
-
-	// mandatory identifier on ObservationLab not compatible with data protection rules with current pseudonymization
 	public static final StructureDefinitionModifier MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER = new MiiModuleLabObservationLab10IdentifierRemover();
+	public static final StructureDefinitionModifier GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER = new GeccoRadiologyProceduresCodingSliceMinFixer();
 
 	private final ValidationPackageClient validationPackageClient;
 	private final ValueSetExpansionClient valueSetExpansionClient;
@@ -78,7 +77,8 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	{
 		this(validationPackageClient, valueSetExpansionClient, mapper, fhirContext, internalSnapshotGeneratorFactory,
 				internalValueSetExpanderFactory, PACKAGE_IGNORE,
-				Arrays.asList(CLOSED_TYPE_SLICING_REMOVER, MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER));
+				Arrays.asList(CLOSED_TYPE_SLICING_REMOVER, MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER,
+						GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER));
 	}
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,

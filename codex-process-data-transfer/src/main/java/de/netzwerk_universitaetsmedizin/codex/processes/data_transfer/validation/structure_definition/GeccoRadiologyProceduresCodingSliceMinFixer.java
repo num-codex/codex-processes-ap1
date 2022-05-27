@@ -4,6 +4,9 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * HAPI snapshot generator adds min=1, if no min value specified in the parent StructureDefinition.
+ */
 public class GeccoRadiologyProceduresCodingSliceMinFixer implements StructureDefinitionModifier
 {
 	private static final Logger logger = LoggerFactory.getLogger(GeccoRadiologyProceduresCodingSliceMinFixer.class);

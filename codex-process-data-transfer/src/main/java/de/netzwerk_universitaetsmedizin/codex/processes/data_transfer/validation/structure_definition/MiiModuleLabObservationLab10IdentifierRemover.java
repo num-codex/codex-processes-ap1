@@ -9,6 +9,9 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Mandatory identifier on ObservationLab not compatible with data protection rules with current pseudonymization.
+ */
 public class MiiModuleLabObservationLab10IdentifierRemover implements StructureDefinitionModifier
 {
 	private static final Logger logger = LoggerFactory.getLogger(MiiModuleLabObservationLab10IdentifierRemover.class);

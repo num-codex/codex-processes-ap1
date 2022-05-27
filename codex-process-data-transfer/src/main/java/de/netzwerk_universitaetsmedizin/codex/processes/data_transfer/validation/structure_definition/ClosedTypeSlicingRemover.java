@@ -9,6 +9,9 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Closed type slicings result in error from the snapshot generator.
+ */
 public class ClosedTypeSlicingRemover implements StructureDefinitionModifier
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClosedTypeSlicingRemover.class);
