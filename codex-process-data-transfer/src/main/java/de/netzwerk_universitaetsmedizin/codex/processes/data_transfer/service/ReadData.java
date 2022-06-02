@@ -44,6 +44,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
@@ -237,19 +238,33 @@ public class ReadData extends AbstractServiceDelegate
 
 	protected String getConditionalUpdateUrl(String pseudonym, DomainResource resource)
 	{
+		String patientIdentifier = ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+
 		if (resource instanceof Patient)
 		{
-			return "Patient?identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-					+ pseudonym;
+			return "Patient?identifier=" + patientIdentifier;
 		}
 		else if (resource instanceof Condition)
 		{
 			Condition c = (Condition) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			return "Condition?_profile=" + profileUrl + "&recorded-date="
-					+ c.getRecordedDateElement().getValueAsString() + "&patient:identifier="
-					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Condition.name(), profileUrl,
+					patientIdentifier);
+
+			if (c.hasRecordedDateElement() && c.getRecordedDateElement().getValueAsString() != null)
+				updateUrl = updateUrl + "&recorded-date=" + c.getRecordedDateElement().getValueAsString();
+
+			if (c.hasCategory())
+				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(c.getCategoryFirstRep().getCodingFirstRep());
+
+			if (c.hasCode())
+				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(c.getCode().getCodingFirstRep());
+
+			if (c.hasBodySite())
+				updateUrl = updateUrl + "&body-site=" + getCodingUpdateUrl(c.getBodySiteFirstRep().getCodingFirstRep());
+
+			return updateUrl;
 		}
 		else if (resource instanceof Consent)
 		{
@@ -258,21 +273,20 @@ public class ReadData extends AbstractServiceDelegate
 
 			if (NUM_CODEX_DO_NOT_RESUSCITAT_ORDER.equals(profileUrl))
 			{
-				boolean scopePresent = c.getScope().getCoding().stream().filter(co -> co.hasSystem())
+				boolean scopePresent = c.getScope().getCoding().stream().filter(Coding::hasSystem)
 						.filter(co -> "http://terminology.hl7.org/CodeSystem/consentscope".equals(co.getSystem()))
-						.filter(co -> co.hasCode()).filter(co -> "adr".equals(co.getCode())).findAny().isPresent();
+						.filter(Coding::hasCode).anyMatch(co -> "adr".equals(co.getCode()));
 				boolean categoryPresent = c.getCategory().stream().flatMap(coc -> coc.getCoding().stream())
-						.filter(co -> co.hasSystem())
+						.filter(Coding::hasSystem)
 						.filter(co -> "http://terminology.hl7.org/CodeSystem/consentcategorycodes"
 								.equals(co.getSystem()))
-						.filter(co -> co.hasCode()).filter(co -> "dnr".equals(co.getCode())).findAny().isPresent();
+						.filter(Coding::hasCode).anyMatch(co -> "dnr".equals(co.getCode()));
 
 				if (scopePresent && categoryPresent)
-					return "Consent?_profile=" + profileUrl
+					return getInitialConditionalUpdateUrl(ResourceType.Consent.name(), profileUrl, patientIdentifier)
 							+ "&scope=http://terminology.hl7.org/CodeSystem/consentscope|adr"
-							+ "&category=http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr"
-							+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-							+ pseudonym;
+							+ "&category=http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr";
+
 				else
 					throw new RuntimeException("Resource of type Consent with profile " + profileUrl
 							+ " is missing scope: http://terminology.hl7.org/CodeSystem/consentscope|adr and/or category: http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr");
@@ -285,61 +299,99 @@ public class ReadData extends AbstractServiceDelegate
 			DiagnosticReport dr = (DiagnosticReport) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			return "DiagnosticReport?_profile=" + profileUrl + "&date="
-					+ dr.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
-					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.DiagnosticReport.name(), profileUrl,
+					patientIdentifier);
+
+			if (dr.hasEffectiveDateTimeType() && dr.getEffectiveDateTimeType().getValueAsString() != null)
+				updateUrl = updateUrl + "&date=" + dr.getEffectiveDateTimeType().getValueAsString();
+
+			if (dr.hasCategory())
+				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(dr.getCategoryFirstRep().getCodingFirstRep());
+
+			if (dr.hasCode())
+				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(dr.getCode().getCodingFirstRep());
+
+			return updateUrl;
 		}
 		else if (resource instanceof Immunization)
 		{
 			Immunization i = (Immunization) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			return "Immunization?_profile=" + profileUrl + "&date=" + i.getOccurrenceDateTimeType().getValueAsString()
-					+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-					+ pseudonym;
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Immunization.name(), profileUrl,
+					patientIdentifier);
+
+			if (i.hasOccurrenceDateTimeType() && i.getOccurrenceDateTimeType().getValueAsString() != null)
+				updateUrl = updateUrl + "&date=" + i.getOccurrenceDateTimeType().getValueAsString();
+			else if (i.hasStatus())
+				updateUrl = updateUrl + "&status=" + i.getStatus().toCode();
+
+			if (i.hasVaccineCode())
+				updateUrl = updateUrl + "&vaccine-code=" + i.getVaccineCode().getCodingFirstRep();
+
+			return updateUrl;
 		}
 		else if (resource instanceof MedicationStatement)
 		{
 			MedicationStatement ms = (MedicationStatement) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			return "MedicationStatement?_profile=" + profileUrl + "&effective="
-					+ ms.getEffectiveDateTimeType().getValueAsString() + "&patient:identifier="
-					+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-		}
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.MedicationStatement.name(), profileUrl,
+					patientIdentifier);
 
+			if (ms.hasEffectiveDateTimeType() && ms.getEffectiveDateTimeType().getValueAsString() != null)
+				updateUrl = updateUrl + "&effective=" + ms.getEffectiveDateTimeType();
+
+			if (!ms.hasEffectiveDateTimeType() && ms.hasStatus())
+				updateUrl = updateUrl + "&status=" + ms.getStatus().toCode();
+
+			if (ms.hasMedicationCodeableConcept())
+				updateUrl = updateUrl + "&code="
+						+ getCodingUpdateUrl(ms.getMedicationCodeableConcept().getCodingFirstRep());
+
+			return updateUrl;
+		}
 		else if (resource instanceof Observation)
 		{
 			Observation o = (Observation) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)
 					|| MII_LAB_STRUCTURED_DEFINITION.equals(v));
 
-			if (MII_LAB_STRUCTURED_DEFINITION.equals(profileUrl))
-			{
-				Coding loincCode = o.getCode().getCoding().stream()
-						.filter(c -> "http://loinc.org".equals(c.getSystem())).findFirst()
-						.orElseThrow(() -> new RuntimeException("Observation (" + MII_LAB_STRUCTURED_DEFINITION
-								+ ") not supported, missing LOINC code"));
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Observation.name(), profileUrl,
+					patientIdentifier);
 
-				return "Observation?_profile=" + profileUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString()
-						+ "&code=" + loincCode.getSystem() + "|" + loincCode.getCode() + "&patient:identifier="
-						+ ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym;
-			}
-			else
-			{
-				return "Observation?_profile=" + profileUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString()
-						+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-						+ pseudonym;
-			}
+			if (o.hasEffectiveDateTimeType() && o.getEffectiveDateTimeType().getValueAsString() != null)
+				updateUrl = updateUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString();
+
+			if (o.hasCategory())
+				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(o.getCategoryFirstRep().getCodingFirstRep());
+
+			if (o.hasCode())
+				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(o.getCode().getCodingFirstRep());
+
+			return updateUrl;
 		}
 		else if (resource instanceof Procedure)
 		{
 			Procedure p = (Procedure) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			return "Procedure?_profile=" + profileUrl + "&date=" + p.getPerformedDateTimeType().getValueAsString()
-					+ "&patient:identifier=" + ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|"
-					+ pseudonym;
+			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Procedure.name(), profileUrl,
+					patientIdentifier);
+
+			if (p.hasPerformedDateTimeType() && p.getPerformedDateTimeType().getValueAsString() != null)
+				updateUrl = updateUrl + "&date=" + p.getPerformedDateTimeType().getValueAsString();
+			else if (p.hasStatus())
+				updateUrl = updateUrl + "&status=" + p.getStatus().toCode();
+
+			if (p.hasCategory())
+				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(p.getCategory().getCodingFirstRep());
+
+			if (p.hasCode())
+				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(p.getCode().getCodingFirstRep());
+
+			return updateUrl;
+
 		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
@@ -350,5 +402,15 @@ public class ReadData extends AbstractServiceDelegate
 		return resource.getMeta().getProfile().stream().map(CanonicalType::getValue).filter(filter).findFirst()
 				.orElseThrow(() -> new RuntimeException("Resource of type " + resource.getResourceType().name()
 						+ " not supported, missing NUM or MII profile"));
+	}
+
+	private String getInitialConditionalUpdateUrl(String resourceName, String profileUrl, String patientIdentifier)
+	{
+		return resourceName + "?_profile=" + profileUrl + "&patient:identifier=" + patientIdentifier;
+	}
+
+	private String getCodingUpdateUrl(Coding coding)
+	{
+		return coding.getSystem() + "|" + coding.getCode();
 	}
 }
