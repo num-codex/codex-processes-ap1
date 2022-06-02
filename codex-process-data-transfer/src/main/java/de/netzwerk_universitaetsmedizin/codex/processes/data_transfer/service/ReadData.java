@@ -255,13 +255,13 @@ public class ReadData extends AbstractServiceDelegate
 			if (c.hasRecordedDateElement() && c.getRecordedDateElement().getValueAsString() != null)
 				updateUrl = updateUrl + "&recorded-date=" + c.getRecordedDateElement().getValueAsString();
 
-			if (c.hasCategory())
+			if (c.hasCategory() && c.getCategoryFirstRep().hasCoding())
 				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(c.getCategoryFirstRep().getCodingFirstRep());
 
-			if (c.hasCode())
+			if (c.hasCode() && c.getCode().hasCoding())
 				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(c.getCode().getCodingFirstRep());
 
-			if (c.hasBodySite())
+			if (c.hasBodySite() && c.getBodySiteFirstRep().hasCoding())
 				updateUrl = updateUrl + "&body-site=" + getCodingUpdateUrl(c.getBodySiteFirstRep().getCodingFirstRep());
 
 			return updateUrl;
@@ -305,10 +305,10 @@ public class ReadData extends AbstractServiceDelegate
 			if (dr.hasEffectiveDateTimeType() && dr.getEffectiveDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&date=" + dr.getEffectiveDateTimeType().getValueAsString();
 
-			if (dr.hasCategory())
+			if (dr.hasCategory() && dr.getCategoryFirstRep().hasCoding())
 				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(dr.getCategoryFirstRep().getCodingFirstRep());
 
-			if (dr.hasCode())
+			if (dr.hasCode() && dr.getCode().hasCoding())
 				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(dr.getCode().getCodingFirstRep());
 
 			return updateUrl;
@@ -326,7 +326,7 @@ public class ReadData extends AbstractServiceDelegate
 			else if (i.hasStatus())
 				updateUrl = updateUrl + "&status=" + i.getStatus().toCode();
 
-			if (i.hasVaccineCode())
+			if (i.hasVaccineCode() && i.getVaccineCode().hasCoding())
 				updateUrl = updateUrl + "&vaccine-code=" + i.getVaccineCode().getCodingFirstRep();
 
 			return updateUrl;
@@ -341,11 +341,10 @@ public class ReadData extends AbstractServiceDelegate
 
 			if (ms.hasEffectiveDateTimeType() && ms.getEffectiveDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&effective=" + ms.getEffectiveDateTimeType();
-
-			if (!ms.hasEffectiveDateTimeType() && ms.hasStatus())
+			else if (ms.hasStatus())
 				updateUrl = updateUrl + "&status=" + ms.getStatus().toCode();
 
-			if (ms.hasMedicationCodeableConcept())
+			if (ms.hasMedicationCodeableConcept() && ms.getMedicationCodeableConcept().hasCoding())
 				updateUrl = updateUrl + "&code="
 						+ getCodingUpdateUrl(ms.getMedicationCodeableConcept().getCodingFirstRep());
 
@@ -363,10 +362,10 @@ public class ReadData extends AbstractServiceDelegate
 			if (o.hasEffectiveDateTimeType() && o.getEffectiveDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&date=" + o.getEffectiveDateTimeType().getValueAsString();
 
-			if (o.hasCategory())
+			if (o.hasCategory() && o.getCategoryFirstRep().hasCoding())
 				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(o.getCategoryFirstRep().getCodingFirstRep());
 
-			if (o.hasCode())
+			if (o.hasCode() && o.getCode().hasCoding())
 				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(o.getCode().getCodingFirstRep());
 
 			return updateUrl;
@@ -384,10 +383,10 @@ public class ReadData extends AbstractServiceDelegate
 			else if (p.hasStatus())
 				updateUrl = updateUrl + "&status=" + p.getStatus().toCode();
 
-			if (p.hasCategory())
+			if (p.hasCategory() && p.getCategory().hasCoding())
 				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(p.getCategory().getCodingFirstRep());
 
-			if (p.hasCode())
+			if (p.hasCode() && p.getCode().hasCoding())
 				updateUrl = updateUrl + "&code=" + getCodingUpdateUrl(p.getCode().getCodingFirstRep());
 
 			return updateUrl;
