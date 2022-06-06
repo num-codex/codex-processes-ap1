@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.WebApplicationException;
@@ -17,24 +18,32 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 
 public class ValidationPackageClientJersey implements ValidationPackageClient
 {
+	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
+			.getLogger(ValueSetExpansionClientJersey.class.getName());
+
 	private final Client client;
 	private final String baseUrl;
 
 	public ValidationPackageClientJersey(String baseUrl)
 	{
-		this(baseUrl, null, null, null, null, null, null, null, null, 0, 0);
+		this(baseUrl, null, null, null, null, null, null, null, null, 0, 0, false);
 	}
 
 	public ValidationPackageClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String basicAuthUsername, char[] basicAuthPassword, String proxySchemeHostPort,
-			String proxyUsername, char[] proxyPassword, int connectTimeout, int readTimeout)
+			String proxyUsername, char[] proxyPassword, int connectTimeout, int readTimeout, boolean logRequests)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
 			sslContext = SslConfigurator.newInstance().trustStore(trustStore).createSSLContext();
+		if (trustStore == null && keyStore != null && keyStorePassword != null)
+			sslContext = SslConfigurator.newInstance().keyStore(keyStore).keyStorePassword(keyStorePassword)
+					.createSSLContext();
 		else if (trustStore != null && keyStore != null && keyStorePassword != null)
 			sslContext = SslConfigurator.newInstance().trustStore(trustStore).keyStore(keyStore)
 					.keyStorePassword(keyStorePassword).createSSLContext();
@@ -60,6 +69,12 @@ public class ValidationPackageClientJersey implements ValidationPackageClient
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);
+
+		if (logRequests)
+		{
+			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.FINE, Verbosity.PAYLOAD_ANY,
+					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
+		}
 
 		client = builder.build();
 

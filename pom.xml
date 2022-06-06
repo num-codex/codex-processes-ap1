@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.netzwerk-universitaetsmedizin.codex</groupId>
@@ -22,6 +20,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<hapi.version>5.1.0</hapi.version>
 		<dsf.version>0.6.0</dsf.version>
+		<slf4j.version>1.8.0-beta4</slf4j.version>
 	</properties>
 
 	<description>Business processes for the NUM CODEX project (AP1) as plugins for the HiGHmed Data Sharing Framework.</description>
@@ -107,7 +106,12 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.8.0-beta4</version>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<dependency>
@@ -115,7 +119,7 @@
 				<artifactId>jackson-annotations</artifactId>
 				<version>2.12.0</version>
 			</dependency>
-				<dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>1.20</version>

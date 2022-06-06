@@ -60,47 +60,57 @@ public class ValidateData extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
-
-		logger.info("Validating bundle with {} entr{}", bundle.getEntry().size(),
-				bundle.getEntry().size() == 1 ? "y" : "ies");
-		bundle = bundleValidatorSupplier.create().validate(bundle);
-
-		if (bundle.hasEntry())
+		bundleValidatorSupplier.create().ifPresentOrElse(validator ->
 		{
-			if (bundle.getEntry().stream().anyMatch(e -> !e.hasResponse() || !e.getResponse().hasOutcome()
-					|| !(e.getResponse().getOutcome() instanceof OperationOutcome)))
-			{
-				logger.warn(
-						"Validation result bundle has entries wihout response.outcome instance of OperationOutcome");
-			}
-			else
-			{
-				logValidationDetails(bundle);
+			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-				if (bundle.getEntry().stream().map(e -> (OperationOutcome) e.getResponse().getOutcome())
-						.flatMap(o -> o.getIssue().stream()).anyMatch(i -> IssueSeverity.FATAL.equals(i.getSeverity())
-								|| IssueSeverity.ERROR.equals(i.getSeverity())))
+			logger.info("Validating bundle with {} entr{}", bundle.getEntry().size(),
+					bundle.getEntry().size() == 1 ? "y" : "ies");
+
+			bundle = validator.validate(bundle);
+
+			if (bundle.hasEntry())
+			{
+				if (bundle.getEntry().stream().anyMatch(e -> !e.hasResponse() || !e.getResponse().hasOutcome()
+						|| !(e.getResponse().getOutcome() instanceof OperationOutcome)))
 				{
-					logger.error("Validation of transfer bundle failed");
-
-					addErrorsToTaskAndSetFailed(bundle);
-					errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
-							.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
-									getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
-
-					throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE_VALUE_VALIDATION_FAILED);
+					logger.warn(
+							"Validation result bundle has entries wihout response.outcome instance of OperationOutcome");
 				}
 				else
 				{
-					removeValidationResultsAndUserData(bundle);
+					logValidationDetails(bundle);
+
+					if (bundle.getEntry().stream().map(e -> (OperationOutcome) e.getResponse().getOutcome())
+							.flatMap(o -> o.getIssue().stream())
+							.anyMatch(i -> IssueSeverity.FATAL.equals(i.getSeverity())
+									|| IssueSeverity.ERROR.equals(i.getSeverity())))
+					{
+						logger.error("Validation of transfer bundle failed");
+
+						addErrorsToTaskAndSetFailed(bundle);
+						errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
+								.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
+										getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
+
+						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE_VALUE_VALIDATION_FAILED);
+					}
+					else
+					{
+						removeValidationResultsAndUserData(bundle);
+					}
 				}
 			}
-		}
-		else
+			else
+			{
+				logger.warn("Validation result bundle has no entries");
+			}
+		}, () ->
 		{
-			logger.warn("Validation result bundle has no entries");
-		}
+			logger.warn(
+					"{} not initialized, skipping validation. This is likley due to an error during startup of the process plugin.",
+					BundleValidatorFactory.class.getSimpleName());
+		});
 
 		// TODO maybe check only one pseudonym used
 	}

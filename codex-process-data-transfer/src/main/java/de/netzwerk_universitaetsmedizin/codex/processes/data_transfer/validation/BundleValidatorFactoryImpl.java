@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +49,8 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 	}
 
 	@Override
-	public BundleValidator create()
+	public Optional<BundleValidator> create()
 	{
-		init();
-
-		return validationPackageManager.createBundleValidator(validationSupport);
+		return Optional.ofNullable(validationSupport).map(validationPackageManager::createBundleValidator);
 	}
 }

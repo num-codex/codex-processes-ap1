@@ -14,6 +14,8 @@ import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
 import org.highmed.dsf.fhir.resources.ValueSetResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.PropertyResolver;
 
@@ -27,6 +29,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
+	private static final Logger logger = LoggerFactory.getLogger(DataTransferProcessPluginDefinition.class);
+
 	public static final String VERSION = "0.5.0";
 	public static final LocalDate DATE = LocalDate.of(2021, 9, 6);
 
@@ -125,7 +129,15 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
 		{
-			pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
+			boolean testOk = pluginApplicationContext.getBean(ValidationConfig.class)
+					.testConnectionToTerminologyServer();
+
+			if (testOk)
+				pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
+			else
+				logger.warn(
+						"Due to an error while testing the connection to the terminology server the {} can not be initialized, this will lead to the validation of bundles beeing skipped.",
+						BundleValidatorFactory.class.getSimpleName());
 		}
 	}
 }

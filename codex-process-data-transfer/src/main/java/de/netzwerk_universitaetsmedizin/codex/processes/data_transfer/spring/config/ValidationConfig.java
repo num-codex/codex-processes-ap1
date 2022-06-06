@@ -17,10 +17,13 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.fhir.json.ObjectMapperFactory;
 import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,11 +110,14 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.timeout.read:300000}")
 	private int packageClientReadTimeout;
 
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.verbose:false}")
+	private boolean packageClientVerbose;
+
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.cacheFolder:#{null}}")
 	private String valueSetCacheFolder;
 
 	// TODO default should be MII ontology server
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.server.baseUrl:https://r4.ontoserver.csiro.au/fhir}")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.server.baseUrl:https://terminology-highmed.medic.medfak.uni-koeln.de/fhir}")
 	private String valueSetExpansionServerBaseUrl;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.trust.certificates:#{null}}")
@@ -146,6 +152,9 @@ public class ValidationConfig
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.timeout.read:300000}")
 	private int valueSetExpansionClientReadTimeout;
+
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.verbose:false}")
+	private boolean valueSetExpansionClientVerbose;
 
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.cacheFolder:#{null}}")
 	private String structureDefinitionCacheFolder;
@@ -193,6 +202,26 @@ public class ValidationConfig
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Bean
+	public BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory()
+	{
+		return (fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(structureDefinitionCacheFolder(), fc,
+				new PluginSnapshotGeneratorImpl(fc, vs));
+	}
+
+	@Bean
+	public Path structureDefinitionCacheFolder()
+	{
+		return cacheFolder("StructureDefinition", structureDefinitionCacheFolder);
+	}
+
+	@Bean
+	public BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory()
+	{
+		return (fc, vs) -> new ValueSetExpanderWithFileSystemCache(valueSetCacheFolder(), fc,
+				new ValueSetExpanderImpl(fc, vs));
 	}
 
 	private Path cacheFolder(String cacheFolderType, String cacheFolder)
@@ -273,8 +302,8 @@ public class ValidationConfig
 					clientCertificatePrivateKeyPassword);
 			X509Certificate certificate = PemIo.readX509CertificateFromPem(clientCertificatePath);
 
-			logger.debug("Creating key-store for {} from {} and {} with password {}", clientCertificatePath.toString(),
-					clientCertificatePrivateKeyPath.toString(),
+			logger.debug("Creating key-store for {} from {} and {} with password {}", keyStoreType,
+					clientCertificatePath.toString(), clientCertificatePrivateKeyPath.toString(),
 					clientCertificatePrivateKeyPassword != null ? "***" : "null");
 			return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
 					UUID.randomUUID().toString(), keyStorePassword);
@@ -320,7 +349,8 @@ public class ValidationConfig
 		return new ValidationPackageClientJersey(packageServerBaseUrl, packageClientTrustStore, packageClientKeyStore,
 				packageClientKeyStore == null ? null : packageClientKeyStorePassword, packageClientBasicAuthUsername,
 				packageClientBasicAuthPassword, packageClientProxySchemeHostPort, packageClientProxyUsername,
-				packageClientProxyPassword, packageClientConnectTimeout, packageClientReadTimeout);
+				packageClientProxyPassword, packageClientConnectTimeout, packageClientReadTimeout,
+				packageClientVerbose);
 	}
 
 	@Bean
@@ -362,7 +392,7 @@ public class ValidationConfig
 				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
 				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
-				valueSetExpansionClientReadTimeout, objectMapper(), fhirContext);
+				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, objectMapper(), fhirContext);
 	}
 
 	@Bean
@@ -371,23 +401,37 @@ public class ValidationConfig
 		return ObjectMapperFactory.createObjectMapper(fhirContext);
 	}
 
-	@Bean
-	public BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory()
+	public boolean testConnectionToTerminologyServer()
 	{
-		return (fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(structureDefinitionCacheFolder(), fc,
-				new PluginSnapshotGeneratorImpl(fc, vs));
-	}
+		logger.info(
+				"Testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
+				valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
+				valueSetExpansionClientCertificatePrivateKey,
+				valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
+				valueSetExpansionClientBasicAuthUsername,
+				valueSetExpansionClientBasicAuthPassword != null ? "***" : "null",
+				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxySchemeHostPort,
+				valueSetExpansionClientProxyUsername, valueSetExpansionClientProxyPassword != null ? "***" : "null");
 
-	@Bean
-	public Path structureDefinitionCacheFolder()
-	{
-		return cacheFolder("StructureDefinition", structureDefinitionCacheFolder);
-	}
+		try
+		{
+			CapabilityStatement metadata = valueSetExpansionClientJersey().getMetadata();
+			logger.info("Connection test OK: {} - {}", metadata.getSoftware().getName(),
+					metadata.getSoftware().getVersion());
+			return true;
+		}
+		catch (Exception e)
+		{
+			if (e instanceof WebApplicationException)
+			{
+				String response = ((WebApplicationException) e).getResponse().readEntity(String.class);
+				logger.error("Connection test failed: {} - {}", e.getMessage(), response);
+			}
+			else
+				logger.error("Connection test failed: {}", e.getMessage());
 
-	@Bean
-	public BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory()
-	{
-		return (fc, vs) -> new ValueSetExpanderWithFileSystemCache(valueSetCacheFolder(), fc,
-				new ValueSetExpanderImpl(fc, vs));
+			return false;
+		}
 	}
 }

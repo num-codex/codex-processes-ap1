@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,10 +117,14 @@ public class ValidationMain implements InitializingBean
 		try (AnnotationConfigApplicationContext springContext = new AnnotationConfigApplicationContext(TestConfig.class,
 				ValidationConfig.class))
 		{
-			ValidationMain main = springContext.getBean(ValidationMain.class);
+			ValidationConfig config = springContext.getBean(ValidationConfig.class);
+			boolean testOk = config.testConnectionToTerminologyServer();
 
-			main.testOntologyServerConnection();
-			main.validate(args);
+			if (testOk)
+			{
+				ValidationMain main = springContext.getBean(ValidationMain.class);
+				main.validate(args);
+			}
 		}
 		catch (Exception e)
 		{
@@ -160,22 +163,6 @@ public class ValidationMain implements InitializingBean
 		Objects.requireNonNull(validationPackage, "validationPackage");
 		Objects.requireNonNull(output, "output");
 		Objects.requireNonNull(valueSetExpansionClient, "valueSetExpansionClient");
-	}
-
-	public void testOntologyServerConnection()
-	{
-		logger.info("Testing connection to ontology server");
-		try
-		{
-			CapabilityStatement metadata = valueSetExpansionClient.getMetadata();
-			logger.info("Connection test OK: {} - {}", metadata.getSoftware().getName(),
-					metadata.getSoftware().getVersion());
-		}
-		catch (Exception e)
-		{
-			logger.info("Connection test failed: {}", e.getMessage());
-			throw e;
-		}
 	}
 
 	public void validate(String[] files)
