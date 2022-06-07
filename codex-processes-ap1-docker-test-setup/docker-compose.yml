@@ -66,7 +66,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
+    image: ghcr.io/highmed/fhir:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5000:5000
@@ -113,7 +113,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
+    image: ghcr.io/highmed/bpe:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5003:5003
@@ -194,7 +194,7 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
+    image: ghcr.io/highmed/fhir:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5001:5001
@@ -241,7 +241,7 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
+    image: ghcr.io/highmed/bpe:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5004:5004
@@ -298,7 +298,7 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
+    image: ghcr.io/highmed/fhir:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5002:5002
@@ -345,7 +345,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
+    image: ghcr.io/highmed/bpe:0.6.0
     restart: on-failure
     ports:
       - 127.0.0.1:5005:5005
@@ -404,7 +404,7 @@ services:
       - crr-fhir
     # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
-    image: ehrbase/ehrbase-postgres:latest
+    image: ehrbase/ehrbase-postgres
     networks:
       - crr-ehrbase-network
     environment:
@@ -414,7 +414,7 @@ services:
       EHRBASE_PASSWORD: ehrbase
       TZ: Europe/Berlin
   crr-ehrbase:
-    image: ehrbase/ehrbase:latest
+    image: ehrbase/ehrbase
     networks:
       - crr-ehrbase-network
     environment:
@@ -433,7 +433,7 @@ services:
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:latest
+    image: ehrbase/fhir-bridge
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
