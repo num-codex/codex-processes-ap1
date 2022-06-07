@@ -404,7 +404,7 @@ services:
       - crr-fhir
     # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
-    image: ehrbase/ehrbase-postgres:latest
+    image: ehrbase/ehrbase-postgres
     networks:
       - crr-ehrbase-network
     environment:
@@ -414,7 +414,7 @@ services:
       EHRBASE_PASSWORD: ehrbase
       TZ: Europe/Berlin
   crr-ehrbase:
-    image: ehrbase/ehrbase:latest
+    image: ehrbase/ehrbase
     networks:
       - crr-ehrbase-network
     environment:
@@ -433,7 +433,7 @@ services:
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:latest
+    image: ehrbase/fhir-bridge
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
