@@ -115,6 +115,11 @@
 				<artifactId>jackson-annotations</artifactId>
 				<version>2.12.0</version>
 			</dependency>
+			<dependency>
+    			<groupId>org.springframework</groupId>
+    			<artifactId>spring-web</artifactId>
+				<version>5.3.19</version>
+			</dependency>
 
 			<!-- testing -->
 			<dependency>
@@ -126,8 +131,12 @@
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
 				<version>${dsf.version}</version>
-				<scope>test</scope>
 				<type>test-jar</type>
+			</dependency>
+			<dependency>
+			    <groupId>org.mockito</groupId>
+			    <artifactId>mockito-core</artifactId>
+			    <version>4.5.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
