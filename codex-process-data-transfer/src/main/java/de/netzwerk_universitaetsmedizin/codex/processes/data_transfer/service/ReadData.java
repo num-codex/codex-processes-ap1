@@ -249,7 +249,7 @@ public class ReadData extends AbstractServiceDelegate
 			Condition c = (Condition) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Condition.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.Condition.name(), profileUrl,
 					patientIdentifier);
 
 			if (c.hasRecordedDateElement() && c.getRecordedDateElement().getValueAsString() != null)
@@ -283,7 +283,7 @@ public class ReadData extends AbstractServiceDelegate
 						.filter(Coding::hasCode).anyMatch(co -> "dnr".equals(co.getCode()));
 
 				if (scopePresent && categoryPresent)
-					return getInitialConditionalUpdateUrl(ResourceType.Consent.name(), profileUrl, patientIdentifier)
+					return getBaseConditionalUpdateUrl(ResourceType.Consent.name(), profileUrl, patientIdentifier)
 							+ "&scope=http://terminology.hl7.org/CodeSystem/consentscope|adr"
 							+ "&category=http://terminology.hl7.org/CodeSystem/consentcategorycodes|dnr";
 
@@ -299,7 +299,7 @@ public class ReadData extends AbstractServiceDelegate
 			DiagnosticReport dr = (DiagnosticReport) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.DiagnosticReport.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.DiagnosticReport.name(), profileUrl,
 					patientIdentifier);
 
 			if (dr.hasEffectiveDateTimeType() && dr.getEffectiveDateTimeType().getValueAsString() != null)
@@ -318,13 +318,11 @@ public class ReadData extends AbstractServiceDelegate
 			Immunization i = (Immunization) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Immunization.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.Immunization.name(), profileUrl,
 					patientIdentifier);
 
 			if (i.hasOccurrenceDateTimeType() && i.getOccurrenceDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&date=" + i.getOccurrenceDateTimeType().getValueAsString();
-			else if (i.hasStatus())
-				updateUrl = updateUrl + "&status=" + i.getStatus().toCode();
 
 			if (i.hasVaccineCode() && i.getVaccineCode().hasCoding())
 				updateUrl = updateUrl + "&vaccine-code=" + i.getVaccineCode().getCodingFirstRep();
@@ -336,13 +334,11 @@ public class ReadData extends AbstractServiceDelegate
 			MedicationStatement ms = (MedicationStatement) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.MedicationStatement.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.MedicationStatement.name(), profileUrl,
 					patientIdentifier);
 
 			if (ms.hasEffectiveDateTimeType() && ms.getEffectiveDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&effective=" + ms.getEffectiveDateTimeType();
-			else if (ms.hasStatus())
-				updateUrl = updateUrl + "&status=" + ms.getStatus().toCode();
 
 			if (ms.hasMedicationCodeableConcept() && ms.getMedicationCodeableConcept().hasCoding())
 				updateUrl = updateUrl + "&code="
@@ -356,7 +352,7 @@ public class ReadData extends AbstractServiceDelegate
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)
 					|| MII_LAB_STRUCTURED_DEFINITION.equals(v));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Observation.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.Observation.name(), profileUrl,
 					patientIdentifier);
 
 			if (o.hasEffectiveDateTimeType() && o.getEffectiveDateTimeType().getValueAsString() != null)
@@ -375,13 +371,11 @@ public class ReadData extends AbstractServiceDelegate
 			Procedure p = (Procedure) resource;
 			String profileUrl = getProfileUrl(resource, v -> v.startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX));
 
-			String updateUrl = getInitialConditionalUpdateUrl(ResourceType.Procedure.name(), profileUrl,
+			String updateUrl = getBaseConditionalUpdateUrl(ResourceType.Procedure.name(), profileUrl,
 					patientIdentifier);
 
 			if (p.hasPerformedDateTimeType() && p.getPerformedDateTimeType().getValueAsString() != null)
 				updateUrl = updateUrl + "&date=" + p.getPerformedDateTimeType().getValueAsString();
-			else if (p.hasStatus())
-				updateUrl = updateUrl + "&status=" + p.getStatus().toCode();
 
 			if (p.hasCategory() && p.getCategory().hasCoding())
 				updateUrl = updateUrl + "&category=" + getCodingUpdateUrl(p.getCategory().getCodingFirstRep());
@@ -403,7 +397,7 @@ public class ReadData extends AbstractServiceDelegate
 						+ " not supported, missing NUM or MII profile"));
 	}
 
-	private String getInitialConditionalUpdateUrl(String resourceName, String profileUrl, String patientIdentifier)
+	private String getBaseConditionalUpdateUrl(String resourceName, String profileUrl, String patientIdentifier)
 	{
 		return resourceName + "?_profile=" + profileUrl + "&patient:identifier=" + patientIdentifier;
 	}
