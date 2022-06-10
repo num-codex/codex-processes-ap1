@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;

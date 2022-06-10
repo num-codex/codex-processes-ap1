@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_FROM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION;

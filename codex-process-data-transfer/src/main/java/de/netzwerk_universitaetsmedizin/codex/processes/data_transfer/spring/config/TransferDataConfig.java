@@ -25,25 +25,25 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.Crr
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.CheckConsent;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DecryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromDic;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.DownloadDataFromTransferHub;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.EncryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ExtractPatientReference;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentIdatMerge;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.HandleNoConsentUsageAndTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.InsertDataIntoCodex;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReadData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ResolvePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForCrr;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForTransferHub;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ValidateData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DecryptData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromTransferHub;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.InsertDataIntoCodex;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckConsent;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.EncryptData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ExtractPatientReference;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.HandleNoConsentIdatMerge;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.HandleNoConsentUsageAndTransfer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ReadData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ResolvePseudonym;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.StoreDataForTransferHub;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ValidateData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.DownloadDataFromDic;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.ReplacePseudonym;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.StoreDataForCrr;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.FindNewData;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.SaveLastExportTo;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StartTimer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StopTimer;
 
 @Configuration
 public class TransferDataConfig

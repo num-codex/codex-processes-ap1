@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;

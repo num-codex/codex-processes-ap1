@@ -1,10 +1,10 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BINARY_URL;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM;
@@ -34,20 +34,21 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StoreDataForCrr extends AbstractServiceDelegate
+public class StoreDataForTransferHub extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreDataForCrr.class);
+	private static final Logger logger = LoggerFactory.getLogger(StoreDataForTransferHub.class);
 
 	private final EndpointProvider endpointProvider;
-	private final String crrIdentifierValue;
+	private final String geccoTransferHubIdentifierValue;
 
-	public StoreDataForCrr(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, EndpointProvider endpointProvider, String crrIdentifierValue)
+	public StoreDataForTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper, EndpointProvider endpointProvider,
+			String geccoTransferHubIdentifierValue)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.endpointProvider = endpointProvider;
-		this.crrIdentifierValue = crrIdentifierValue;
+		this.geccoTransferHubIdentifierValue = geccoTransferHubIdentifierValue;
 	}
 
 	@Override
@@ -56,7 +57,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(crrIdentifierValue, "crrIdentifierValue");
+		Objects.requireNonNull(geccoTransferHubIdentifierValue, "geccoTransferHubIdentifierValue");
 	}
 
 	@Override
@@ -64,17 +65,18 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 	{
 		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-		String downloadUrl = saveBinaryForCrr(encrypted, crrIdentifierValue);
+		String downloadUrl = saveBinaryForGth(encrypted, geccoTransferHubIdentifierValue);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL, Variables.stringValue(downloadUrl));
 
-		Endpoint targetEndpoint = getEndpoint(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR, crrIdentifierValue);
+		Endpoint targetEndpoint = getEndpoint(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS,
+				geccoTransferHubIdentifierValue);
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET,
-				TargetValues.create(Target.createUniDirectionalTarget(crrIdentifierValue,
+				TargetValues.create(Target.createUniDirectionalTarget(geccoTransferHubIdentifierValue,
 						getEndpointIdentifier(targetEndpoint), targetEndpoint.getAddress())));
 	}
 
-	protected String saveBinaryForCrr(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
+	protected String saveBinaryForGth(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
 	{
 		Reference securityContext = new Reference();
 		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
@@ -96,7 +98,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		catch (Exception e)
 		{
 			logger.debug("Binary to create {}", FhirContext.forR4().newJsonParser().encodeResourceToString(binary));
-			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
+			logger.warn("Error while creating Binary resoruce: " + e.getMessage(), e);
 			throw e;
 		}
 	}

@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_STOP_TIMER;
 
@@ -12,11 +12,11 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StopTimer extends AbstractServiceDelegate
+public class StartTimer extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(StopTimer.class);
+	private static final Logger logger = LoggerFactory.getLogger(StartTimer.class);
 
-	public StopTimer(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public StartTimer(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
@@ -25,7 +25,7 @@ public class StopTimer extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		logger.debug("Setting variable '{}' to true", BPMN_EXECUTION_VARIABLE_STOP_TIMER);
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_STOP_TIMER, Variables.booleanValue(true));
+		logger.debug("Setting variable '{}' to false", BPMN_EXECUTION_VARIABLE_STOP_TIMER);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_STOP_TIMER, Variables.booleanValue(false));
 	}
 }
