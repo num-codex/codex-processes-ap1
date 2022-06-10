@@ -31,8 +31,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.re
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.EncryptData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ExtractPatientReference;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.HandleNoConsentIdatMerge;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.HandleNoConsentUsageAndTransfer;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.SetNoConsentIdatMergeError;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.SetNoConsentUsageAndTransferError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ReadData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ResolvePseudonym;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.StoreDataForTransferHub;
@@ -314,15 +314,15 @@ public class TransferDataConfig
 	}
 
 	@Bean
-	public HandleNoConsentUsageAndTransfer handleNoConsentUsageAndTransfer()
+	public SetNoConsentUsageAndTransferError setNoConsentUsageAndTransferError()
 	{
-		return new HandleNoConsentUsageAndTransfer(fhirClientProvider, taskHelper, readAccessHelper);
+		return new SetNoConsentUsageAndTransferError(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean
-	public HandleNoConsentIdatMerge handleNoConsentIdatMerge()
+	public SetNoConsentIdatMergeError setNoConsentIdatMergeError()
 	{
-		return new HandleNoConsentIdatMerge(fhirClientProvider, taskHelper, readAccessHelper);
+		return new SetNoConsentIdatMergeError(fhirClientProvider, taskHelper, readAccessHelper);
 	}
 
 	@Bean

@@ -35,15 +35,15 @@
     </bpmn:intermediateThrowEvent>
     <bpmn:boundaryEvent id="Event_1v57p58" attachedToRef="DownloadDataFromDic">
       <bpmn:outgoing>Flow_1n9z3h0</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_0z9c5av" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0z9c5av" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_0nhr47n" attachedToRef="ReplacePseudonym">
       <bpmn:outgoing>Flow_19uw2w0</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1cn3igw" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1cn3igw" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_1g62jmk" attachedToRef="StoreDataForCrr">
       <bpmn:outgoing>Flow_1dscaiy</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_0fj6e1b" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0fj6e1b" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_1dscaiy" sourceRef="Event_1g62jmk" targetRef="Gateway_1tund4o" />
     <bpmn:serviceTask id="Activity_16xbvhw" name="log success">
@@ -62,15 +62,15 @@
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="Event_1eze3pv" attachedToRef="Activity_09vc4rh">
       <bpmn:outgoing>Flow_06jkx6x</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1a1zy2j" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1a1zy2j" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_1o0klhs" attachedToRef="Activity_0y5chti">
       <bpmn:outgoing>Flow_0z00n16</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_13yihro" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_13yihro" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_0ii8ir3" attachedToRef="Activity_0lrmuw9">
       <bpmn:outgoing>Flow_1otluz4</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_0on3gb4" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0on3gb4" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="Activity_09vc4rh" name="download validation error from CRR">
       <bpmn:incoming>Flow_1o3h7ee</bpmn:incoming>

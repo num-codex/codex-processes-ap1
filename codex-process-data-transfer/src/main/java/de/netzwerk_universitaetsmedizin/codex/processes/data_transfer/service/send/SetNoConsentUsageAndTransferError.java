@@ -9,11 +9,11 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HandleNoConsentUsageAndTransfer extends AbstractServiceDelegate
+public class SetNoConsentUsageAndTransferError extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(HandleNoConsentUsageAndTransfer.class);
+	private static final Logger logger = LoggerFactory.getLogger(SetNoConsentUsageAndTransferError.class);
 
-	public HandleNoConsentUsageAndTransfer(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public SetNoConsentUsageAndTransferError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);

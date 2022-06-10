@@ -22,11 +22,11 @@
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="Event_1tjhiyz" attachedToRef="DownloadDataFromTransferHub">
       <bpmn:outgoing>Flow_0cysiak</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1kf3ess" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1kf3ess" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_05s0i22" attachedToRef="DecryptData">
       <bpmn:outgoing>Flow_03ztcka</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1bnrn2n" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1bnrn2n" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_09lbnic" sourceRef="InsertDataIntoCodex" targetRef="Gateway_078c0ws" />
     <bpmn:serviceTask id="Activity_0ezcge5" name="log error">
@@ -74,15 +74,15 @@
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="Event_00mipbg" attachedToRef="InsertDataIntoCodex">
       <bpmn:outgoing>Flow_193yd93</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1lvt0rd" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1lvt0rd" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_0p9e86m" attachedToRef="Activity_0gr13r9">
       <bpmn:outgoing>Flow_0lzdm4b</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1wcnc8n" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1wcnc8n" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="Event_0zizxzm" attachedToRef="Activity_1lar6le">
       <bpmn:outgoing>Flow_0wsem2y</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1rzefde" />
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1rzefde" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_193yd93" sourceRef="Event_00mipbg" targetRef="Gateway_0wzgymf" />
     <bpmn:sequenceFlow id="Flow_0lzdm4b" sourceRef="Event_0p9e86m" targetRef="Gateway_0wzgymf" />

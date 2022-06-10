@@ -16,6 +16,8 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED = "idatMergeGranted";
 	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
 	String BPMN_EXECUTION_VARIABLE_BINARY_URL = "binaryUrl";
+	String BPMN_EXECUTION_VARIABLE_ERROR_CODE = "errorCode";
+	String BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE = "errorMessage";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/crr-pseudonym";

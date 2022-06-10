@@ -9,11 +9,11 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HandleNoConsentIdatMerge extends AbstractServiceDelegate
+public class SetNoConsentIdatMergeError extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(HandleNoConsentIdatMerge.class);
+	private static final Logger logger = LoggerFactory.getLogger(SetNoConsentIdatMergeError.class);
 
-	public HandleNoConsentIdatMerge(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public SetNoConsentIdatMergeError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
