@@ -47,7 +47,7 @@
       <max value="1" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer-error-type" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer-error" />
       </binding>
     </element>
     <element id="Extension.extension:type.url">
@@ -64,7 +64,7 @@
     <element id="Extension.extension:type.value[x].system">
       <path value="Extension.extension.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-type" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error" />
     </element>
     <element id="Extension.extension:type.value[x].code">
       <path value="Extension.extension.value[x].code" />

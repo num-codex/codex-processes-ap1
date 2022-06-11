@@ -75,7 +75,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var cD = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer.xml");
 		var cDeS = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error-source.xml");
-		var cDeT = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error-type.xml");
+		var cDe = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error.xml");
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
@@ -95,13 +95,13 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var vD = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer.xml");
 		var vDeS = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-source.xml");
-		var vDeT = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-type.xml");
+		var vDe = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error.xml");
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
 				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
 				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
-				Arrays.asList(aSen, cD, cDeS, cDeT, nD, nB, sTexErMe, sTstaDsen, vD, vDeS, vDeT), //
+				Arrays.asList(aSen, cD, cDeS, cDe, nD, nB, sTexErMe, sTstaDsen, vD, vDeS, vDe), //
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
 				Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,

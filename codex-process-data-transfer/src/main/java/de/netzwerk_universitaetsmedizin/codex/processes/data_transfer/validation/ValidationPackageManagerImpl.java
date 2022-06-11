@@ -270,7 +270,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		}
 		catch (Exception e)
 		{
-			logger.error(
+			logger.warn(
 					"Error while expanding ValueSet {}|{}: {} - {}, trying to expand via external ontolgy server next",
 					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 

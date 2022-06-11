@@ -67,8 +67,8 @@ public interface ConstantsDataTransfer
 
 	String HAPI_USER_DATA_SOURCE_ID_ELEMENT = "source-id";
 
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-type";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE_VALUE_VALIDATION_FAILED = "validation-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED = "validation-failed";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-source";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC = "MeDIC";

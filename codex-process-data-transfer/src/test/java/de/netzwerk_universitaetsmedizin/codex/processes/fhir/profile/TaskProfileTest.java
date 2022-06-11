@@ -71,10 +71,10 @@ public class TaskProfileTest
 					"num-codex-task-stop-data-trigger.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
 					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
-					"num-codex-data-transfer-error-type.xml"),
+					"num-codex-data-transfer-error.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
 					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
-					"num-codex-data-transfer-error-type.xml"));
+					"num-codex-data-transfer-error.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

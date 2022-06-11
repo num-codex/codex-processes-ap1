@@ -116,7 +116,6 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.cacheFolder:#{null}}")
 	private String valueSetCacheFolder;
 
-	// TODO default should be MII ontology server
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.server.baseUrl:https://terminology-highmed.medic.medfak.uni-koeln.de/fhir}")
 	private String valueSetExpansionServerBaseUrl;
 

@@ -1,7 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE_VALUE_VALIDATION_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.HAPI_USER_DATA_SOURCE_ID_ELEMENT;
 
 import java.util.Objects;
@@ -93,7 +93,7 @@ public class ValidateData extends AbstractServiceDelegate
 								.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
 										getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
 
-						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_TYPE_VALUE_VALIDATION_FAILED);
+						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED);
 					}
 					else
 					{
@@ -111,8 +111,6 @@ public class ValidateData extends AbstractServiceDelegate
 					"{} not initialized, skipping validation. This is likley due to an error during startup of the process plugin.",
 					BundleValidatorFactory.class.getSimpleName());
 		});
-
-		// TODO maybe check only one pseudonym used
 	}
 
 	private void logValidationDetails(Bundle bundle)

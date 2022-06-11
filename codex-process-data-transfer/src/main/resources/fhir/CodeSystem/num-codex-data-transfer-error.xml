@@ -5,18 +5,18 @@
 			<code value="ALL" />
 		</tag>
 	</meta>
-	<url value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-type" />
+	<url value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />
-	<name value="NumCodexDataTransferErrorType" />
-	<title value="NUM-CODEX data-transfer error type" />
+	<name value="NumCodexDataTransferError" />
+	<title value="NUM-CODEX data-transfer error" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
 	<!-- date managed by bpe -->
 	<date value="#{date}" />
 	<publisher value="NUM-CODEX" />
-	<description value="CodeSystem with error type values for the NUM-CODEX data-transfer processes" />
+	<description value="CodeSystem with error codes for the NUM-CODEX data-transfer processes" />
 	<caseSensitive value="true" />
 	<hierarchyMeaning value="grouped-by" />
 	<versionNeeded value="false" />
@@ -26,5 +26,5 @@
 		<display value="Validation Failed" />
 		<definition value="Error or fatal error during validaton of FHIR resources" />
 	</concept>
-	<!-- TODO add additional error types -->
+	<!-- TODO add additional error codes -->
 </CodeSystem> 
