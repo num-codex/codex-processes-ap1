@@ -197,7 +197,7 @@ public class ValidationMain implements InitializingBean
 				.flatMap(p -> Arrays.stream(p.getPropertyNames())
 						.filter(n -> n.startsWith("de.netzwerk.universitaetsmedizin"))
 						.map(k -> new String[] { k, Objects.toString(p.getProperty(k)) }))
-				.map(e -> e[0].contains("password") ? new String[] { e[0], "*****" } : e).map(e -> e[0] + ": " + e[1]);
+				.map(e -> e[0].contains("password") ? new String[] { e[0], "***" } : e).map(e -> e[0] + ": " + e[1]);
 	}
 
 	private IParser getOutputParser()

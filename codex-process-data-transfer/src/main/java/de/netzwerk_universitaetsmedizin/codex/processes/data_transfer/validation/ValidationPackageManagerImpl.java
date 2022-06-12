@@ -67,7 +67,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	private final BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory;
 	private final BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory;
 
-	private final List<ValidationPackageIdentifier> packagesToIgnore = new ArrayList<>();
+	private final List<ValidationPackageIdentifier> noDownloadPackages = new ArrayList<>();
 	private final List<StructureDefinitionModifier> structureDefinitionModifiers = new ArrayList<>();
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
@@ -85,7 +85,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
 			BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory,
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory,
-			Collection<ValidationPackageIdentifier> packagesToIgnore,
+			Collection<ValidationPackageIdentifier> noDownloadPackages,
 			Collection<? extends StructureDefinitionModifier> structureDefinitionModifiers)
 	{
 		this.validationPackageClient = validationPackageClient;
@@ -95,8 +95,8 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		this.internalSnapshotGeneratorFactory = internalSnapshotGeneratorFactory;
 		this.internalValueSetExpanderFactory = internalValueSetExpanderFactory;
 
-		if (packagesToIgnore != null)
-			this.packagesToIgnore.addAll(packagesToIgnore);
+		if (noDownloadPackages != null)
+			this.noDownloadPackages.addAll(noDownloadPackages);
 
 		if (structureDefinitionModifiers != null)
 			this.structureDefinitionModifiers.addAll(structureDefinitionModifiers);
@@ -166,9 +166,9 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			// already downloaded
 			return;
 		}
-		else if (packagesToIgnore.contains(identifier))
+		else if (noDownloadPackages.contains(identifier))
 		{
-			logger.debug("Ignoring package {}", identifier.toString());
+			logger.debug("Not downloading package {}", identifier.toString());
 			return;
 		}
 

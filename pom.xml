@@ -78,6 +78,11 @@
 				<artifactId>dsf-fhir-server</artifactId>
 				<version>${dsf.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<version>${dsf.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
