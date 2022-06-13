@@ -19,7 +19,7 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 		<hapi.version>5.1.0</hapi.version>
-		<dsf.version>0.6.0</dsf.version>
+		<dsf.version>0.7.0-SNAPSHOT</dsf.version>
 		<slf4j.version>1.8.0-beta4</slf4j.version>
 	</properties>
 

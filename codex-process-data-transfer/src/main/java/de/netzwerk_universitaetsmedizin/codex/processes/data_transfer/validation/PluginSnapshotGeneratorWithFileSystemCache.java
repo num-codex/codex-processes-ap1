@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
@@ -16,12 +18,12 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.context.FhirContext;
 
 public class PluginSnapshotGeneratorWithFileSystemCache
-		extends AbstractFhirResourceFileSystemCache<PluginSnapshotWithValidationMessages, StructureDefinition>
-		implements PluginSnapshotGenerator, InitializingBean
+		extends AbstractFhirResourceFileSystemCache<SnapshotWithValidationMessages, StructureDefinition>
+		implements SnapshotGenerator, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationPackageClientWithFileSystemCache.class);
 
-	private final PluginSnapshotGenerator delegate;
+	private final SnapshotGenerator delegate;
 
 	/**
 	 * For JSON content with gzip compression using the <code>.json.xz</code> file name suffix.
@@ -37,7 +39,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 	 * @see AbstractFileSystemCache#IN_COMPRESSOR_FACTORY
 	 */
 	public PluginSnapshotGeneratorWithFileSystemCache(Path cacheFolder, FhirContext fhirContext,
-			PluginSnapshotGenerator delegate)
+			SnapshotGenerator delegate)
 	{
 		super(cacheFolder, StructureDefinition.class, fhirContext);
 
@@ -47,7 +49,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 	public PluginSnapshotGeneratorWithFileSystemCache(Path cacheFolder, String fileNameSuffix,
 			FunctionWithIoException<OutputStream, OutputStream> outCompressorFactory,
 			FunctionWithIoException<InputStream, InputStream> inCompressorFactory, FhirContext fhirContext,
-			PluginSnapshotGenerator delegate)
+			SnapshotGenerator delegate)
 	{
 		super(cacheFolder, fileNameSuffix, outCompressorFactory, inCompressorFactory, StructureDefinition.class,
 				fhirContext);
@@ -64,7 +66,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 	}
 
 	@Override
-	public PluginSnapshotWithValidationMessages generateSnapshot(StructureDefinition structureDefinition)
+	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition structureDefinition)
 	{
 		Objects.requireNonNull(structureDefinition, "differential");
 
@@ -72,7 +74,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 		{
 			logger.debug("StructureDefinition {}|{} has snapshot", structureDefinition.getUrl(),
 					structureDefinition.getVersion());
-			return new PluginSnapshotWithValidationMessages(structureDefinition, Collections.emptyList());
+			return new SnapshotWithValidationMessages(structureDefinition, Collections.emptyList());
 		}
 
 		Objects.requireNonNull(structureDefinition.getUrl(), "structureDefinition.url");
@@ -80,10 +82,10 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 
 		try
 		{
-			PluginSnapshotWithValidationMessages read = readResourceFromCache(structureDefinition.getUrl(),
+			SnapshotWithValidationMessages read = readResourceFromCache(structureDefinition.getUrl(),
 					structureDefinition.getVersion(),
 					// needs to return original structureDefinition object with included snapshot
-					sd -> new PluginSnapshotWithValidationMessages(structureDefinition.setSnapshot(sd.getSnapshot()),
+					sd -> new SnapshotWithValidationMessages(structureDefinition.setSnapshot(sd.getSnapshot()),
 							Collections.emptyList()));
 			if (read != null)
 				return read;
@@ -96,10 +98,10 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 		}
 	}
 
-	private PluginSnapshotWithValidationMessages downloadAndWriteToCache(StructureDefinition structureDefinition)
+	private SnapshotWithValidationMessages downloadAndWriteToCache(StructureDefinition structureDefinition)
 			throws IOException
 	{
-		PluginSnapshotWithValidationMessages snapshot = delegate.generateSnapshot(structureDefinition);
+		SnapshotWithValidationMessages snapshot = delegate.generateSnapshot(structureDefinition);
 
 		if (PublicationStatus.DRAFT.equals(snapshot.getSnapshot().getStatus()))
 		{
@@ -109,7 +111,14 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 			return snapshot;
 		}
 		else
-			return writeRsourceToCache(snapshot, PluginSnapshotWithValidationMessages::getSnapshot,
+			return writeRsourceToCache(snapshot, SnapshotWithValidationMessages::getSnapshot,
 					StructureDefinition::getUrl, StructureDefinition::getVersion);
+	}
+
+	@Override
+	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential,
+			String baseAbsoluteUrlPrefix)
+	{
+		throw new UnsupportedOperationException("not implemented");
 	}
 }

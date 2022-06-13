@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.highmed.dsf.fhir.validation.ValidationSupportWithCustomResources;
 import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -64,7 +66,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	private final ObjectMapper mapper;
 	private final FhirContext fhirContext;
 
-	private final BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory;
+	private final BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory;
 	private final BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory;
 
 	private final List<ValidationPackageIdentifier> noDownloadPackages = new ArrayList<>();
@@ -72,7 +74,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
-			BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory,
+			BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory,
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory)
 	{
 		this(validationPackageClient, valueSetExpansionClient, mapper, fhirContext, internalSnapshotGeneratorFactory,
@@ -83,7 +85,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
-			BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory,
+			BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory,
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory,
 			Collection<ValidationPackageIdentifier> noDownloadPackages,
 			Collection<? extends StructureDefinitionModifier> structureDefinitionModifiers)
@@ -300,7 +302,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		ValidationSupportChain supportChain = createSupportChain(fhirContext, resources, snapshots.values(),
 				expandedValueSets);
 
-		PluginSnapshotGenerator generator = internalSnapshotGeneratorFactory.apply(fhirContext, supportChain);
+		SnapshotGenerator generator = internalSnapshotGeneratorFactory.apply(fhirContext, supportChain);
 
 		resources.stream().flatMap(r -> r.getStructureDefinitions().stream())
 				.filter(s -> s.hasDifferential() && !s.hasSnapshot())
@@ -323,7 +325,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	private void createSnapshot(Map<String, StructureDefinition> structureDefinitionsByUrl,
-			Map<String, StructureDefinition> snapshots, PluginSnapshotGenerator generator, StructureDefinition diff)
+			Map<String, StructureDefinition> snapshots, SnapshotGenerator generator, StructureDefinition diff)
 	{
 		if (snapshots.containsKey(diff.getUrl() + "|" + diff.getVersion()))
 			return;
@@ -352,7 +354,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		{
 			structureDefinitionModifiers.forEach(f -> f.modify(diff));
 
-			PluginSnapshotWithValidationMessages snapshot = generator.generateSnapshot(diff);
+			SnapshotWithValidationMessages snapshot = generator.generateSnapshot(diff);
 
 			if (snapshot.getMessages().isEmpty())
 				snapshots.put(snapshot.getSnapshot().getUrl() + "|" + snapshot.getSnapshot().getVersion(),

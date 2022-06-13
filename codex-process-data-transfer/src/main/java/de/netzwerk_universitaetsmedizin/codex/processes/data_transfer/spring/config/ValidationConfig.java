@@ -22,6 +22,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.fhir.json.ObjectMapperFactory;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
 import org.highmed.dsf.tools.generator.ProcessDocumentation;
@@ -37,7 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithFileSystemCache;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClient;
@@ -238,7 +238,7 @@ public class ValidationConfig
 	}
 
 	@Bean
-	public BiFunction<FhirContext, IValidationSupport, PluginSnapshotGenerator> internalSnapshotGeneratorFactory()
+	public BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory()
 	{
 		return (fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(structureDefinitionCacheFolder(), fc,
 				new PluginSnapshotGeneratorImpl(fc, vs));

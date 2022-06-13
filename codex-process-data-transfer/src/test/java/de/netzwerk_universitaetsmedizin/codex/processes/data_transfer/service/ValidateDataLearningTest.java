@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.json.ObjectMapperFactory;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.highmed.dsf.fhir.validation.ValidationSupportWithCustomResources;
 import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -39,10 +41,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidator;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithFileSystemCache;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotWithValidationMessages;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackage;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClientJersey;
@@ -224,7 +224,7 @@ public class ValidateDataLearningTest
 						.equals(s.getUrl()))
 				.findFirst().get();
 
-		PluginSnapshotGenerator sGen = new PluginSnapshotGeneratorImpl(fhirContext, new ValidationSupportChain(
+		SnapshotGenerator sGen = new PluginSnapshotGeneratorImpl(fhirContext, new ValidationSupportChain(
 				new InMemoryTerminologyServerValidationSupport(fhirContext),
 				new ValidationSupportChain(validationPackages.stream()
 						.map(ValidationPackage::getValidationSupportResources)
@@ -234,7 +234,7 @@ public class ValidateDataLearningTest
 				new DefaultProfileValidationSupport(fhirContext),
 				new CommonCodeSystemsTerminologyService(fhirContext)));
 
-		PluginSnapshotWithValidationMessages result = sGen.generateSnapshot(miiRef);
+		SnapshotWithValidationMessages result = sGen.generateSnapshot(miiRef);
 
 		result.getMessages().forEach(m ->
 		{
