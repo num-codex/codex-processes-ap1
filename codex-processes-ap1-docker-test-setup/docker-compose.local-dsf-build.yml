@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  dic-fhir:
+    image: highmed/fhir
+  dic-bpe:
+    image: highmed/bpe
+
+  gth-fhir:
+    image: highmed/fhir
+  gth-bpe:
+    image: highmed/bpe
+
+  crr-fhir:
+    image: highmed/fhir
+  crr-bpe:
+    image: highmed/bpe
