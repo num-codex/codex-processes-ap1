@@ -25,7 +25,7 @@
 			<artifactId>dsf-tools-documentation-generator</artifactId>
 		</dependency>
 		
-		<!-- must be added as regular DSF plugins -->
+		<!-- must be added as regular DSF plugin -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
