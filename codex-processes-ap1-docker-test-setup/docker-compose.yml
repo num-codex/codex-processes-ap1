@@ -141,6 +141,9 @@ services:
       - type: bind
         source: ./dic/bpe/last_event
         target: /opt/bpe/last_event
+      - type: bind
+        source: ./dic/bpe/cache
+        target: /opt/bpe/cache
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
@@ -162,6 +165,9 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
     networks:
       dic-bpe-frontend:
