@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,20 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidator;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorImpl;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithFileSystemCache;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackage;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClient;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClientJersey;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClientWithFileSystemCache;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageDescriptor;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageManager;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageManagerImpl;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpanderWithFileSystemCache;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClient;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClientJersey;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClientWithFileSystemCache;
 
 public class ValidateDataLearningTest
 {
@@ -234,6 +220,8 @@ public class ValidateDataLearningTest
 				new DefaultProfileValidationSupport(fhirContext),
 				new CommonCodeSystemsTerminologyService(fhirContext)));
 
+		sGen = new PluginSnapshotGeneratorWithModifiers(sGen);
+
 		SnapshotWithValidationMessages result = sGen.generateSnapshot(miiRef);
 
 		result.getMessages().forEach(m ->
@@ -256,7 +244,6 @@ public class ValidateDataLearningTest
 		validationPackages.stream().flatMap(p -> p.getValidationSupportResources().getStructureDefinitions().stream())
 				.forEach(s ->
 				{
-
 					logger.info("StructureDefinition {}|{}:", s.getUrl(), s.getVersion());
 					printTree(s, sDefByUrl);
 					logger.debug("");

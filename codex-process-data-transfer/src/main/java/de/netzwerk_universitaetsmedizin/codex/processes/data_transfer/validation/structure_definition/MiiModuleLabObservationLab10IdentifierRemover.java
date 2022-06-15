@@ -28,7 +28,7 @@ public class MiiModuleLabObservationLab10IdentifierRemover implements StructureD
 			List<ElementDefinition> filteredRules = sd.getDifferential().getElement().stream().filter(toRemove.negate())
 					.collect(Collectors.toList());
 
-			logger.warn("Removing validation rules with ids {} in StructureDefinition {}|{}",
+			logger.warn("Removing validation rules with ids {} from StructureDefinition {}|{}",
 					sd.getDifferential().getElement().stream().filter(toRemove).map(ElementDefinition::getId)
 							.collect(Collectors.joining(", ", "[", "]")),
 					sd.getUrl(), sd.getVersion());

@@ -2,7 +2,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -44,21 +43,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.GeccoRadiologyProceduresCodingSliceMinFixer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.StructureDefinitionModifier;
 
 public class ValidationPackageManagerImpl implements InitializingBean, ValidationPackageManager
 {
-	static final Logger logger = LoggerFactory.getLogger(ValidationPackageManagerImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidationPackageManagerImpl.class);
 
 	public static final List<ValidationPackageIdentifier> PACKAGE_IGNORE = List
 			.of(new ValidationPackageIdentifier("hl7.fhir.r4.core", "4.0.1"));
-
-	public static final StructureDefinitionModifier CLOSED_TYPE_SLICING_REMOVER = new ClosedTypeSlicingRemover();
-	public static final StructureDefinitionModifier MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER = new MiiModuleLabObservationLab10IdentifierRemover();
-	public static final StructureDefinitionModifier GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER = new GeccoRadiologyProceduresCodingSliceMinFixer();
 
 	private final ValidationPackageClient validationPackageClient;
 	private final ValueSetExpansionClient valueSetExpansionClient;
@@ -70,7 +61,6 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	private final BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory;
 
 	private final List<ValidationPackageIdentifier> noDownloadPackages = new ArrayList<>();
-	private final List<StructureDefinitionModifier> structureDefinitionModifiers = new ArrayList<>();
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
@@ -78,17 +68,14 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory)
 	{
 		this(validationPackageClient, valueSetExpansionClient, mapper, fhirContext, internalSnapshotGeneratorFactory,
-				internalValueSetExpanderFactory, PACKAGE_IGNORE,
-				Arrays.asList(CLOSED_TYPE_SLICING_REMOVER, MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER,
-						GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER));
+				internalValueSetExpanderFactory, PACKAGE_IGNORE);
 	}
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
 			BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory,
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory,
-			Collection<ValidationPackageIdentifier> noDownloadPackages,
-			Collection<? extends StructureDefinitionModifier> structureDefinitionModifiers)
+			Collection<ValidationPackageIdentifier> noDownloadPackages)
 	{
 		this.validationPackageClient = validationPackageClient;
 		this.valueSetExpansionClient = valueSetExpansionClient;
@@ -99,9 +86,6 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 		if (noDownloadPackages != null)
 			this.noDownloadPackages.addAll(noDownloadPackages);
-
-		if (structureDefinitionModifiers != null)
-			this.structureDefinitionModifiers.addAll(structureDefinitionModifiers);
 	}
 
 	@Override
@@ -273,7 +257,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		catch (Exception e)
 		{
 			logger.warn(
-					"Error while expanding ValueSet {}|{}: {} - {}, trying to expand via external ontolgy server next",
+					"Error while expanding ValueSet {}|{}: {} - {}, trying to expand via external terminology server next",
 					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 
 			expandExternal(expandedValueSets, v);
@@ -352,8 +336,6 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 		try
 		{
-			structureDefinitionModifiers.forEach(f -> f.modify(diff));
-
 			SnapshotWithValidationMessages snapshot = generator.generateSnapshot(diff);
 
 			if (snapshot.getMessages().isEmpty())

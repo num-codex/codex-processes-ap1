@@ -40,6 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithFileSystemCache;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithModifiers;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClientJersey;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageClientWithFileSystemCache;
@@ -210,13 +211,9 @@ public class ValidationConfig
 	@Bean
 	public ValidationPackageManager validationPackageManager()
 	{
-		List<StructureDefinitionModifier> structureDefinitionModifiers = structureDefinitionModifierClasses.stream()
-				.map(this::createStructureDefinitionModifier).collect(Collectors.toList());
-
 		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(), objectMapper(),
 				fhirContext, internalSnapshotGeneratorFactory(), internalValueSetExpanderFactory(),
-				noDownloadPackages.stream().map(ValidationPackageIdentifier::fromString).collect(Collectors.toList()),
-				structureDefinitionModifiers);
+				noDownloadPackages.stream().map(ValidationPackageIdentifier::fromString).collect(Collectors.toList()));
 	}
 
 	private StructureDefinitionModifier createStructureDefinitionModifier(String className)
@@ -240,8 +237,12 @@ public class ValidationConfig
 	@Bean
 	public BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory()
 	{
+		List<StructureDefinitionModifier> structureDefinitionModifiers = structureDefinitionModifierClasses.stream()
+				.map(this::createStructureDefinitionModifier).collect(Collectors.toList());
+
 		return (fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(structureDefinitionCacheFolder(), fc,
-				new PluginSnapshotGeneratorImpl(fc, vs));
+				new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs),
+						structureDefinitionModifiers));
 	}
 
 	@Bean

@@ -78,16 +78,15 @@ public class ValueSetExpansionClientWithFileSystemCache extends AbstractFhirReso
 		Objects.requireNonNull(valueSet.getUrl(), "valueSet.url");
 		Objects.requireNonNull(valueSet.getVersion(), "valueSet.version");
 
-		// ValueSet read = readFromCache(valueSet.getUrl(), valueSet.getVersion(), ValueSet.class, Function.identity());
 		ValueSet read = readResourceFromCache(valueSet.getUrl(), valueSet.getVersion(), Function.identity());
 
 		if (read != null)
 			return read;
 		else
-			return downloadAndWriteToCache(valueSet);
+			return expandAndWriteToCache(valueSet);
 	}
 
-	private ValueSet downloadAndWriteToCache(ValueSet valueSet) throws IOException
+	private ValueSet expandAndWriteToCache(ValueSet valueSet) throws IOException
 	{
 		ValueSet expanded = delegate.expand(valueSet);
 
@@ -98,7 +97,6 @@ public class ValueSetExpansionClientWithFileSystemCache extends AbstractFhirReso
 			return expanded;
 		}
 		else
-			// return writeToCache(expanded, Function.identity(), ValueSet::getUrl, ValueSet::getVersion);
 			return writeRsourceToCache(expanded, Function.identity(), ValueSet::getUrl, ValueSet::getVersion);
 	}
 

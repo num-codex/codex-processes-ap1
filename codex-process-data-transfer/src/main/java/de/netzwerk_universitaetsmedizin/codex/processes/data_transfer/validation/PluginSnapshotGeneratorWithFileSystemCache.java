@@ -90,7 +90,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 			if (read != null)
 				return read;
 			else
-				return downloadAndWriteToCache(structureDefinition);
+				return generateSnapshotAndWriteToCache(structureDefinition);
 		}
 		catch (IOException e)
 		{
@@ -98,7 +98,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 		}
 	}
 
-	private SnapshotWithValidationMessages downloadAndWriteToCache(StructureDefinition structureDefinition)
+	private SnapshotWithValidationMessages generateSnapshotAndWriteToCache(StructureDefinition structureDefinition)
 			throws IOException
 	{
 		SnapshotWithValidationMessages snapshot = delegate.generateSnapshot(structureDefinition);
