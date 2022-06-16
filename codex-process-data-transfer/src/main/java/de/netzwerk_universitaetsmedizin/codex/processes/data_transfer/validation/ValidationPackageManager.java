@@ -1,7 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
-import java.util.List;
-
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -18,7 +17,7 @@ public interface ValidationPackageManager
 	 *            not <code>null</code>
 	 * @return unmodifiable list of {@link ValidationPackage}s
 	 */
-	default List<ValidationPackage> downloadPackageWithDependencies(String name, String version)
+	default ValidationPackageWithDepedencies downloadPackageWithDependencies(String name, String version)
 	{
 		return downloadPackageWithDependencies(new ValidationPackageIdentifier(name, version));
 	}
@@ -32,18 +31,20 @@ public interface ValidationPackageManager
 	 *            not <code>null</code>
 	 * @return unmodifiable list of {@link ValidationPackage}s
 	 */
-	List<ValidationPackage> downloadPackageWithDependencies(ValidationPackageIdentifier identifier);
+	ValidationPackageWithDepedencies downloadPackageWithDependencies(ValidationPackageIdentifier identifier);
 
 	/**
-	 * Will try to generate snapshots for all {@link StructureDefinition}s and expand all {@link ValueSet}s, before
-	 * returning a {@link IValidationSupport}.
+	 * Will try to generate snapshots for all {@link StructureDefinition}s of the root package and its dependencies,
+	 * will try to expand all {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE},
+	 * {@link BindingStrength#PREFERRED} or {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of
+	 * the root package or their dependencies, before returning a {@link IValidationSupport}.
 	 * 
-	 * @param validationPackages
+	 * @param packageWithDependencies
 	 *            not <code>null</code>
 	 * @return validation support for the validator
 	 */
 	IValidationSupport expandValueSetsAndGenerateStructureDefinitionSnapshots(
-			List<ValidationPackage> validationPackages);
+			ValidationPackageWithDepedencies packageWithDependencies);
 
 	/**
 	 * @param validationSupport
@@ -54,7 +55,10 @@ public interface ValidationPackageManager
 
 	/**
 	 * Downloads the given FHIR package and all its dependencies. Will try to generate snapshots for all
-	 * {@link StructureDefinition}s and expand all {@link ValueSet}s, before returning a {@link BundleValidator}.
+	 * {@link StructureDefinition}s of the specified (root) package and its dependencies, will try to expand all
+	 * {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE}, {@link BindingStrength#PREFERRED} or
+	 * {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of the specified (root) package or their
+	 * dependencies, before returning a {@link IValidationSupport}.
 	 * 
 	 * @param name
 	 *            not <code>null</code>
@@ -69,7 +73,10 @@ public interface ValidationPackageManager
 
 	/**
 	 * Downloads the given FHIR package and all its dependencies. Will try to generate snapshots for all
-	 * {@link StructureDefinition}s and expand all {@link ValueSet}s, before returning a {@link BundleValidator}.
+	 * {@link StructureDefinition}s of the specified (root) package and its dependencies, will try to expand all
+	 * {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE}, {@link BindingStrength#PREFERRED} or
+	 * {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of the specified (root) package or their
+	 * dependencies, before returning a {@link IValidationSupport}.
 	 * 
 	 * @param identifier
 	 *            not <code>null</code>

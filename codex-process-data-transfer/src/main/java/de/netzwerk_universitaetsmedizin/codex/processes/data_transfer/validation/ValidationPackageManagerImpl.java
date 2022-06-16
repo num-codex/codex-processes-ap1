@@ -6,14 +6,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -26,11 +23,9 @@ import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -48,8 +43,10 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationPackageManagerImpl.class);
 
-	public static final List<ValidationPackageIdentifier> PACKAGE_IGNORE = List
+	public static final List<ValidationPackageIdentifier> NO_PACKAGE_DOWNLOAD = List
 			.of(new ValidationPackageIdentifier("hl7.fhir.r4.core", "4.0.1"));
+
+	public static final EnumSet<BindingStrength> VALUE_SET_BINDING_STRENGTHS = EnumSet.allOf(BindingStrength.class);
 
 	private final ValidationPackageClient validationPackageClient;
 	private final ValueSetExpansionClient valueSetExpansionClient;
@@ -61,6 +58,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	private final BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory;
 
 	private final List<ValidationPackageIdentifier> noDownloadPackages = new ArrayList<>();
+	private final EnumSet<BindingStrength> valueSetBindingStrengths;
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
@@ -68,14 +66,15 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory)
 	{
 		this(validationPackageClient, valueSetExpansionClient, mapper, fhirContext, internalSnapshotGeneratorFactory,
-				internalValueSetExpanderFactory, PACKAGE_IGNORE);
+				internalValueSetExpanderFactory, NO_PACKAGE_DOWNLOAD, VALUE_SET_BINDING_STRENGTHS);
 	}
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
 			ValueSetExpansionClient valueSetExpansionClient, ObjectMapper mapper, FhirContext fhirContext,
 			BiFunction<FhirContext, IValidationSupport, SnapshotGenerator> internalSnapshotGeneratorFactory,
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory,
-			Collection<ValidationPackageIdentifier> noDownloadPackages)
+			Collection<ValidationPackageIdentifier> noDownloadPackages,
+			EnumSet<BindingStrength> valueSetBindingStrengths)
 	{
 		this.validationPackageClient = validationPackageClient;
 		this.valueSetExpansionClient = valueSetExpansionClient;
@@ -86,6 +85,8 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 		if (noDownloadPackages != null)
 			this.noDownloadPackages.addAll(noDownloadPackages);
+
+		this.valueSetBindingStrengths = valueSetBindingStrengths;
 	}
 
 	@Override
@@ -102,28 +103,25 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	@Override
-	public List<ValidationPackage> downloadPackageWithDependencies(ValidationPackageIdentifier identifier)
+	public ValidationPackageWithDepedencies downloadPackageWithDependencies(ValidationPackageIdentifier identifier)
 	{
 		Objects.requireNonNull(identifier, "identifier");
 
 		Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion = new HashMap<>();
 		downloadPackageWithDependencies(identifier, packagesByNameAndVersion);
 
-		return Collections.unmodifiableList(new ArrayList<>(packagesByNameAndVersion.values()));
+		return ValidationPackageWithDepedencies.from(packagesByNameAndVersion, identifier);
 	}
 
 	@Override
 	public IValidationSupport expandValueSetsAndGenerateStructureDefinitionSnapshots(
-			List<ValidationPackage> validationPackages)
+			ValidationPackageWithDepedencies packageWithDependencies)
 	{
-		Objects.requireNonNull(validationPackages, "validationPackages");
+		Objects.requireNonNull(packageWithDependencies, "packageWithDependencies");
 
-		validationPackages.forEach(p -> p.parseResources(fhirContext));
+		packageWithDependencies.parseResources(fhirContext);
 
-		List<ValidationSupportResources> resources = validationPackages.stream()
-				.map(ValidationPackage::getValidationSupportResources).collect(Collectors.toList());
-
-		return withSnapshots(resources, withExpandedValueSets(resources));
+		return withSnapshots(packageWithDependencies, withExpandedValueSets(packageWithDependencies));
 	}
 
 	@Override
@@ -139,8 +137,9 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	{
 		Objects.requireNonNull(identifier, "identifier");
 
-		List<ValidationPackage> vPackages = downloadPackageWithDependencies(identifier);
-		IValidationSupport validationSupport = expandValueSetsAndGenerateStructureDefinitionSnapshots(vPackages);
+		ValidationPackageWithDepedencies packageWithDependencies = downloadPackageWithDependencies(identifier);
+		IValidationSupport validationSupport = expandValueSetsAndGenerateStructureDefinitionSnapshots(
+				packageWithDependencies);
 		return createBundleValidator(validationSupport);
 	}
 
@@ -191,13 +190,13 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		}
 	}
 
-	private List<ValueSet> withExpandedValueSets(List<ValidationSupportResources> resources)
+	private List<ValueSet> withExpandedValueSets(ValidationPackageWithDepedencies packageWithDependencies)
 	{
 		List<ValueSet> expandedValueSets = new ArrayList<>();
 		ValueSetExpander expander = internalValueSetExpanderFactory.apply(fhirContext,
-				createSupportChain(fhirContext, resources, Collections.emptyList(), expandedValueSets));
+				createSupportChain(fhirContext, packageWithDependencies, Collections.emptyList(), expandedValueSets));
 
-		resources.stream().flatMap(r -> r.getValueSets().stream()).forEach(v ->
+		packageWithDependencies.getValueSetsIncludingDependencies(valueSetBindingStrengths).forEach(v ->
 		{
 			logger.debug("Expanding ValueSet {}|{}", v.getUrl(), v.getVersion());
 
@@ -275,119 +274,85 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			return Optional.empty();
 	}
 
-	private IValidationSupport withSnapshots(List<ValidationSupportResources> resources,
+	private IValidationSupport withSnapshots(ValidationPackageWithDepedencies packageWithDependencies,
 			List<ValueSet> expandedValueSets)
 	{
-		Map<String, StructureDefinition> structureDefinitionsByUrl = resources.stream()
-				.flatMap(r -> r.getStructureDefinitions().stream())
-				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
-
 		Map<String, StructureDefinition> snapshots = new HashMap<>();
-		ValidationSupportChain supportChain = createSupportChain(fhirContext, resources, snapshots.values(),
-				expandedValueSets);
+		ValidationSupportChain supportChain = createSupportChain(fhirContext, packageWithDependencies,
+				snapshots.values(), expandedValueSets);
 
 		SnapshotGenerator generator = internalSnapshotGeneratorFactory.apply(fhirContext, supportChain);
 
-		resources.stream().flatMap(r -> r.getStructureDefinitions().stream())
+		packageWithDependencies.getValidationSupportResources().getStructureDefinitions().stream()
 				.filter(s -> s.hasDifferential() && !s.hasSnapshot())
-				.forEach(diff -> createSnapshot(structureDefinitionsByUrl, snapshots, generator, diff));
+				.forEach(diff -> createSnapshot(packageWithDependencies, snapshots, generator, diff));
 
 		return supportChain;
 	}
 
-	private ValidationSupportChain createSupportChain(FhirContext context, List<ValidationSupportResources> resources,
-			Collection<? extends StructureDefinition> snapshots, Collection<? extends ValueSet> expandedValueSets)
-	{
-		return new ValidationSupportChain(new CodeValidatorForExpandedValueSets(context),
-				new InMemoryTerminologyServerValidationSupport(context),
-				new ValidationSupportWithCustomResources(context, snapshots, null, expandedValueSets),
-				new ValidationSupportChain(resources.stream()
-						.map(r -> new ValidationSupportWithCustomResources(context, r.getStructureDefinitions(),
-								r.getCodeSystems(), r.getValueSets()))
-						.toArray(IValidationSupport[]::new)),
-				new DefaultProfileValidationSupport(context), new CommonCodeSystemsTerminologyService(context));
-	}
-
-	private void createSnapshot(Map<String, StructureDefinition> structureDefinitionsByUrl,
+	private void createSnapshot(ValidationPackageWithDepedencies packageWithDependencies,
 			Map<String, StructureDefinition> snapshots, SnapshotGenerator generator, StructureDefinition diff)
 	{
 		if (snapshots.containsKey(diff.getUrl() + "|" + diff.getVersion()))
 			return;
 
-		Set<String> dependencies = new HashSet<>();
-		Set<String> targetDependencies = new HashSet<>();
+		List<StructureDefinition> definitions = new ArrayList<>();
+		definitions.addAll(packageWithDependencies.getStructureDefinitionDependencies(diff));
+		definitions.add(diff);
 
-		calculateDependencies(diff, structureDefinitionsByUrl, dependencies, targetDependencies);
+		logger.debug("Generating snapshot for {}|{}, base {}, dependencies {}", diff.getUrl(), diff.getVersion(),
+				diff.getBaseDefinition(),
+				definitions.stream()
+						.filter(sd -> !sd.equals(diff) && !sd.getUrl().equals(diff.getBaseDefinition())
+								&& !(sd.getUrl() + "|" + sd.getVersion()).equals(diff.getBaseDefinition()))
+						.map(sd -> sd.getUrl() + "|" + sd.getVersion()).sorted()
+						.collect(Collectors.joining(", ", "[", "]")));
 
-		logger.debug("Generating snapshot for {}|{}, base {}, dependencies {}, target-dependencies {}", diff.getUrl(),
-				diff.getVersion(), diff.getBaseDefinition(),
-				dependencies.stream().sorted().collect(Collectors.joining(", ", "[", "]")),
-				targetDependencies.stream().sorted().collect(Collectors.joining(", ", "[", "]")));
-
-		if (structureDefinitionsByUrl.containsKey(diff.getBaseDefinition()))
-			createSnapshot(structureDefinitionsByUrl, snapshots, generator,
-					structureDefinitionsByUrl.get(diff.getBaseDefinition()));
-
-		dependencies.stream().filter(structureDefinitionsByUrl::containsKey).map(structureDefinitionsByUrl::get)
-				.forEach(s -> createSnapshot(structureDefinitionsByUrl, snapshots, generator, s));
-
-		targetDependencies.stream().filter(structureDefinitionsByUrl::containsKey).map(structureDefinitionsByUrl::get)
-				.forEach(s -> createSnapshot(structureDefinitionsByUrl, snapshots, generator, s));
-
-		try
-		{
-			SnapshotWithValidationMessages snapshot = generator.generateSnapshot(diff);
-
-			if (snapshot.getMessages().isEmpty())
-				snapshots.put(snapshot.getSnapshot().getUrl() + "|" + snapshot.getSnapshot().getVersion(),
-						snapshot.getSnapshot());
-			else
-			{
-				snapshot.getMessages().forEach(m ->
+		definitions.stream().filter(sd -> sd.hasDifferential() && !sd.hasSnapshot()
+				&& !snapshots.containsKey(sd.getUrl() + "|" + sd.getVersion())).forEach(sd ->
 				{
-					if (EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
-							.contains(m.getLevel()))
-						logger.warn("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(), m.toString());
-					else
-						logger.info("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(), m.toString());
-				});
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("Error while generating snapshot for {}|{}: {} - {}", diff.getUrl(), diff.getVersion(),
-					e.getClass().getName(), e.getMessage());
-		}
-	}
-
-	private void calculateDependencies(StructureDefinition structureDefinition,
-			Map<String, StructureDefinition> structureDefinitionsByUrl, Set<String> dependencies,
-			Set<String> targetDependencies)
-	{
-		for (ElementDefinition element : structureDefinition.getDifferential().getElement())
-		{
-			if (element.getType().stream().filter(t -> !t.getProfile().isEmpty() || !t.getTargetProfile().isEmpty())
-					.findAny().isPresent())
-			{
-				for (TypeRefComponent type : element.getType())
-				{
-					if (!type.getProfile().isEmpty())
+					try
 					{
-						for (CanonicalType profile : type.getProfile())
-						{
-							dependencies.add(profile.getValue());
+						SnapshotWithValidationMessages snapshot = generator.generateSnapshot(sd);
 
-							if (structureDefinitionsByUrl.containsKey(profile.getValue()))
-								calculateDependencies(structureDefinitionsByUrl.get(profile.getValue()),
-										structureDefinitionsByUrl, dependencies, targetDependencies);
+						if (!snapshot.getMessages().stream().anyMatch(
+								m -> EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
+										.contains(m.getLevel())))
+						{
+							snapshots.put(snapshot.getSnapshot().getUrl() + "|" + snapshot.getSnapshot().getVersion(),
+									snapshot.getSnapshot());
+						}
+						else
+						{
+							snapshot.getMessages().forEach(m ->
+							{
+								if (EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
+										.contains(m.getLevel()))
+									logger.warn("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
+											m.toString());
+								else
+									logger.info("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
+											m.toString());
+							});
 						}
 					}
+					catch (Exception e)
+					{
+						logger.error("Error while generating snapshot for {}|{}: {} - {}", diff.getUrl(),
+								diff.getVersion(), e.getClass().getName(), e.getMessage());
+					}
+				});
+	}
 
-					if (!type.getTargetProfile().isEmpty())
-						for (CanonicalType targetProfile : type.getTargetProfile())
-							targetDependencies.add(targetProfile.getValue());
-				}
-			}
-		}
+	private ValidationSupportChain createSupportChain(FhirContext context,
+			ValidationPackageWithDepedencies packageWithDependencies,
+			Collection<? extends StructureDefinition> snapshots, Collection<? extends ValueSet> expandedValueSets)
+	{
+		return new ValidationSupportChain(new CodeValidatorForExpandedValueSets(context),
+				new InMemoryTerminologyServerValidationSupport(context),
+				new ValidationSupportWithCustomResources(context, snapshots, null, expandedValueSets),
+				new ValidationSupportWithCustomResources(context, packageWithDependencies.getAllStructureDefinitions(),
+						packageWithDependencies.getAllCodeSystems(), packageWithDependencies.getAllValueSets()),
+				new DefaultProfileValidationSupport(context), new CommonCodeSystemsTerminologyService(context));
 	}
 }

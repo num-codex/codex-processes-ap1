@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -39,7 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class ValidateDataLearningTest
 {
@@ -84,12 +82,9 @@ public class ValidateDataLearningTest
 				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
 				ValueSetExpanderImpl::new);
 
-		List<ValidationPackage> validationPackages = manager.downloadPackageWithDependencies("de.gecco", "1.0.5");
-		validationPackages.forEach(p ->
-		{
-			logger.debug(p.getName() + "/" + p.getVersion());
-			p.parseResources(fhirContext);
-		});
+		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
+				"1.0.5");
+		packageWithDependencies.parseResources(fhirContext);
 	}
 
 	@Test
@@ -192,33 +187,27 @@ public class ValidateDataLearningTest
 				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
 				ValueSetExpanderImpl::new);
 
-		List<ValidationPackage> validationPackages = manager.downloadPackageWithDependencies("de.gecco", "1.0.5");
-		validationPackages.forEach(p ->
-		{
-			logger.debug(p.getName() + "/" + p.getVersion());
-			p.parseResources(fhirContext);
-		});
+		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
+				"1.0.5");
+		packageWithDependencies.parseResources(fhirContext);
 
-		validationPackages.stream().flatMap(p -> p.getValidationSupportResources().getStructureDefinitions().stream())
+		packageWithDependencies.getAllStructureDefinitions().stream()
 				.sorted(Comparator.comparing(StructureDefinition::getUrl)
 						.thenComparing(Comparator.comparing(StructureDefinition::getVersion)))
 				.forEach(s -> logger.debug(s.getUrl() + " " + s.getVersion()));
 
-		StructureDefinition miiRef = validationPackages.stream()
-				.flatMap(p -> p.getValidationSupportResources().getStructureDefinitions().stream())
+		StructureDefinition miiRef = packageWithDependencies.getAllStructureDefinitions().stream()
 				.filter(s -> "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/MII-Reference"
 						.equals(s.getUrl()))
 				.findFirst().get();
 
-		SnapshotGenerator sGen = new PluginSnapshotGeneratorImpl(fhirContext, new ValidationSupportChain(
-				new InMemoryTerminologyServerValidationSupport(fhirContext),
-				new ValidationSupportChain(validationPackages.stream()
-						.map(ValidationPackage::getValidationSupportResources)
-						.map(r -> new ValidationSupportWithCustomResources(fhirContext, r.getStructureDefinitions(),
-								r.getCodeSystems(), r.getValueSets()))
-						.toArray(IValidationSupport[]::new)),
-				new DefaultProfileValidationSupport(fhirContext),
-				new CommonCodeSystemsTerminologyService(fhirContext)));
+		SnapshotGenerator sGen = new PluginSnapshotGeneratorImpl(fhirContext,
+				new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext),
+						new ValidationSupportWithCustomResources(fhirContext,
+								packageWithDependencies.getAllStructureDefinitions(),
+								packageWithDependencies.getAllCodeSystems(), packageWithDependencies.getAllValueSets()),
+						new DefaultProfileValidationSupport(fhirContext),
+						new CommonCodeSystemsTerminologyService(fhirContext)));
 
 		sGen = new PluginSnapshotGeneratorWithModifiers(sGen);
 
@@ -237,17 +226,15 @@ public class ValidateDataLearningTest
 						result.getSnapshot().getVersion(), m.toString());
 		});
 
-		Map<String, StructureDefinition> sDefByUrl = validationPackages.stream()
-				.flatMap(p -> p.getValidationSupportResources().getStructureDefinitions().stream())
+		Map<String, StructureDefinition> sDefByUrl = packageWithDependencies.getAllStructureDefinitions().stream()
 				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
 
-		validationPackages.stream().flatMap(p -> p.getValidationSupportResources().getStructureDefinitions().stream())
-				.forEach(s ->
-				{
-					logger.info("StructureDefinition {}|{}:", s.getUrl(), s.getVersion());
-					printTree(s, sDefByUrl);
-					logger.debug("");
-				});
+		packageWithDependencies.getAllStructureDefinitions().forEach(s ->
+		{
+			logger.info("StructureDefinition {}|{}:", s.getUrl(), s.getVersion());
+			printTree(s, sDefByUrl);
+			logger.debug("");
+		});
 	}
 
 	private void printTree(StructureDefinition def, Map<String, StructureDefinition> structureDefinitionsByUrl)

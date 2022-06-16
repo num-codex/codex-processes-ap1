@@ -12,6 +12,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
 import org.highmed.dsf.tools.generator.ProcessDocumentation;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +127,10 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.verbose:false}")
 	private boolean packageClientVerbose;
 
+	@ProcessDocumentation(description = "ValueSets found in the StructureDefinitions with the specified binding strength will be expanded", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.bindingStrength:required,extensible,preferred,example}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> valueSetExpansionBindingStrengths;
+
 	@ProcessDocumentation(description = "Folder for storing expanded ValueSets", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.cacheFolder:${java.io.tmpdir}/codex_gecco_validation_cache/ValueSet}")
 	private String valueSetCacheFolder;
@@ -211,9 +217,14 @@ public class ValidationConfig
 	@Bean
 	public ValidationPackageManager validationPackageManager()
 	{
+		List<ValidationPackageIdentifier> noDownload = noDownloadPackages.stream()
+				.map(ValidationPackageIdentifier::fromString).collect(Collectors.toList());
+		EnumSet<BindingStrength> bindingStrengths = EnumSet.copyOf(
+				valueSetExpansionBindingStrengths.stream().map(BindingStrength::fromCode).collect(Collectors.toList()));
+
 		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(), objectMapper(),
-				fhirContext, internalSnapshotGeneratorFactory(), internalValueSetExpanderFactory(),
-				noDownloadPackages.stream().map(ValidationPackageIdentifier::fromString).collect(Collectors.toList()));
+				fhirContext, internalSnapshotGeneratorFactory(), internalValueSetExpanderFactory(), noDownload,
+				bindingStrengths);
 	}
 
 	private StructureDefinitionModifier createStructureDefinitionModifier(String className)

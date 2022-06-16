@@ -1,6 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -40,12 +39,12 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 			return;
 
 		logger.info("Downloading FHIR validation package {} and dependencies", validationPackageIdentifier.toString());
-		List<ValidationPackage> validationPackages = validationPackageManager
+		ValidationPackageWithDepedencies packageWithDependencies = validationPackageManager
 				.downloadPackageWithDependencies(validationPackageIdentifier);
 
 		logger.info("Expanding ValueSets and generating StructureDefinition snapshots");
 		validationSupport = validationPackageManager
-				.expandValueSetsAndGenerateStructureDefinitionSnapshots(validationPackages);
+				.expandValueSetsAndGenerateStructureDefinitionSnapshots(packageWithDependencies);
 	}
 
 	@Override
