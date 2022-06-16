@@ -110,6 +110,12 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 					snapshot.getSnapshot().getStatus());
 			return snapshot;
 		}
+		else if (!snapshot.getSnapshot().hasSnapshot())
+		{
+			logger.info("Not writing StructureDefinition {}|{} without snapshot to cache",
+					snapshot.getSnapshot().getUrl(), snapshot.getSnapshot().getVersion());
+			return snapshot;
+		}
 		else
 			return writeRsourceToCache(snapshot, SnapshotWithValidationMessages::getSnapshot,
 					StructureDefinition::getUrl, StructureDefinition::getVersion);
