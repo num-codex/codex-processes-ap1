@@ -144,7 +144,7 @@ public abstract class AbstractFileSystemCache<T> implements InitializingBean
 				OutputStream cOut = outCompressorFactory.apply(bOut);
 				OutputStreamWriter writer = new OutputStreamWriter(cOut, StandardCharsets.UTF_8))
 		{
-			logger.debug("Wirting {} {} to cache at {}", cacheEntryType, cacheId, cacheFile.toString());
+			logger.debug("Writing {} {} to cache at {}", cacheEntryType, cacheId, cacheFile.toString());
 			encoder.accept(writer, resource);
 		}
 

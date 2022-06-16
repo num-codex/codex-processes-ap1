@@ -108,7 +108,7 @@ public class ValidateData extends AbstractServiceDelegate
 		}, () ->
 		{
 			logger.warn(
-					"{} not initialized, skipping validation. This is likley due to an error during startup of the process plugin.",
+					"{} not initialized, skipping validation. This is likley due to an error during startup of the process plugin",
 					BundleValidatorFactory.class.getSimpleName());
 		});
 	}

@@ -136,7 +136,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 				pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
 			else
 				logger.warn(
-						"Due to an error while testing the connection to the terminology server the {} can not be initialized, this will lead to the validation of bundles beeing skipped.",
+						"Due to an error while testing the connection to the terminology server {} was not initialized, validation of bundles will be skipped.",
 						BundleValidatorFactory.class.getSimpleName());
 		}
 	}
