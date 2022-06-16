@@ -255,7 +255,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		}
 		catch (Exception e)
 		{
-			logger.warn(
+			logger.info(
 					"Error while expanding ValueSet {}|{}: {} - {}, trying to expand via external terminology server next",
 					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 
@@ -315,26 +315,24 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 					{
 						SnapshotWithValidationMessages snapshot = generator.generateSnapshot(sd);
 
-						if (!snapshot.getMessages().stream().anyMatch(
-								m -> EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
-										.contains(m.getLevel())))
-						{
+						if (snapshot.getSnapshot().hasSnapshot())
 							snapshots.put(snapshot.getSnapshot().getUrl() + "|" + snapshot.getSnapshot().getVersion(),
 									snapshot.getSnapshot());
-						}
 						else
+							logger.error(
+									"Error while generating snapshot for {}|{}: Not snaphsot returned from generator",
+									diff.getUrl(), diff.getVersion());
+
+						snapshot.getMessages().forEach(m ->
 						{
-							snapshot.getMessages().forEach(m ->
-							{
-								if (EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
-										.contains(m.getLevel()))
-									logger.warn("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
-											m.toString());
-								else
-									logger.info("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
-											m.toString());
-							});
-						}
+							if (EnumSet.of(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.WARNING)
+									.contains(m.getLevel()))
+								logger.warn("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
+										m.toString());
+							else
+								logger.info("{}|{} {}: {}", diff.getUrl(), diff.getVersion(), m.getLevel(),
+										m.toString());
+						});
 					}
 					catch (Exception e)
 					{
