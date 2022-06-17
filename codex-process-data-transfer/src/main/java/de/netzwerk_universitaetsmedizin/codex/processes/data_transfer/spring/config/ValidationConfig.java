@@ -453,9 +453,9 @@ public class ValidationConfig
 				valueSetExpansionClientCertificatePrivateKey,
 				valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
 				valueSetExpansionClientBasicAuthUsername,
-				valueSetExpansionClientBasicAuthPassword != null ? "***" : "null",
-				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxySchemeHostPort,
-				valueSetExpansionClientProxyUsername, valueSetExpansionClientProxyPassword != null ? "***" : "null");
+				valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
+				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
+				valueSetExpansionClientProxyPassword != null ? "***" : "null");
 
 		try
 		{
