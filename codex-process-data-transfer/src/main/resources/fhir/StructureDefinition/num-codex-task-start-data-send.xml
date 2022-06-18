@@ -144,5 +144,30 @@
         <code value="instant" />
       </type>
     </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="0" />
+    </element>
+    <element id="Task.output:error.extension:error-metadata">
+      <path value="Task.output.extension" />
+      <sliceName value="error-metadata" />
+      <min value="0" />
+      <type>
+        <code value="Extension" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata" />
+      </type>
+      <isModifier value="false" />
+    </element>
   </differential>
 </StructureDefinition>

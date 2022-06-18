@@ -6,8 +6,10 @@
     </tag>
   </meta>
   <url value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive" />
+  <!-- version managed by bpe -->
   <version value="#{version}" />
   <name value="TaskStartDataReceive" />
+  <!-- status managed by bpe -->
   <status value="unknown" />
   <experimental value="false" />
   <!-- date managed by bpe -->

@@ -16,8 +16,8 @@
                         "url": "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/ethnic-group",
                         "valueCoding": {
                             "system": "http://snomed.info/sct",
-                            "code": "186019001",
-                            "display": "Other ethnic, mixed origin"
+                            "code": "26242008",
+                            "display": "Mixed (qualifier value)"
                         }
                     },
                     {
@@ -107,8 +107,8 @@
                     "coding": [
                         {
                             "system": "http://snomed.info/sct",
-                            "code": "413839001",
-                            "display": "Chronic lung disease"
+                            "code": "13645005",
+                            "display": "Chronic obstructive lung disease (disorder)"
                         }
                     ]
                 },

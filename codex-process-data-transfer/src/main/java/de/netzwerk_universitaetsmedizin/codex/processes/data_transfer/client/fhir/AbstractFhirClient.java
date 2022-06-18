@@ -233,8 +233,9 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	private PatientReference getAbsoluteUrlPatientReference(Patient patient)
 	{
 		IdType idElement = patient.getIdElement();
-		return PatientReference.from(new IdType(geccoClient.getGenericFhirClient().getServerBase(),
-				idElement.getResourceType(), idElement.getIdPart(), null).getValue());
+		return PatientReference
+				.from(new IdType(geccoClient.getServerBase(), idElement.getResourceType(), idElement.getIdPart(), null)
+						.getValue());
 	}
 
 	private Stream<Patient> getPatients(Bundle bundle)
