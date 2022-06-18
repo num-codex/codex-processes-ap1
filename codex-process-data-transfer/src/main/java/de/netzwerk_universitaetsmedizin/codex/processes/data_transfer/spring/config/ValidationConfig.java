@@ -40,6 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactoryImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithFileSystemCache;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.PluginSnapshotGeneratorWithModifiers;
@@ -62,6 +64,10 @@ import de.rwh.utils.crypto.io.PemIo;
 public class ValidationConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationConfig.class);
+
+	@ProcessDocumentation(description = "Enables/disables local FHIR validation, set to `false` to skip validation", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation:true}")
+	private boolean validationEnabled;
 
 	@ProcessDocumentation(description = "FHIR implementation guide package used to validated resources, specify as `name|version`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package:de.gecco|1.0.5}")
@@ -222,9 +228,9 @@ public class ValidationConfig
 		EnumSet<BindingStrength> bindingStrengths = EnumSet.copyOf(
 				valueSetExpansionBindingStrengths.stream().map(BindingStrength::fromCode).collect(Collectors.toList()));
 
-		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(), objectMapper(),
-				fhirContext, internalSnapshotGeneratorFactory(), internalValueSetExpanderFactory(), noDownload,
-				bindingStrengths);
+		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(),
+				validationObjectMapper(), fhirContext, internalSnapshotGeneratorFactory(),
+				internalValueSetExpanderFactory(), noDownload, bindingStrengths);
 	}
 
 	private StructureDefinitionModifier createStructureDefinitionModifier(String className)
@@ -360,7 +366,7 @@ public class ValidationConfig
 	@Bean
 	public ValidationPackageClient validationPackageClient()
 	{
-		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), objectMapper(),
+		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), validationObjectMapper(),
 				validationPackageClientJersey());
 	}
 
@@ -435,11 +441,12 @@ public class ValidationConfig
 				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
 				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
-				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, objectMapper(), fhirContext);
+				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, validationObjectMapper(),
+				fhirContext);
 	}
 
 	@Bean
-	public ObjectMapper objectMapper()
+	public ObjectMapper validationObjectMapper()
 	{
 		return ObjectMapperFactory.createObjectMapper(fhirContext);
 	}
@@ -476,5 +483,12 @@ public class ValidationConfig
 
 			return false;
 		}
+	}
+
+	@Bean
+	public BundleValidatorFactory bundleValidatorFactory()
+	{
+		return new BundleValidatorFactoryImpl(validationEnabled, validationPackageManager(),
+				validationPackageIdentifier());
 	}
 }

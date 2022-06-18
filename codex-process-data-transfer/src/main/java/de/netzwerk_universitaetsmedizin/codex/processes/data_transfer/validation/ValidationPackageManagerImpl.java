@@ -43,10 +43,11 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationPackageManagerImpl.class);
 
-	public static final List<ValidationPackageIdentifier> NO_PACKAGE_DOWNLOAD = List
+	public static final List<ValidationPackageIdentifier> DEFAULT_NO_PACKAGE_DOWNLOAD_LIST = List
 			.of(new ValidationPackageIdentifier("hl7.fhir.r4.core", "4.0.1"));
 
-	public static final EnumSet<BindingStrength> VALUE_SET_BINDING_STRENGTHS = EnumSet.allOf(BindingStrength.class);
+	public static final EnumSet<BindingStrength> DEFAULT_VALUE_SET_BINDING_STRENGTHS = EnumSet
+			.allOf(BindingStrength.class);
 
 	private final ValidationPackageClient validationPackageClient;
 	private final ValueSetExpansionClient valueSetExpansionClient;
@@ -66,7 +67,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			BiFunction<FhirContext, IValidationSupport, ValueSetExpander> internalValueSetExpanderFactory)
 	{
 		this(validationPackageClient, valueSetExpansionClient, mapper, fhirContext, internalSnapshotGeneratorFactory,
-				internalValueSetExpanderFactory, NO_PACKAGE_DOWNLOAD, VALUE_SET_BINDING_STRENGTHS);
+				internalValueSetExpanderFactory, DEFAULT_NO_PACKAGE_DOWNLOAD_LIST, DEFAULT_VALUE_SET_BINDING_STRENGTHS);
 	}
 
 	public ValidationPackageManagerImpl(ValidationPackageClient validationPackageClient,
@@ -125,11 +126,16 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	@Override
-	public BundleValidator createBundleValidator(IValidationSupport validationSupport)
+	public BundleValidator createBundleValidator(IValidationSupport validationSupport,
+			ValidationPackageWithDepedencies packageWithDependencies)
 	{
 		Objects.requireNonNull(validationSupport, "validationSupport");
+		Objects.requireNonNull(packageWithDependencies, "packageWithDependencies");
 
-		return new BundleValidatorImpl(new ResourceValidatorImpl(fhirContext, validationSupport));
+		BundleValidatorImpl validator = new BundleValidatorImpl(fhirContext, packageWithDependencies,
+				new ResourceValidatorImpl(fhirContext, validationSupport));
+
+		return validator;
 	}
 
 	@Override
@@ -140,7 +146,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		ValidationPackageWithDepedencies packageWithDependencies = downloadPackageWithDependencies(identifier);
 		IValidationSupport validationSupport = expandValueSetsAndGenerateStructureDefinitionSnapshots(
 				packageWithDependencies);
-		return createBundleValidator(validationSupport);
+		return createBundleValidator(validationSupport, packageWithDependencies);
 	}
 
 	private void downloadPackageWithDependencies(ValidationPackageIdentifier identifier,

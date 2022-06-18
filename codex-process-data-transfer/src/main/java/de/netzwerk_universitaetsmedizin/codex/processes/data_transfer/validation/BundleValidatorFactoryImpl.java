@@ -13,14 +13,17 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 {
 	private static final Logger logger = LoggerFactory.getLogger(BundleValidatorFactoryImpl.class);
 
+	private final boolean validationEnabled;
 	private final ValidationPackageManager validationPackageManager;
 	private final ValidationPackageIdentifier validationPackageIdentifier;
 
 	private IValidationSupport validationSupport;
+	private ValidationPackageWithDepedencies packageWithDependencies;
 
-	public BundleValidatorFactoryImpl(ValidationPackageManager validationPackageManager,
+	public BundleValidatorFactoryImpl(boolean validationEnabled, ValidationPackageManager validationPackageManager,
 			ValidationPackageIdentifier validationPackageIdentifier)
 	{
+		this.validationEnabled = validationEnabled;
 		this.validationPackageManager = validationPackageManager;
 		this.validationPackageIdentifier = validationPackageIdentifier;
 	}
@@ -33,14 +36,19 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 	}
 
 	@Override
+	public boolean isEnabled()
+	{
+		return validationEnabled;
+	}
+
+	@Override
 	public void init()
 	{
 		if (validationSupport != null)
 			return;
 
 		logger.info("Downloading FHIR validation package {} and dependencies", validationPackageIdentifier.toString());
-		ValidationPackageWithDepedencies packageWithDependencies = validationPackageManager
-				.downloadPackageWithDependencies(validationPackageIdentifier);
+		packageWithDependencies = validationPackageManager.downloadPackageWithDependencies(validationPackageIdentifier);
 
 		logger.info("Expanding ValueSets and generating StructureDefinition snapshots");
 		validationSupport = validationPackageManager
@@ -50,6 +58,10 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 	@Override
 	public Optional<BundleValidator> create()
 	{
-		return Optional.ofNullable(validationSupport).map(validationPackageManager::createBundleValidator);
+		if (validationPackageManager == null || validationSupport == null)
+			return Optional.empty();
+		else
+			return Optional
+					.of(validationPackageManager.createBundleValidator(validationSupport, packageWithDependencies));
 	}
 }

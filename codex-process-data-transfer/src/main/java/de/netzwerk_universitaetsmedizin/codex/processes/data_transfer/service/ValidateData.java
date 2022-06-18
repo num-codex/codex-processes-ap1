@@ -14,6 +14,8 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -60,6 +62,12 @@ public class ValidateData extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
+		if (!bundleValidatorSupplier.isEnabled())
+		{
+			logger.warn("Validation disabled, skipping validation. Modify configuration to enable validation");
+			return;
+		}
+
 		bundleValidatorSupplier.create().ifPresentOrElse(validator ->
 		{
 			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
@@ -81,19 +89,28 @@ public class ValidateData extends AbstractServiceDelegate
 				{
 					logValidationDetails(bundle);
 
-					if (bundle.getEntry().stream().map(e -> (OperationOutcome) e.getResponse().getOutcome())
-							.flatMap(o -> o.getIssue().stream())
-							.anyMatch(i -> IssueSeverity.FATAL.equals(i.getSeverity())
-									|| IssueSeverity.ERROR.equals(i.getSeverity())))
+					long resourcesWithErrorCount = bundle.getEntry().stream().filter(BundleEntryComponent::hasResponse)
+							.map(BundleEntryComponent::getResponse).filter(BundleEntryResponseComponent::hasOutcome)
+							.map(BundleEntryResponseComponent::getOutcome).filter(r -> r instanceof OperationOutcome)
+							.map(o -> (OperationOutcome) o).map(
+									o -> o.getIssue().stream()
+											.anyMatch(i -> IssueSeverity.FATAL.equals(i.getSeverity())
+													|| IssueSeverity.ERROR.equals(i.getSeverity())))
+							.filter(b -> b).count();
+
+					if (resourcesWithErrorCount > 0)
 					{
-						logger.error("Validation of transfer bundle failed");
+						logger.error("Validation of transfer bundle failed, {} resource{} with error",
+								resourcesWithErrorCount, resourcesWithErrorCount != 1 ? "s" : "");
 
 						addErrorsToTaskAndSetFailed(bundle);
 						errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 								.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
 										getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
 
-						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED);
+						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
+								"Validation of transfer bundle failed, " + resourcesWithErrorCount + " resource"
+										+ (resourcesWithErrorCount != 1 ? "s" : "") + " with error");
 					}
 					else
 					{

@@ -5,6 +5,11 @@ import java.util.Optional;
 public interface BundleValidatorFactory
 {
 	/**
+	 * @return <code>true</code> if validation is enabled
+	 */
+	boolean isEnabled();
+
+	/**
 	 * Initializes the {@link BundleValidatorFactory} by downloading all necessary FHIR implementation guides, expanding
 	 * ValueSets and generating StructureDefinition snapshots.
 	 */

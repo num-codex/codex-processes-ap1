@@ -48,9 +48,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.St
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StoreDataForTransferHub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ValidateData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactoryImpl;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageIdentifier;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValidationPackageManager;
 
 @Configuration
 public class TransferDataConfig
@@ -74,10 +71,7 @@ public class TransferDataConfig
 	private FhirContext fhirContext;
 
 	@Autowired
-	private ValidationPackageManager validationPackageManager;
-
-	@Autowired
-	private ValidationPackageIdentifier validationPackageIdentifier;
+	private BundleValidatorFactory bundleValidatorFactory;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the GECCO FHIR server", processNames = {
 			"wwwnetzwerk-universitaetsmedizinde_dataSend",
@@ -443,7 +437,7 @@ public class TransferDataConfig
 	@Bean
 	public ValidateData validateData()
 	{
-		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper, bundleValidatorFactory(),
+		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper, bundleValidatorFactory,
 				errorOutputParameterGenerator(), errorLogger());
 	}
 
@@ -457,12 +451,6 @@ public class TransferDataConfig
 	public ErrorLogger errorLogger()
 	{
 		return new ErrorLogger();
-	}
-
-	@Bean
-	public BundleValidatorFactory bundleValidatorFactory()
-	{
-		return new BundleValidatorFactoryImpl(validationPackageManager, validationPackageIdentifier);
 	}
 
 	@Bean

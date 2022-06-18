@@ -49,9 +49,13 @@ public interface ValidationPackageManager
 	/**
 	 * @param validationSupport
 	 *            not <code>null</code>
-	 * @return {@link BundleValidator} for the given {@link IValidationSupport}
+	 * @param packageWithDependencies
+	 *            not <code>null</code>
+	 * @return {@link BundleValidator} for the given {@link IValidationSupport} and
+	 *         {@link ValidationPackageWithDepedencies}
 	 */
-	BundleValidator createBundleValidator(IValidationSupport validationSupport);
+	BundleValidator createBundleValidator(IValidationSupport validationSupport,
+			ValidationPackageWithDepedencies packageWithDependencies);
 
 	/**
 	 * Downloads the given FHIR package and all its dependencies. Will try to generate snapshots for all
