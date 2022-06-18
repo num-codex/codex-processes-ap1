@@ -128,6 +128,18 @@ public class GeccoClientImpl implements GeccoClient
 	}
 
 	@Override
+	public String getServerBase()
+	{
+		return geccoServerBase;
+	}
+
+	@Override
+	public FhirContext getFhirContext()
+	{
+		return fhirContext;
+	}
+
+	@Override
 	public void testConnection()
 	{
 		CapabilityStatement statement = getGenericFhirClient().capabilities().ofType(CapabilityStatement.class)
@@ -152,12 +164,6 @@ public class GeccoClientImpl implements GeccoClient
 			logger.warn("Error while creating GECCO FHIR client: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public FhirContext getFhirContext()
-	{
-		return fhirContext;
 	}
 
 	@Override

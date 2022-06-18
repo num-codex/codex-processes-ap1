@@ -39,6 +39,18 @@ public class GeccoClientFactory
 		}
 
 		@Override
+		public String getServerBase()
+		{
+			return null;
+		}
+
+		@Override
+		public FhirContext getFhirContext()
+		{
+			return fhirContext;
+		}
+
+		@Override
 		public void testConnection()
 		{
 			logger.warn("Stub implementation, no connection test performed");
@@ -48,12 +60,6 @@ public class GeccoClientFactory
 		public GeccoFhirClient getFhirClient()
 		{
 			return new GeccoFhirClientStub(this);
-		}
-
-		@Override
-		public FhirContext getFhirContext()
-		{
-			return fhirContext;
 		}
 
 		@Override
@@ -139,6 +145,11 @@ public class GeccoClientFactory
 		this.localIdentifierValue = localIdentifierValue;
 		this.geccoFhirClientClass = geccoFhirClientClass;
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
+	}
+
+	public String getServerBase()
+	{
+		return geccoServerBase;
 	}
 
 	public void testConnection()

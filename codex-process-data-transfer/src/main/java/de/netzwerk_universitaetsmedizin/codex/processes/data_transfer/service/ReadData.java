@@ -70,7 +70,6 @@ public class ReadData extends AbstractServiceDelegate
 
 	private final FhirContext fhirContext;
 	private final GeccoClientFactory geccoClientFactory;
-	private final String geccoServerBase;
 
 	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory,
@@ -80,7 +79,6 @@ public class ReadData extends AbstractServiceDelegate
 
 		this.fhirContext = fhirContext;
 		this.geccoClientFactory = geccoClientFactory;
-		this.geccoServerBase = geccoServerBase;
 	}
 
 	@Override
@@ -90,7 +88,6 @@ public class ReadData extends AbstractServiceDelegate
 
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
-		Objects.requireNonNull(geccoServerBase, "geccoServerBase");
 	}
 
 	@Override
@@ -183,7 +180,7 @@ public class ReadData extends AbstractServiceDelegate
 			return null;
 
 		return r.getIdElement().isAbsolute() ? r.getIdElement()
-				: r.getIdElement().withServerBase(geccoServerBase, r.getResourceType().name());
+				: r.getIdElement().withServerBase(geccoClientFactory.getServerBase(), r.getResourceType().name());
 	}
 
 	private DomainResource clean(DomainResource r)
