@@ -41,6 +41,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -55,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 
 public class TaskProfileTest
 {
@@ -62,13 +65,16 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION, DATE,
-			Arrays.asList("highmed-task-base-0.5.0.xml", "num-codex-task-start-data-receive.xml",
-					"num-codex-task-start-data-send.xml", "num-codex-task-start-data-translate.xml",
-					"num-codex-task-start-data-trigger.xml", "num-codex-task-stop-data-trigger.xml"),
+			Arrays.asList("highmed-task-base-0.5.0.xml", "num-codex-extension-error-metadata.xml",
+					"num-codex-task-start-data-receive.xml", "num-codex-task-start-data-send.xml",
+					"num-codex-task-start-data-translate.xml", "num-codex-task-start-data-trigger.xml",
+					"num-codex-task-stop-data-trigger.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
-					"num-codex-data-transfer.xml"),
+					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
+					"num-codex-data-transfer-error.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
-					"num-codex-data-transfer.xml"));
+					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
+					"num-codex-data-transfer-error.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -212,6 +218,27 @@ public class TaskProfileTest
 		task.addInput().setValue(new DateTimeType(new Date(), TemporalPrecisionEnum.DAY)).getType().addCoding()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM);
+		logTask(task);
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	@Test
+	public void testTaskStartDataSendValidWithValidationError() throws Exception
+	{
+		Task task = createValidTaskStartDataSendWithIdentifierReference();
+		task.setStatus(TaskStatus.FAILED);
+
+		OperationOutcome outcome = new OperationOutcome();
+		outcome.addIssue().setSeverity(IssueSeverity.ERROR).addLocation("Patient.identifier[0].system");
+		new ErrorOutputParameterGenerator()
+				.createMeDicValidationError(new IdType("http://gecco.fhir.server/fhir", "Patient", "42", null), outcome)
+				.forEach(task::addOutput);
+
 		logTask(task);
 
 		ValidationResult result = resourceValidator.validate(task);

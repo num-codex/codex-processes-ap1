@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>codex-process-data-transfer</artifactId>
@@ -16,31 +14,41 @@
 	</properties>
 
 	<dependencies>
+		<!-- provided by DSF -->
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-base</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-documentation-generator</artifactId>
+		</dependency>
+		
+		<!-- must be added as regular DSF plugin -->
+		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>log4j2-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-fhir-validation</artifactId>
-			<scope>test</scope>
-		</dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/ValidateDataLearningTest.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -147,6 +155,26 @@
 							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/plugin</outputDirectory>
 						</configuration>
 					</execution>
+
+					<execution>
+						<id>copy-standalone-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<includeArtifactIds>hapi-fhir-base,hapi-fhir-client,hapi-fhir-converter,hapi-fhir-structures-r4,hapi-fhir-structures-r5,hapi-fhir-validation,hapi-fhir-validation-resources-r4,
+							hapi-fhir-validation-resources-r5,org.hl7.fhir.convertors,org.hl7.fhir.dstu2,org.hl7.fhir.dstu2016may,org.hl7.fhir.dstu3,org.hl7.fhir.r4,org.hl7.fhir.r5,org.hl7.fhir.utilities,
+							org.hl7.fhir.validation,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,caffeine,guava,
+							commons-codec,commons-io,crypto-utils,log4j2-utils,jakarta.activation,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
+							httpclient,httpcore,log4j-api,log4j-core,log4j-slf4j-impl,bcpkix-jdk15on,bcprov-jdk15on,bcutil-jdk15on,ucum,hk2-api,hk2-locator,hk2-utils,osgi-resource-locator,
+							aopalliance-repackaged,jakarta.inject,jersey-apache-connector,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
+							dsf-bpe-process-base,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
+							slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
+							</includeArtifactIds>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -197,6 +225,53 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>src/assembly/zip.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>zip-assembly</id>
+						<phase>install</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>
+							org.highmed.dsf.tools.generator.DocumentationGenerator
+						</argument>
+						<argument>
+							de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config
+						</argument>
+					</arguments>
+					<includeProjectDependencies>true</includeProjectDependencies>
+					<addResourcesToClasspath>true</addResourcesToClasspath>
+					<classpathScope>compile</classpathScope>
+					<workingDirectory>${project.basedir}</workingDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

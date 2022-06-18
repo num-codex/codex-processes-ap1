@@ -133,6 +133,11 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 
 		GeccoFhirClient fhirClient = geccoClientFactory.getGeccoClient().getFhirClient();
 
-		return fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
+		PatientReferenceList references = fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
+
+		logger.info("Found {} patient{} with changes to transport", references.getReferences().size(),
+				references.getReferences().size() != 1 ? "s" : "");
+
+		return references;
 	}
 }

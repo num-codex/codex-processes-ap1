@@ -2,7 +2,7 @@ version: '3.8'
 services:
   proxy:
     image: nginx:1.21
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:443:443
     secrets:
@@ -35,9 +35,9 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,8 +66,8 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5000:5000
     secrets:
@@ -113,8 +113,8 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5003:5003
     secrets:
@@ -141,6 +141,9 @@ services:
       - type: bind
         source: ./dic/bpe/last_event
         target: /opt/bpe/last_event
+      - type: bind
+        source: ./dic/bpe/cache
+        target: /opt/bpe/cache
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
@@ -162,6 +165,10 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -169,10 +176,10 @@ services:
     depends_on:
       - db
       - dic-fhir
-    # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
+      # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
     build: ./dic/hapi
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:8080:8080
     environment:
@@ -194,8 +201,8 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5001:5001
     secrets:
@@ -241,8 +248,8 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5004:5004
     secrets:
@@ -298,8 +305,8 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/fhir:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5002:5002
     secrets:
@@ -345,8 +352,8 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.6.0-RC3
-    restart: on-failure
+    image: ghcr.io/highmed/bpe:0.6.0
+    restart: "no"
     ports:
       - 127.0.0.1:5005:5005
     secrets:
@@ -402,9 +409,9 @@ services:
     depends_on:
       - db
       - crr-fhir
-    # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
+      # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
-    image: ehrbase/ehrbase-postgres:latest
+    image: ehrbase/ehrbase-postgres
     networks:
       - crr-ehrbase-network
     environment:
@@ -414,7 +421,7 @@ services:
       EHRBASE_PASSWORD: ehrbase
       TZ: Europe/Berlin
   crr-ehrbase:
-    image: ehrbase/ehrbase:latest
+    image: ehrbase/ehrbase
     networks:
       - crr-ehrbase-network
     environment:
@@ -428,12 +435,12 @@ services:
       SECURITY_AUTHADMINPASSWORD: mySuperAwesomePassword123
       SYSTEM_NAME: local.ehrbase.org
       ADMIN_API_ACTIVE: 'true'
-#      SERVER_DISABLESTRICTVALIDATION: 'true'
+      # SERVER_DISABLESTRICTVALIDATION: 'true'
       TZ: Europe/Berlin
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge:latest
+    image: ehrbase/fhir-bridge
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
@@ -444,7 +451,7 @@ services:
       FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/
       FHIR_BRIDGE_FHIR_VALIDATION_OPTIONAL_IDENTIFIER: 'true'
       TZ: Europe/Berlin
-#      SPRING_PROFILES_ACTIVE: dev
+      # SPRING_PROFILES_ACTIVE: dev
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase

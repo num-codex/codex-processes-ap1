@@ -14,6 +14,8 @@ import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
 import org.highmed.dsf.fhir.resources.ValueSetResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.PropertyResolver;
 
@@ -22,9 +24,13 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Ftt
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
 {
+	private static final Logger logger = LoggerFactory.getLogger(DataTransferProcessPluginDefinition.class);
+
 	public static final String VERSION = "0.5.0";
 	public static final LocalDate DATE = LocalDate.of(2021, 9, 6);
 
@@ -55,7 +61,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class);
+		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class);
 	}
 
 	@Override
@@ -68,28 +74,34 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 		var aRec = ActivityDefinitionResource.file("fhir/ActivityDefinition/num-codex-data-receive.xml");
 
 		var cD = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer.xml");
+		var cDeS = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error-source.xml");
+		var cDe = CodeSystemResource.file("fhir/CodeSystem/num-codex-data-transfer-error.xml");
 
 		var nD = NamingSystemResource.file("fhir/NamingSystem/num-codex-dic-pseudonym-identifier.xml");
 		var nC = NamingSystemResource.file("fhir/NamingSystem/num-codex-crr-pseudonym-identifier.xml");
 		var nB = NamingSystemResource.file("fhir/NamingSystem/num-codex-bloom-filter-identifier.xml");
 
+		var sTexErMe = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-extension-error-metadata.xml");
+		var sTstaDrec = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
+		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
+		var sTstaDtra = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
 		var sTstoDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-stop-data-trigger.xml");
-		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
-		var sTstaDtra = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
-		var sTstaDrec = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
 
 		var vD = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer.xml");
+		var vDeS = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-source.xml");
+		var vDe = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error.xml");
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
 				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
 				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
-				Arrays.asList(aSen, cD, nD, nB, sTstaDsen, vD), //
+				Arrays.asList(aSen, cD, cDeS, cDe, nD, nB, sTexErMe, sTstaDsen, vD, vDeS, vDe), //
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
 				Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
@@ -113,6 +125,19 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 				|| activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataTranslate"))
 		{
 			pluginApplicationContext.getBean(FttpClientFactory.class).testConnection();
+		}
+
+		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
+		{
+			boolean testOk = pluginApplicationContext.getBean(ValidationConfig.class)
+					.testConnectionToTerminologyServer();
+
+			if (testOk)
+				pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
+			else
+				logger.warn(
+						"Due to an error while testing the connection to the terminology server {} was not initialized, validation of bundles will be skipped.",
+						BundleValidatorFactory.class.getSimpleName());
 		}
 	}
 }
