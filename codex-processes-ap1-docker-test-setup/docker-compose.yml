@@ -37,7 +37,7 @@ services:
     image: postgres:13
     restart: "no"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U liquibase_user -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -176,7 +176,7 @@ services:
     depends_on:
       - db
       - dic-fhir
-    # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
+      # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
     build: ./dic/hapi
     restart: "no"
@@ -409,7 +409,7 @@ services:
     depends_on:
       - db
       - crr-fhir
-    # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
+      # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
     image: ehrbase/ehrbase-postgres
     networks:
@@ -435,7 +435,7 @@ services:
       SECURITY_AUTHADMINPASSWORD: mySuperAwesomePassword123
       SYSTEM_NAME: local.ehrbase.org
       ADMIN_API_ACTIVE: 'true'
-#      SERVER_DISABLESTRICTVALIDATION: 'true'
+      # SERVER_DISABLESTRICTVALIDATION: 'true'
       TZ: Europe/Berlin
     depends_on:
       - crr-ehrbase-db
@@ -451,7 +451,7 @@ services:
       FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/
       FHIR_BRIDGE_FHIR_VALIDATION_OPTIONAL_IDENTIFIER: 'true'
       TZ: Europe/Berlin
-#      SPRING_PROFILES_ACTIVE: dev
+      # SPRING_PROFILES_ACTIVE: dev
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase
