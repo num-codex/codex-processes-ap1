@@ -25,11 +25,11 @@ import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DownloadDataFromTransferHub extends AbstractServiceDelegate
+public class DownloadDataFromGth extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(DownloadDataFromTransferHub.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadDataFromGth.class);
 
-	public DownloadDataFromTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public DownloadDataFromGth(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);

@@ -47,6 +47,9 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
+		// TODO set status variable (SUCCESS, VALIDATION_ERROR)
+		logger.debug("set status variable (SUCCESS, VALIDATION_ERROR)");
+
 		try
 		{
 			logger.info("Executing bundle against FHIR store ...");

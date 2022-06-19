@@ -1,4 +1,4 @@
-package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
+package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -9,11 +9,11 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SetNoConsentIdatMergeError extends AbstractServiceDelegate
+public class SetTimeoutError extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(SetNoConsentIdatMergeError.class);
+	private static final Logger logger = LoggerFactory.getLogger(SetTimeoutError.class);
 
-	public SetNoConsentIdatMergeError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public SetTimeoutError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);

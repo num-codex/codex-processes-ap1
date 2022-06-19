@@ -34,14 +34,14 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StoreDataForTransferHub extends AbstractServiceDelegate
+public class StoreDataForGth extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreDataForTransferHub.class);
+	private static final Logger logger = LoggerFactory.getLogger(StoreDataForGth.class);
 
 	private final EndpointProvider endpointProvider;
 	private final String geccoTransferHubIdentifierValue;
 
-	public StoreDataForTransferHub(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public StoreDataForGth(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper, EndpointProvider endpointProvider,
 			String geccoTransferHubIdentifierValue)
 	{

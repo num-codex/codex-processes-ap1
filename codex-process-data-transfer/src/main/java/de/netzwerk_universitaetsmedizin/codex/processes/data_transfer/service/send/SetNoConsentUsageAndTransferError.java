@@ -20,9 +20,9 @@ public class SetNoConsentUsageAndTransferError extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution arg0) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		// TODO Auto-generated method stub
-		logger.debug("TODO");
+		// TODO set Variable errorCode, errorMessage
+		logger.debug("TODO set Variable errorCode, errorMessage");
 	}
 }

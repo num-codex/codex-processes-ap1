@@ -25,28 +25,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.Crr
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartReceiveProcess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartSendProcess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DecryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromTransferHub;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.InsertDataIntoCodex;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckConsent;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.EncryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ExtractPatientReference;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.SetNoConsentIdatMergeError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.SetNoConsentUsageAndTransferError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ReadData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ResolvePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.StoreDataForTransferHub;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ValidateData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.DownloadDataFromDic;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.StoreDataForCrr;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.FindNewData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.SaveLastExportTo;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StartTimer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StopTimer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
 @Configuration
@@ -294,6 +272,61 @@ public class TransferDataConfig
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String localIdentifierValue;
 
+	public List<String> idatMergeGrantedOids()
+	{
+		return idatMergeGrantedOids;
+	}
+
+	public List<String> mdatTransferGrantedOids()
+	{
+		return mdatTransferGrantedOids;
+	}
+
+	public String geccoTransferHubIdentifierValue()
+	{
+		return geccoTransferHubIdentifierValue;
+	}
+
+	public String crrIdentifierValue()
+	{
+		return crrIdentifierValue;
+	}
+
+	public FhirWebserviceClientProvider fhirClientProvider()
+	{
+		return fhirClientProvider;
+	}
+
+	public TaskHelper taskHelper()
+	{
+		return taskHelper;
+	}
+
+	public ReadAccessHelper readAccessHelper()
+	{
+		return readAccessHelper;
+	}
+
+	public FhirContext fhirContext()
+	{
+		return fhirContext;
+	}
+
+	public BundleValidatorFactory bundleValidatorFactory()
+	{
+		return bundleValidatorFactory;
+	}
+
+	public EndpointProvider endpointProvider()
+	{
+		return endpointProvider;
+	}
+
+	public OrganizationProvider organizationProvider()
+	{
+		return organizationProvider;
+	}
+
 	@Bean
 	public CrrKeyProvider crrKeyProvider()
 	{
@@ -359,87 +392,6 @@ public class TransferDataConfig
 		return new ConsentClientFactory();
 	}
 
-	// numCodexDataTrigger
-
-	@Bean
-	public StartTimer startTimer()
-	{
-		return new StartTimer(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public FindNewData findNewData()
-	{
-		return new FindNewData(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider, endpointProvider,
-				geccoClientFactory());
-	}
-
-	@Bean
-	public StartSendProcess startSendProcess()
-	{
-		return new StartSendProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
-				fhirContext);
-	}
-
-	@Bean
-	public StopTimer stopTimer()
-	{
-		return new StopTimer(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public SaveLastExportTo saveLastExportTo()
-	{
-		return new SaveLastExportTo(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	// numCodexDataSend
-
-	@Bean
-	public ExtractPatientReference extractPseudonym()
-	{
-		return new ExtractPatientReference(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public ResolvePseudonym resolvePseudonym()
-	{
-		return new ResolvePseudonym(fhirClientProvider, taskHelper, readAccessHelper, geccoClientFactory(),
-				fttpClientFactory());
-	}
-
-	@Bean
-	public CheckConsent checkConsent()
-	{
-		return new CheckConsent(fhirClientProvider, taskHelper, readAccessHelper, consentClientFactory(),
-				idatMergeGrantedOids, mdatTransferGrantedOids);
-	}
-
-	@Bean
-	public SetNoConsentUsageAndTransferError setNoConsentUsageAndTransferError()
-	{
-		return new SetNoConsentUsageAndTransferError(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public SetNoConsentIdatMergeError setNoConsentIdatMergeError()
-	{
-		return new SetNoConsentIdatMergeError(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public ReadData readData()
-	{
-		return new ReadData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, geccoClientFactory());
-	}
-
-	@Bean
-	public ValidateData validateData()
-	{
-		return new ValidateData(fhirClientProvider, taskHelper, readAccessHelper, bundleValidatorFactory,
-				errorOutputParameterGenerator(), errorLogger());
-	}
-
 	@Bean
 	public ErrorOutputParameterGenerator errorOutputParameterGenerator()
 	{
@@ -450,74 +402,5 @@ public class TransferDataConfig
 	public ErrorLogger errorLogger()
 	{
 		return new ErrorLogger();
-	}
-
-	@Bean
-	public EncryptData encryptData()
-	{
-		return new EncryptData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, crrKeyProvider());
-	}
-
-	@Bean
-	public StoreDataForTransferHub storeDataForTransferHub()
-	{
-		return new StoreDataForTransferHub(fhirClientProvider, taskHelper, readAccessHelper, endpointProvider,
-				geccoTransferHubIdentifierValue);
-	}
-
-	@Bean
-	public StartTranslateProcess startTranslateProcess()
-	{
-		return new StartTranslateProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
-				fhirContext);
-	}
-
-	// numCodexDataTranslate
-
-	@Bean
-	public DownloadDataFromDic downloadDataFromDiz()
-	{
-		return new DownloadDataFromDic(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public ReplacePseudonym replacePseudonym()
-	{
-		return new ReplacePseudonym(fhirClientProvider, taskHelper, readAccessHelper, fttpClientFactory());
-	}
-
-	@Bean
-	public StoreDataForCrr storeDataForCodex()
-	{
-		return new StoreDataForCrr(fhirClientProvider, taskHelper, readAccessHelper, endpointProvider,
-				crrIdentifierValue);
-	}
-
-	@Bean
-	public StartReceiveProcess startReceiveProcess()
-	{
-		return new StartReceiveProcess(fhirClientProvider, taskHelper, readAccessHelper, organizationProvider,
-				fhirContext);
-	}
-
-	// InsertDataIntoCodex
-
-	@Bean
-	public DownloadDataFromTransferHub downloadDataFromTransferHub()
-	{
-		return new DownloadDataFromTransferHub(fhirClientProvider, taskHelper, readAccessHelper);
-	}
-
-	@Bean
-	public DecryptData decryptData()
-	{
-		return new DecryptData(fhirClientProvider, taskHelper, readAccessHelper, fhirContext, crrKeyProvider());
-	}
-
-	@Bean
-	public InsertDataIntoCodex insertDataIntoCodex()
-	{
-		return new InsertDataIntoCodex(fhirClientProvider, taskHelper, readAccessHelper, fhirContext,
-				geccoClientFactory());
 	}
 }

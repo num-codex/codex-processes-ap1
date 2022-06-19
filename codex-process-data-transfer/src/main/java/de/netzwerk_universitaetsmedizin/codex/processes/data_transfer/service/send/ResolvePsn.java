@@ -26,14 +26,14 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues.PatientReferenceValue;
 
-public class ResolvePseudonym extends AbstractServiceDelegate implements InitializingBean
+public class ResolvePsn extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResolvePseudonym.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResolvePsn.class);
 
 	private final GeccoClientFactory geccoClientFactory;
 	private final FttpClientFactory fttpClientFactory;
 
-	public ResolvePseudonym(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public ResolvePsn(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory,
 			FttpClientFactory fttpClientFactory)
 	{

@@ -22,8 +22,12 @@ import org.springframework.core.env.PropertyResolver;
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ReceiveConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.SendConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TranslateConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TriggerConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
@@ -61,7 +65,8 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class);
+		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class,
+				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class);
 	}
 
 	@Override
