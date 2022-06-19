@@ -24,7 +24,7 @@ import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 public class ValidationPackageClientJersey implements ValidationPackageClient
 {
 	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
-			.getLogger(ValueSetExpansionClientJersey.class.getName());
+			.getLogger(ValidationPackageClientJersey.class.getName());
 
 	private final Client client;
 	private final String baseUrl;
