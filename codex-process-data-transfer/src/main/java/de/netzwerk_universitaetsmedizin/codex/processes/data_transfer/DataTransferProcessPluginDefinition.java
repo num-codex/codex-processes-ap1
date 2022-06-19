@@ -29,6 +29,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.con
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TranslateConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TriggerConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig.TerminologyServerConnectionTestStatus;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
@@ -147,12 +148,12 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
 		{
-			boolean testOk = pluginApplicationContext.getBean(ValidationConfig.class)
+			TerminologyServerConnectionTestStatus status = pluginApplicationContext.getBean(ValidationConfig.class)
 					.testConnectionToTerminologyServer();
 
-			if (testOk)
+			if (TerminologyServerConnectionTestStatus.OK.equals(status))
 				pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
-			else
+			else if (TerminologyServerConnectionTestStatus.NOT_OK.equals(status))
 				logger.warn(
 						"Due to an error while testing the connection to the terminology server {} was not initialized, validation of bundles will be skipped.",
 						BundleValidatorFactory.class.getSimpleName());

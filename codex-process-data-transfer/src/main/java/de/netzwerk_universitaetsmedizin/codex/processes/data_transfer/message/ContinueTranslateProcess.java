@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_RETURN_TARGET;
+
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -22,6 +24,12 @@ public class ContinueTranslateProcess extends AbstractTaskMessageSend
 			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper, readAccessHelper, organizationProvider, fhirContext);
+	}
+
+	@Override
+	protected Target getTarget()
+	{
+		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_RETURN_TARGET);
 	}
 
 	@Override

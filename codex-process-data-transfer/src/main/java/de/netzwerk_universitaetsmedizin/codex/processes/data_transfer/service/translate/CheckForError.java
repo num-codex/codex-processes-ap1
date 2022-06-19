@@ -29,6 +29,11 @@ public class CheckForError extends AbstractServiceDelegate
 		// TODO set Variable status (enum ContinueStatus)
 		logger.debug("TODO set Variable status (enum ContinueStatus)");
 
-		execution.setVariableLocal(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
+		logger.info("Leading Task -> {}",
+				getLeadingTaskFromExecutionVariables().getMeta().getProfile().get(0).getValue());
+		logger.info("Current Task -> {}",
+				getCurrentTaskFromExecutionVariables().getMeta().getProfile().get(0).getValue());
+
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 	}
 }

@@ -32,7 +32,7 @@ public class TranslateConfig
 	public DownloadDataFromDic downloadDataFromDiz()
 	{
 		return new DownloadDataFromDic(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider());
 	}
 
 	@Bean
@@ -58,7 +58,7 @@ public class TranslateConfig
 				transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Translate-setTimeoutError") // prefix to force distinct bean names
 	public SetTimeoutError setTimeoutError()
 	{
 		return new SetTimeoutError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -72,7 +72,7 @@ public class TranslateConfig
 				transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Translate-checkForError") // prefix to force distinct bean names
 	public CheckForError checkForError()
 	{
 		return new CheckForError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -87,7 +87,7 @@ public class TranslateConfig
 				transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Translate-logSuccess") // prefix to force distinct bean names
 	public LogSuccess logSuccess()
 	{
 		return new LogSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -123,7 +123,7 @@ public class TranslateConfig
 				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Translate-logValidationError") // prefix to force distinct bean names
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -145,7 +145,7 @@ public class TranslateConfig
 				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Translate-logError") // prefix to force distinct bean names
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),

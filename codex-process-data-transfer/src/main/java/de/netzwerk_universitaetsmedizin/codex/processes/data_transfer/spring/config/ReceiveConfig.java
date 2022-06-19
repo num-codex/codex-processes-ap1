@@ -27,7 +27,8 @@ public class ReceiveConfig
 	public DownloadDataFromGth downloadDataFromGth()
 	{
 		return new DownloadDataFromGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider(),
+				transferDataConfig.gthIdentifierValue());
 	}
 
 	@Bean
@@ -54,14 +55,14 @@ public class ReceiveConfig
 				transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Receive-logSuccess") // prefix to force distinct bean names
 	public LogSuccess logSuccess()
 	{
 		return new LogSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Receive-logValidation") // prefix to force distinct bean names
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -105,7 +106,7 @@ public class ReceiveConfig
 				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Receive-logError") // prefix to force distinct bean names
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),

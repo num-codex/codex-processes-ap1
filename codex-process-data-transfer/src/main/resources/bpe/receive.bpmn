@@ -58,7 +58,7 @@
       <bpmn:outgoing>Flow_0qzurps</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1pjawha" name="success" sourceRef="Gateway_078c0ws" targetRef="ContinueTranslateProcess">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'SUCCESS'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'SUCCESS'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0ok68b5" sourceRef="Event_1ngq9gx" targetRef="DeleteValidationErrorForGth" />
     <bpmn:endEvent id="Event_0l90akm">
@@ -97,7 +97,7 @@
       <bpmn:outgoing>Flow_1pjawha</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_02q1fg2" name="validation error" sourceRef="Gateway_078c0ws" targetRef="LogValidationError">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0qzurps" sourceRef="StoreValidationErrorForGth" targetRef="ContinueTranslateProcessWithValidationError" />
     <bpmn:intermediateThrowEvent id="ContinueTranslateProcessWithValidationError" name="continue translate process with validation error">

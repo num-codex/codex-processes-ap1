@@ -157,7 +157,7 @@ public class TransferDataConfig
 
 	@ProcessDocumentation(description = "DSF organization identifier of the GECCO Transfer Hub", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}")
-	private String geccoTransferHubIdentifierValue;
+	private String gthIdentifierValue;
 
 	@ProcessDocumentation(description = "DSF organization identifier of the central research repository", processNames = "wwwnetzwerk-universitaetsmedizinde_dataTranslate")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
@@ -282,9 +282,9 @@ public class TransferDataConfig
 		return mdatTransferGrantedOids;
 	}
 
-	public String geccoTransferHubIdentifierValue()
+	public String gthIdentifierValue()
 	{
-		return geccoTransferHubIdentifierValue;
+		return gthIdentifierValue;
 	}
 
 	public String crrIdentifierValue()

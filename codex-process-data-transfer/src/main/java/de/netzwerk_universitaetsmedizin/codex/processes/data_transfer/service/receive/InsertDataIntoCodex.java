@@ -1,6 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
 
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
@@ -57,6 +59,8 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 				logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
 			geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
+
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 		}
 		catch (Exception e)
 		{

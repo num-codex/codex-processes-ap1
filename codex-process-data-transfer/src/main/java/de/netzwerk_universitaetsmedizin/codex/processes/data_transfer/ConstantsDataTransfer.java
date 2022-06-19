@@ -19,6 +19,7 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_ERROR_CODE = "errorCode";
 	String BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE = "errorMessage";
 	String BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS = "continueStatus";
+	String BPMN_EXECUTION_VARIABLE_RETURN_TARGET = "returnTarget";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/crr-pseudonym";

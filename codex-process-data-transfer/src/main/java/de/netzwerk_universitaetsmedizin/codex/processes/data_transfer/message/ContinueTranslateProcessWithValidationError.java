@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_RETURN_TARGET;
+
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -26,10 +28,15 @@ public class ContinueTranslateProcessWithValidationError extends AbstractTaskMes
 	}
 
 	@Override
+	protected Target getTarget()
+	{
+		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_RETURN_TARGET);
+	}
+
+	@Override
 	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
 			String profile, Stream<ParameterComponent> additionalInputParameters)
 	{
-
 		// TODO implement continue translate with validation error
 		logger.debug("implement continue translate with validation error");
 

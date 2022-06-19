@@ -95,7 +95,7 @@ public class SendConfig
 	{
 		return new StoreDataForGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider(),
-				transferDataConfig.geccoTransferHubIdentifierValue());
+				transferDataConfig.gthIdentifierValue());
 	}
 
 	@Bean
@@ -106,7 +106,7 @@ public class SendConfig
 				transferDataConfig.fhirContext());
 	}
 
-	@Bean
+	@Bean(name = "Send-setTimeoutError") // prefix to force distinct bean names
 	public SetTimeoutError setTimeoutError()
 	{
 		return new SetTimeoutError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -120,7 +120,7 @@ public class SendConfig
 				transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Send-checkForError") // prefix to force distinct bean names
 	public CheckForError checkForError()
 	{
 		return new CheckForError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
@@ -141,21 +141,21 @@ public class SendConfig
 				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Send-logSuccess") // prefix to force distinct bean names
 	public LogSuccess logSuccess()
 	{
 		return new LogSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Send-logValidationError") // prefix to force distinct bean names
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper());
 	}
 
-	@Bean
+	@Bean(name = "Send-logError") // prefix to force distinct bean names
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
