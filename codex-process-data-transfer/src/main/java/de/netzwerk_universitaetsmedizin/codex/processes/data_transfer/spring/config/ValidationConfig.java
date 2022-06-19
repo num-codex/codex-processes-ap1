@@ -134,7 +134,7 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.timeout.read:300000}")
 	private int packageClientReadTimeout;
 
-	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the FHIR implementation guide package server set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the FHIR implementation guide package server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.verbose:false}")
 	private boolean packageClientVerbose;
 
@@ -194,7 +194,7 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.timeout.read:300000}")
 	private int valueSetExpansionClientReadTimeout;
 
-	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the terminology server set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the terminology server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.verbose:false}")
 	private boolean valueSetExpansionClientVerbose;
 
