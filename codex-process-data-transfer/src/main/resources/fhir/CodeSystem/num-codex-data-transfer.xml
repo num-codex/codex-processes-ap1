@@ -34,7 +34,7 @@
 	<concept>
 		<code value="data-reference" />
 		<display value="Data Reference" />
-		<definition value="Reference to an encrypted GECCO Data-Set" />
+		<definition value="Reference to an encrypted GECCO dataset or result bundle" />
 	</concept>
 	<concept>
 		<code value="export-from" />
