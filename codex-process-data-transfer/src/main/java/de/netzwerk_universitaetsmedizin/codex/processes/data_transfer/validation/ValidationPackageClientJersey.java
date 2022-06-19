@@ -23,8 +23,12 @@ import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 
 public class ValidationPackageClientJersey implements ValidationPackageClient
 {
-	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
-			.getLogger(ValidationPackageClientJersey.class.getName());
+	private static final java.util.logging.Logger requestDebugLogger;
+	static
+	{
+		requestDebugLogger = java.util.logging.Logger.getLogger(ValidationPackageClientJersey.class.getName());
+		requestDebugLogger.setLevel(Level.INFO);
+	}
 
 	private final Client client;
 	private final String baseUrl;
@@ -72,7 +76,7 @@ public class ValidationPackageClientJersey implements ValidationPackageClient
 
 		if (logRequests)
 		{
-			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.FINE, Verbosity.PAYLOAD_ANY,
+			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
 		}
 
