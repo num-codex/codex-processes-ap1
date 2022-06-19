@@ -176,7 +176,7 @@
 	<url value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />
-	<name value="dataSend" />
+	<name value="DataSend" />
 	<title value="Data Send Process" />
 	<subtitle value="Data Send to GECCO Transfer Hub Process" />
 	<!-- status managed by bpe -->

@@ -109,7 +109,7 @@
 		value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />
-	<name value="dataTrigger" />
+	<name value="DataTrigger" />
 	<title value="Data Trigger Process" />
 	<subtitle value="Start/Stop Data Trigger Process" />
 	<!-- status managed by bpe -->

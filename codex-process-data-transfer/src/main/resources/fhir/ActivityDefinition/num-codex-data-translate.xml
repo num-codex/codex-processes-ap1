@@ -144,7 +144,7 @@
 	<url value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />
-	<name value="dataTranslate" />
+	<name value="DataTranslate" />
 	<title value="Data Translate Process" />
 	<subtitle value="GECCO Transfer Hub Data Translate Process" />
 	<!-- status managed by bpe -->
