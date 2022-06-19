@@ -29,7 +29,7 @@
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1bnrn2n" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_09lbnic" sourceRef="InsertDataIntoCodex" targetRef="Gateway_078c0ws" />
-    <bpmn:serviceTask id="Activity_0ezcge5" name="log error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.">
+    <bpmn:serviceTask id="LogError" name="log error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogError">
       <bpmn:incoming>Flow_1jsw4ms</bpmn:incoming>
       <bpmn:outgoing>Flow_0jhj8th</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -48,8 +48,8 @@
     <bpmn:sequenceFlow id="Flow_0cysiak" sourceRef="Event_1tjhiyz" targetRef="Gateway_0wzgymf" />
     <bpmn:sequenceFlow id="Flow_03ztcka" sourceRef="Event_05s0i22" targetRef="Gateway_0wzgymf" />
     <bpmn:sequenceFlow id="Flow_0gjzmhl" sourceRef="Gateway_0wzgymf" targetRef="ContinueTranslateProcessWithError" />
-    <bpmn:sequenceFlow id="Flow_1g2ia7m" sourceRef="Activity_0gr13r9" targetRef="StoreValidationErrorForGth" />
-    <bpmn:serviceTask id="Activity_0gr13r9" name="encrypt validation error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.">
+    <bpmn:sequenceFlow id="Flow_1g2ia7m" sourceRef="EncryptValidationError" targetRef="StoreValidationErrorForGth" />
+    <bpmn:serviceTask id="EncryptValidationError" name="encrypt validation error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.EncryptValidationError">
       <bpmn:incoming>Flow_11fvfcn</bpmn:incoming>
       <bpmn:outgoing>Flow_1g2ia7m</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -80,7 +80,7 @@
       <bpmn:outgoing>Flow_193yd93</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1lvt0rd" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="Event_0p9e86m" attachedToRef="Activity_0gr13r9">
+    <bpmn:boundaryEvent id="Event_0p9e86m" attachedToRef="EncryptValidationError">
       <bpmn:outgoing>Flow_0lzdm4b</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1wcnc8n" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
@@ -113,7 +113,7 @@
       <bpmn:messageEventDefinition id="MessageEventDefinition_13q8vqu" messageRef="Message_09jqglx" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithValidationError" />
     </bpmn:intermediateThrowEvent>
     <bpmn:sequenceFlow id="Flow_1kkiaj0" sourceRef="ContinueTranslateProcessWithValidationError" targetRef="Event_1ngq9gx" />
-    <bpmn:sequenceFlow id="Flow_11fvfcn" sourceRef="LogValidationError" targetRef="Activity_0gr13r9" />
+    <bpmn:sequenceFlow id="Flow_11fvfcn" sourceRef="LogValidationError" targetRef="EncryptValidationError" />
     <bpmn:serviceTask id="LogValidationError" name="log validation error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogValidationError">
       <bpmn:incoming>Flow_02q1fg2</bpmn:incoming>
       <bpmn:outgoing>Flow_11fvfcn</bpmn:outgoing>
@@ -145,13 +145,13 @@
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0gjzmhl</bpmn:incoming>
       <bpmn:outgoing>Flow_1jsw4ms</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_1j7eh6e" messageRef="Message_07a8kee" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message." />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1j7eh6e" messageRef="Message_07a8kee" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithError" />
     </bpmn:intermediateThrowEvent>
-    <bpmn:sequenceFlow id="Flow_1jsw4ms" sourceRef="ContinueTranslateProcessWithError" targetRef="Activity_0ezcge5" />
+    <bpmn:sequenceFlow id="Flow_1jsw4ms" sourceRef="ContinueTranslateProcessWithError" targetRef="LogError" />
     <bpmn:endEvent id="Event_0eyl72m">
       <bpmn:incoming>Flow_0jhj8th</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0jhj8th" sourceRef="Activity_0ezcge5" targetRef="Event_0eyl72m" />
+    <bpmn:sequenceFlow id="Flow_0jhj8th" sourceRef="LogError" targetRef="Event_0eyl72m" />
     <bpmn:textAnnotation id="TextAnnotation_0bi1mvw">
       <bpmn:text>Error message &amp; error metadata</bpmn:text>
     </bpmn:textAnnotation>
@@ -289,7 +289,7 @@ Codex PSN</bpmn:text>
       <bpmndi:BPMNShape id="Activity_0pau3xo_di" bpmnElement="InsertDataIntoCodex">
         <dc:Bounds x="590" y="57" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0s7itnq_di" bpmnElement="Activity_0gr13r9">
+      <bpmndi:BPMNShape id="Activity_0s7itnq_di" bpmnElement="EncryptValidationError">
         <dc:Bounds x="1060" y="190" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1703afw_di" bpmnElement="StoreValidationErrorForGth">
@@ -328,7 +328,7 @@ Codex PSN</bpmn:text>
           <dc:Bounds x="1436" y="428" width="89" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0mmlkch_di" bpmnElement="Activity_0ezcge5">
+      <bpmndi:BPMNShape id="Activity_0mmlkch_di" bpmnElement="LogError">
         <dc:Bounds x="1580" y="363" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0eyl72m_di" bpmnElement="Event_0eyl72m">
