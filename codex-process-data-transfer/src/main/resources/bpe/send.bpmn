@@ -177,7 +177,6 @@
       <bpmn:incoming>Flow_04t997c</bpmn:incoming>
       <bpmn:incoming>Flow_0yow5g2</bpmn:incoming>
       <bpmn:incoming>Flow_1ojlya5</bpmn:incoming>
-      <bpmn:incoming>Flow_0cyogvc</bpmn:incoming>
       <bpmn:incoming>Flow_0wqrp5a</bpmn:incoming>
       <bpmn:outgoing>Flow_16ouahu</bpmn:outgoing>
     </bpmn:exclusiveGateway>
@@ -194,10 +193,6 @@
     <bpmn:sequenceFlow id="Flow_0ervxi8" name="error" sourceRef="Gateway_0if37bo" targetRef="Gateway_13fyv2x">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:boundaryEvent id="Event_1hd3unp" attachedToRef="DeleteDataForGth">
-      <bpmn:outgoing>Flow_0cyogvc</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1dvdeo6" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
-    </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_01cz1ir" sourceRef="Event_1cqf68a" targetRef="Gateway_13fyv2x" />
     <bpmn:sequenceFlow id="Flow_1mff8mx" sourceRef="Event_1l3631s" targetRef="Gateway_13fyv2x" />
     <bpmn:sequenceFlow id="Flow_0sy09vc" sourceRef="Event_0c8ajbv" targetRef="Gateway_13fyv2x" />
@@ -207,7 +202,6 @@
     <bpmn:sequenceFlow id="Flow_04t997c" sourceRef="SetNoConsentIdatMergeError" targetRef="Gateway_13fyv2x" />
     <bpmn:sequenceFlow id="Flow_0yow5g2" sourceRef="Event_1a355wx" targetRef="Gateway_13fyv2x" />
     <bpmn:sequenceFlow id="Flow_1ojlya5" sourceRef="Event_09702b0" targetRef="Gateway_13fyv2x" />
-    <bpmn:sequenceFlow id="Flow_0cyogvc" sourceRef="Event_1hd3unp" targetRef="Gateway_13fyv2x" />
     <bpmn:exclusiveGateway id="Gateway_1lp4ez4">
       <bpmn:incoming>Flow_1tal48r</bpmn:incoming>
       <bpmn:incoming>Flow_009empz</bpmn:incoming>
@@ -334,11 +328,6 @@
       <bpmndi:BPMNEdge id="Flow_15v0mpq_di" bpmnElement="Flow_15v0mpq">
         <di:waypoint x="2125" y="140" />
         <di:waypoint x="2200" y="140" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0cyogvc_di" bpmnElement="Flow_0cyogvc">
-        <di:waypoint x="2300" y="198" />
-        <di:waypoint x="2300" y="530" />
-        <di:waypoint x="2915" y="530" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ojlya5_di" bpmnElement="Flow_1ojlya5">
         <di:waypoint x="370" y="198" />
@@ -639,9 +628,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0tpjy7z_di" bpmnElement="Event_1a355wx">
         <dc:Bounds x="522" y="162" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_05z3d6a_di" bpmnElement="Event_1hd3unp">
-        <dc:Bounds x="2282" y="162" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0f6gwws_di" bpmnElement="Event_1h36t2u">
         <dc:Bounds x="1142" y="162" width="36" height="36" />
