@@ -159,10 +159,10 @@
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_15lb3lf" sourceRef="CheckForError" targetRef="Gateway_0if37bo" />
     <bpmn:sequenceFlow id="Flow_1yj09fp" name="success" sourceRef="Gateway_0if37bo" targetRef="LogSuccess">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'SUCCESS'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'SUCCESS'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0s9c6mf" name="validation error" sourceRef="Gateway_0if37bo" targetRef="DownloadValidationErrorFromGth">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_143c49o" sourceRef="DeleteDataForGth" targetRef="CheckForError" />
     <bpmn:exclusiveGateway id="Gateway_13fyv2x">
@@ -191,7 +191,7 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0ixpqv3" sourceRef="LogSuccess" targetRef="Event_1pp5ms7" />
     <bpmn:sequenceFlow id="Flow_0ervxi8" name="error" sourceRef="Gateway_0if37bo" targetRef="Gateway_13fyv2x">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'ERROR'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_01cz1ir" sourceRef="Event_1cqf68a" targetRef="Gateway_13fyv2x" />
     <bpmn:sequenceFlow id="Flow_1mff8mx" sourceRef="Event_1l3631s" targetRef="Gateway_13fyv2x" />

@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
+
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
@@ -8,6 +10,8 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 
 public class CheckForError extends AbstractServiceDelegate
 {
@@ -24,5 +28,7 @@ public class CheckForError extends AbstractServiceDelegate
 	{
 		// TODO set Variable status (enum ContinueStatus)
 		logger.debug("TODO set Variable status (enum ContinueStatus)");
+
+		execution.setVariableLocal(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 	}
 }

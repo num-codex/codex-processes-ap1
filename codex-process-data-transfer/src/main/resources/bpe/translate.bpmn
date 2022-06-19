@@ -95,10 +95,10 @@
       <bpmn:outgoing>Flow_1uonb5c</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_04mbhgy" name="success" sourceRef="Gateway_0k6vbtk" targetRef="ContinueSendProcess">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'SUCCESS'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'SUCCESS'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_05y4kuz" name="error" sourceRef="Gateway_0k6vbtk" targetRef="Gateway_1tund4o">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'ERROR'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1wd9nsi" sourceRef="CheckForError" targetRef="Gateway_0k6vbtk" />
     <bpmn:sequenceFlow id="Flow_198ccaq" sourceRef="DownloadValidationErrorFromCrr" targetRef="ReplacePseudonymBack" />
@@ -129,7 +129,7 @@
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_0maa1om" sourceRef="Event_1mxue1w" targetRef="DeleteValidationErrorForDic" />
     <bpmn:sequenceFlow id="Flow_1o3h7ee" name="validation error" sourceRef="Gateway_0k6vbtk" targetRef="DownloadValidationErrorFromCrr">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="LogError" name="log error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.LogError">
       <bpmn:incoming>Flow_1cw2fc1</bpmn:incoming>
