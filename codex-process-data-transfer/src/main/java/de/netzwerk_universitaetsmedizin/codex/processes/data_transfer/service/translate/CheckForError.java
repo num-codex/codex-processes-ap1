@@ -12,11 +12,16 @@ import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 
 public class CheckForError extends AbstractServiceDelegate
 {
+	private static final Logger logger = LoggerFactory.getLogger(CheckForError.class);
+
 	public CheckForError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
@@ -42,6 +47,17 @@ public class CheckForError extends AbstractServiceDelegate
 			continueStatus = ContinueStatus.VALIDATION_ERROR;
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, continueStatus);
+
+		try
+		{
+			Task continueTask = getCurrentTaskFromExecutionVariables();
+			continueTask.setStatus(TaskStatus.COMPLETED);
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().update(continueTask);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Unable to update continue Task from CRR", e);
+		}
 	}
 
 	private boolean currentTaskHasProfile(String profile)
