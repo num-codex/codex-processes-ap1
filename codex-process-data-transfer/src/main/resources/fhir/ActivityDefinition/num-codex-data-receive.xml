@@ -43,7 +43,7 @@
 		value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive" />
 	<!-- version managed by bpe -->
 	<version value="#{version}" />
-	<name value="dataReceive" />
+	<name value="DataReceive" />
 	<title value="Data Receive Process" />
 	<subtitle value="NUM-CODEX Central Research Repository Data Receive Process" />
 	<!-- status managed by bpe -->

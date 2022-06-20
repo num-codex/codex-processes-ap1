@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA;
@@ -25,14 +26,30 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 
 public class ErrorOutputParameterGenerator
 {
-	public Stream<TaskOutputComponent> createMeDicValidationError(IdType sourceId, OperationOutcome outcome)
+	public Stream<TaskOutputComponent> createMeDicValidationError(IdType reference, OperationOutcome outcome)
 	{
 		return outcome.getIssue().stream()
 				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
-				.map(i -> createMeDicValidationError(sourceId, i));
+				.map(i -> createValidationError(reference, i,
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC));
 	}
 
-	private TaskOutputComponent createMeDicValidationError(IdType sourceId, OperationOutcomeIssueComponent i)
+	public Stream<TaskOutputComponent> createCrrValidationError(IdType reference, OperationOutcome outcome)
+	{
+		return outcome.getIssue().stream()
+				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
+				.map(i -> createValidationError(reference, i,
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR));
+	}
+
+	public Stream<TaskOutputComponent> createCrrValidationError(OperationOutcome outcome)
+	{
+		return outcome.getIssue().stream()
+				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
+				.map(i -> createValidationError(null, i, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR));
+	}
+
+	private TaskOutputComponent createValidationError(IdType reference, OperationOutcomeIssueComponent i, String source)
 	{
 		TaskOutputComponent output = new TaskOutputComponent();
 		output.getType().getCodingFirstRep().setSystem(CODESYSTEM_HIGHMED_BPMN)
@@ -44,15 +61,32 @@ public class ErrorOutputParameterGenerator
 				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR)
 						.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED));
 		metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_SOURCE)
-				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE)
-						.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC));
+				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE).setCode(source));
 
-		if (sourceId != null)
+		if (reference != null)
 			metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_REFERENCE)
-					.setValue(new Reference().setReferenceElement(sourceId));
+					.setValue(new Reference().setReferenceElement(reference));
 
 		output.setValue(new StringType(
 				"Validation faild at " + i.getLocation().stream().map(StringType::getValue).findFirst().orElse("?")));
+
+		return output;
+	}
+
+	public TaskOutputComponent createError(String source, String code, String message)
+	{
+		TaskOutputComponent output = new TaskOutputComponent();
+		output.getType().getCodingFirstRep().setSystem(CODESYSTEM_HIGHMED_BPMN)
+				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR);
+
+		Extension metaData = output.addExtension();
+		metaData.setUrl(EXTENSION_ERROR_METADATA);
+		metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_TYPE)
+				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR).setCode(code));
+		metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_SOURCE)
+				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE).setCode(source));
+
+		output.setValue(new StringType(message));
 
 		return output;
 	}

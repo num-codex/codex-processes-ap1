@@ -43,8 +43,12 @@ import ca.uhn.fhir.rest.api.Constants;
 public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValueSetExpansionClientJersey.class);
-	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
-			.getLogger(ValueSetExpansionClientJersey.class.getName());
+	private static final java.util.logging.Logger requestDebugLogger;
+	static
+	{
+		requestDebugLogger = java.util.logging.Logger.getLogger(ValueSetExpansionClientJersey.class.getName());
+		requestDebugLogger.setLevel(Level.INFO);
+	}
 
 	private final Client client;
 	private final String baseUrl;
@@ -108,7 +112,7 @@ public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 
 		if (logRequests)
 		{
-			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.FINE, Verbosity.PAYLOAD_ANY,
+			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
 		}
 

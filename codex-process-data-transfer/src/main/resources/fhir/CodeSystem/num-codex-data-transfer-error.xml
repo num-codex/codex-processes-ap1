@@ -22,9 +22,59 @@
 	<versionNeeded value="false" />
 	<content value="complete" />
 	<concept>
+		<code value="patient-not-found" />
+		<display value="Patient Not Found" />
+		<definition value="The referenced Patient could not be found in the local FHIR repository" />
+	</concept>
+	<concept>
+		<code value="bad-patient-reference" />
+		<display value="Bad Patient Reference" />
+		<definition value="The given Patient reference does not point to a resource at the local FHIR repository" />
+	</concept>
+	<concept>
 		<code value="validation-failed" />
 		<display value="Validation Failed" />
 		<definition value="Error or fatal error during validaton of FHIR resources" />
+	</concept>
+	<concept>
+		<code value="download-data-from-dic-failed" />
+		<display value="Download Data From DIC Failed" />
+		<definition value="Error while downloading encrypted GECCO data from DIC" />
+	</concept>
+	<concept>
+		<code value="fttp-not-reachable" />
+		<display value="Unable to Connect to The fTTP" />
+		<definition value="No connection could be established with the fTTP" />
+	</concept>
+	<concept>
+		<code value="no-dic-pseudonym-for-bloomfilter" />
+		<display value="No DIC Pseudonym For Bloomfilter" />
+		<definition value="The fTTP did not return a DIC pseudonym for the given Bloomfilter" />
+	</concept>
+	<concept>
+		<code value="no-crr-pseudonym-for-dic-pseudonym" />
+		<display value="No CRR Pseudonym For DIC pseudonym" />
+		<definition value="The fTTP did not return a CRR pseudonym for the given DIC pseudonym" />
+	</concept>
+	<concept>
+		<code value="download-data-from-gth-failed" />
+		<display value="Download Data From GTH Failed" />
+		<definition value="Error while downloading encrypted GECCO data from GTH" />
+	</concept>
+	<concept>
+		<code value="insert-into-crr-fhir-respository-failed" />
+		<display value="Insert Into CRR FHIR Repository Failed" />
+		<definition value="Error while inserting data into CRR FHIR repository, not a validation error" />
+	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-crr" />
+		<display value="Timeout Waiting For Response From CRR" />
+		<definition value="Timeout while waiting for a response (process continue) task from CRR" />
+	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-gth" />
+		<display value="Timeout Waiting For Response From GTH" />
+		<definition value="Timeout while waiting for a response (process continue) task from GTH" />
 	</concept>
 	<!-- TODO add additional error codes -->
 </CodeSystem> 

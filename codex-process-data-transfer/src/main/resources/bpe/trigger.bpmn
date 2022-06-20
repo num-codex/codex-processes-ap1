@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1bd6yss" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1bd6yss" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1">
   <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataTrigger" isExecutable="true" camunda:versionTag="#{version}">
-    <bpmn:serviceTask id="FindNewData" name="find new data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.FindNewData">
+    <bpmn:serviceTask id="FindNewData" name="find new data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.FindNewData">
       <bpmn:incoming>Flow_0jy9ipp</bpmn:incoming>
       <bpmn:outgoing>Flow_0xlfzol</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -74,7 +74,7 @@
       <bpmn:startEvent id="Event_02xmnq6">
         <bpmn:outgoing>Flow_1x5v76c</bpmn:outgoing>
       </bpmn:startEvent>
-      <bpmn:serviceTask id="StopTimer" name="stop timer" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StopTimer">
+      <bpmn:serviceTask id="StopTimer" name="stop timer" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StopTimer">
         <bpmn:incoming>Flow_0m0cias</bpmn:incoming>
         <bpmn:outgoing>Flow_1vxlaau</bpmn:outgoing>
       </bpmn:serviceTask>
@@ -96,12 +96,12 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!stopTimer}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1bbw6lm" sourceRef="StartTimer" targetRef="Gateway_00tj0cp" />
-    <bpmn:serviceTask id="StartTimer" name="start timer" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.StartTimer">
+    <bpmn:serviceTask id="StartTimer" name="start timer" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.StartTimer">
       <bpmn:incoming>Flow_09o8bb5</bpmn:incoming>
       <bpmn:outgoing>Flow_1bbw6lm</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0hm58q0" sourceRef="SaveLastExportTo" targetRef="Event_1ukqals" />
-    <bpmn:serviceTask id="SaveLastExportTo" name="save last export-to" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.SaveLastExportTo">
+    <bpmn:serviceTask id="SaveLastExportTo" name="save last export-to" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.trigger.SaveLastExportTo">
       <bpmn:incoming>Flow_0stek1z</bpmn:incoming>
       <bpmn:outgoing>Flow_0hm58q0</bpmn:outgoing>
     </bpmn:serviceTask>

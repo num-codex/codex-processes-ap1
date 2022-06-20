@@ -11,6 +11,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -19,6 +20,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.Target;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -41,6 +43,15 @@ public class StartSendProcess extends AbstractTaskMessageSend
 			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper, readAccessHelper, organizationProvider, fhirContext);
+	}
+
+	@Override
+	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
+			String profile, Stream<ParameterComponent> additionalInputParameters)
+	{
+		// can't use same business key as trigger process
+		super.sendTask(target, instantiatesUri, messageName, UUID.randomUUID().toString(), profile,
+				additionalInputParameters);
 	}
 
 	@Override

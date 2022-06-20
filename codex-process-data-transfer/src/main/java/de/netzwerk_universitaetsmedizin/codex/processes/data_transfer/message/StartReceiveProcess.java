@@ -7,7 +7,6 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -46,9 +45,9 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
 			String profile, Stream<ParameterComponent> additionalInputParameters)
 	{
-		String crrBusinessKey = UUID.randomUUID().toString();
+		String crrBusinessKey = createAndSaveAlternativeBusinessKey();
 
-		logger.info("DIC businessKey {}, CRR businessKey {}", businessKey, crrBusinessKey);
+		logger.debug("DIC businessKey {}, CRR businessKey {}", businessKey, crrBusinessKey);
 
 		super.sendTask(target, instantiatesUri, messageName, crrBusinessKey, profile, additionalInputParameters);
 	}

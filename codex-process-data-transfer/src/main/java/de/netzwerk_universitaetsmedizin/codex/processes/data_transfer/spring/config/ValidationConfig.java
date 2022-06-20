@@ -65,6 +65,11 @@ public class ValidationConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationConfig.class);
 
+	public static enum TerminologyServerConnectionTestStatus
+	{
+		OK, NOT_OK, DISABLED
+	}
+
 	@ProcessDocumentation(description = "Enables/disables local FHIR validation, set to `false` to skip validation", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation:true}")
 	private boolean validationEnabled;
@@ -129,7 +134,7 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.timeout.read:300000}")
 	private int packageClientReadTimeout;
 
-	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the FHIR implementation guide package server set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the FHIR implementation guide package server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.verbose:false}")
 	private boolean packageClientVerbose;
 
@@ -189,7 +194,7 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.timeout.read:300000}")
 	private int valueSetExpansionClientReadTimeout;
 
-	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the terminology server set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the terminology server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.verbose:false}")
 	private boolean valueSetExpansionClientVerbose;
 
@@ -451,25 +456,29 @@ public class ValidationConfig
 		return ObjectMapperFactory.createObjectMapper(fhirContext);
 	}
 
-	public boolean testConnectionToTerminologyServer()
+	public TerminologyServerConnectionTestStatus testConnectionToTerminologyServer()
 	{
 		logger.info(
-				"Testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
-				valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
-				valueSetExpansionClientCertificatePrivateKey,
+				"{}esting connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}{}",
+				validationEnabled ? "T" : "Not t", valueSetExpansionClientTrustCertificates,
+				valueSetExpansionClientCertificate, valueSetExpansionClientCertificatePrivateKey,
 				valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
 				valueSetExpansionClientBasicAuthUsername,
 				valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
-				valueSetExpansionClientProxyPassword != null ? "***" : "null");
+				valueSetExpansionClientProxyPassword != null ? "***" : "null",
+				validationEnabled ? "" : ", validation disabled");
+
+		if (!validationEnabled)
+			return TerminologyServerConnectionTestStatus.DISABLED;
 
 		try
 		{
 			CapabilityStatement metadata = valueSetExpansionClient().getMetadata();
 			logger.info("Connection test OK: {} - {}", metadata.getSoftware().getName(),
 					metadata.getSoftware().getVersion());
-			return true;
+			return TerminologyServerConnectionTestStatus.OK;
 		}
 		catch (Exception e)
 		{
@@ -481,7 +490,7 @@ public class ValidationConfig
 			else
 				logger.error("Connection test failed: {}", e.getMessage());
 
-			return false;
+			return TerminologyServerConnectionTestStatus.NOT_OK;
 		}
 	}
 

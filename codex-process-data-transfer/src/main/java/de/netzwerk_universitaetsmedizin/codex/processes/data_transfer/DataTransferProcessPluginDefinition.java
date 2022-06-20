@@ -22,9 +22,14 @@ import org.springframework.core.env.PropertyResolver;
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ReceiveConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.SendConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TranslateConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TriggerConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig.TerminologyServerConnectionTestStatus;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
@@ -61,7 +66,8 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class);
+		return Stream.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class,
+				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class);
 	}
 
 	@Override
@@ -83,29 +89,42 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		var sTexErMe = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-extension-error-metadata.xml");
-		var sTstaDrec = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
-		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
-		var sTstaDtra = StructureDefinitionResource
-				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
 		var sTstaDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-start-data-trigger.xml");
 		var sTstoDtri = StructureDefinitionResource
 				.file("fhir/StructureDefinition/num-codex-task-stop-data-trigger.xml");
+		var sTstaDsen = StructureDefinitionResource.file("fhir/StructureDefinition/num-codex-task-start-data-send.xml");
+		var sTconDsen = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-send.xml");
+		var sTconDsenWvE = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-send-with-validation-error.xml");
+		var sTconDsenWe = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-send-with-error.xml");
+		var sTstaDtra = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-translate.xml");
+		var sTconDtra = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-translate.xml");
+		var sTconDtraWvE = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-translate-with-validation-error.xml");
+		var sTconDtraWe = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-continue-data-translate-with-error.xml");
+		var sTstaDrec = StructureDefinitionResource
+				.file("fhir/StructureDefinition/num-codex-task-start-data-receive.xml");
 
 		var vD = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer.xml");
 		var vDeS = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error-source.xml");
 		var vDe = ValueSetResource.file("fhir/ValueSet/num-codex-data-transfer-error.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of( //
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of(
 				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
-				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD), //
-				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
-				Arrays.asList(aSen, cD, cDeS, cDe, nD, nB, sTexErMe, sTstaDsen, vD, vDeS, vDe), //
+				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD),
+				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION, Arrays.asList(aSen, cD, cDeS, cDe, nB, nD,
+						sTexErMe, sTstaDsen, sTconDsen, sTconDsenWvE, sTconDsenWe, vD, vDeS, vDe),
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
-				Arrays.asList(aTra, cD, nD, nC, sTstaDtra, vD), //
+				Arrays.asList(aTra, cD, cDeS, cDe, nD, nC, sTexErMe, sTstaDtra, sTconDtra, sTconDtraWvE, sTconDtraWe,
+						vD),
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
-				Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
+				Arrays.asList(aRec, cD, cDeS, cDe, nC, sTexErMe, sTstaDrec, vD));
 
 		return ResourceProvider.read(VERSION, DATE,
 				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader, propertyResolver,
@@ -129,12 +148,12 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 
 		if (activeProcesses.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
 		{
-			boolean testOk = pluginApplicationContext.getBean(ValidationConfig.class)
+			TerminologyServerConnectionTestStatus status = pluginApplicationContext.getBean(ValidationConfig.class)
 					.testConnectionToTerminologyServer();
 
-			if (testOk)
+			if (TerminologyServerConnectionTestStatus.OK.equals(status))
 				pluginApplicationContext.getBean(BundleValidatorFactory.class).init();
-			else
+			else if (TerminologyServerConnectionTestStatus.NOT_OK.equals(status))
 				logger.warn(
 						"Due to an error while testing the connection to the terminology server {} was not initialized, validation of bundles will be skipped.",
 						BundleValidatorFactory.class.getSimpleName());

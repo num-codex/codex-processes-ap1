@@ -28,6 +28,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.ValidationResult;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig.TerminologyServerConnectionTestStatus;
 
 public class ValidationMain implements InitializingBean
 {
@@ -118,9 +119,9 @@ public class ValidationMain implements InitializingBean
 				ValidationConfig.class))
 		{
 			ValidationConfig config = springContext.getBean(ValidationConfig.class);
-			boolean testOk = config.testConnectionToTerminologyServer();
+			TerminologyServerConnectionTestStatus status = config.testConnectionToTerminologyServer();
 
-			if (testOk)
+			if (TerminologyServerConnectionTestStatus.OK.equals(status))
 			{
 				ValidationMain main = springContext.getBean(ValidationMain.class);
 				main.validate(args);
