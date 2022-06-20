@@ -1,6 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_PATIENT_NOT_FOUND;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER;
@@ -9,6 +11,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import java.util.Objects;
 import java.util.Optional;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -75,7 +78,8 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 		}, () ->
 		{
 			logger.warn("Patient {} not found", reference);
-			throw new RuntimeException("Patient " + reference + " not found");
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_PATIENT_NOT_FOUND,
+					"Patient at " + reference + " not found");
 		});
 	}
 
@@ -116,7 +120,9 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 	private String resolveBloomFilter(String bloomFilter)
 	{
 		return fttpClientFactory.getFttpClient().getDicPseudonym(bloomFilter)
-				.orElseThrow(() -> new RuntimeException("Could not get DIC pseudonym with bloom filter"));
+				.orElseThrow(() -> new BpmnError(
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER,
+						"Unable to get DIC pseudonym for given BloomFilter"));
 	}
 
 	private void updatePatient(Patient patient)

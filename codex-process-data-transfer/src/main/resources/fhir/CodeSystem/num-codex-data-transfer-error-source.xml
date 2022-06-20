@@ -32,11 +32,6 @@
 		<definition value="Error during process execution at the GECCO Transfer Hub" />
 	</concept>
 	<concept>
-		<code value="fTTP" />
-		<display value="fTTP" />
-		<definition value="Error during process execution at the federated Trusted Third Party" />
-	</concept>
-	<concept>
 		<code value="CRR" />
 		<display value="CRR" />
 		<definition value="Error during process execution in the Central Research Repository" />

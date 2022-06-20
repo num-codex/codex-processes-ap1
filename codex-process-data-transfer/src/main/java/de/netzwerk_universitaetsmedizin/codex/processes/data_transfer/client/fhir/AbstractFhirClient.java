@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_BAD_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -578,8 +580,9 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 			}
 		}
 		else
-			throw new RuntimeException(
-					"Reference should be an absolute local fhir store url to " + client.getServerBase());
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_BAD_PATIENT_REFERENCE,
+					"Patient reference not an absolute reference to a resouce at the local GECCO FHIR server: "
+							+ client.getServerBase());
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.t
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_CRR_PSEUDONYM_FOR_DIC_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 
 import java.util.Objects;
@@ -48,7 +49,10 @@ public class ReplacePseudonym extends AbstractServiceDelegate
 
 		String dicPseudonym = getPseudonym(task).get();
 
-		String crrPseudonym = fttpClientFactory.getFttpClient().getCrrPseudonym(dicPseudonym).get();
+		String crrPseudonym = fttpClientFactory.getFttpClient().getCrrPseudonym(dicPseudonym)
+				.orElseThrow(() -> new BpmnError(
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_CRR_PSEUDONYM_FOR_DIC_PSEUDONYM,
+						"Unable to get CRR pseudonym for given DIC pseudonym"));
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(crrPseudonym));
 	}

@@ -89,9 +89,14 @@ public interface ConstantsDataTransfer
 	String HAPI_USER_DATA_SOURCE_ID_ELEMENT = "source-id";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_PATIENT_NOT_FOUND = "patient-not-found";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_BAD_PATIENT_REFERENCE = "bad-patient-reference";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE = "fttp-not-reachable";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER = "no-dic-pseudonym-for-bloomfilter";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED = "validation-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_CRR = "timeout-waiting-for-response-from-crr";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_DIC_FAILED = "download-data-from-dic-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_CRR_PSEUDONYM_FOR_DIC_PSEUDONYM = "no-crr-pseudonym-for-dic-pseudonym";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_GTH = "timeout-waiting-for-response-from-gth";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_GTH_FAILED = "download-data-from-gth-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED = "insert-into-crr-fhir-respository-failed";
@@ -99,7 +104,6 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-source";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC = "MeDIC";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH = "GTH";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_FTTP = "fTTP";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR = "CRR";
 
 	String EXTENSION_ERROR_METADATA = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata";
