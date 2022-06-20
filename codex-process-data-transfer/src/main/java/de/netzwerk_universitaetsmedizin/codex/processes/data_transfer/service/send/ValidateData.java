@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -112,9 +113,9 @@ public class ValidateData extends AbstractServiceDelegate
 								resourcesWithErrorCount, resourcesWithErrorCount != 1 ? "s" : "");
 
 						addErrorsToTask(bundle);
-						errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
-								.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
-										getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
+						errorLogger.logValidationFailedLocal(
+								getLeadingTaskFromExecutionVariables().getIdElement().withServerBase(
+										getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 
 						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
 								"Validation of transfer bundle failed, " + resourcesWithErrorCount + " resource"

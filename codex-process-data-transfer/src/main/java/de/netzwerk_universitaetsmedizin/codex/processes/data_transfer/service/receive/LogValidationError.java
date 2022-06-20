@@ -13,25 +13,30 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 
 public class LogValidationError extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(LogValidationError.class);
 
 	private final ErrorOutputParameterGenerator errorOutputParameterGenerator;
+	private final ErrorLogger errorLogger;
 
 	public LogValidationError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, ErrorOutputParameterGenerator errorOutputParameterGenerator)
+			ReadAccessHelper readAccessHelper, ErrorOutputParameterGenerator errorOutputParameterGenerator,
+			ErrorLogger errorLogger)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
 		this.errorOutputParameterGenerator = errorOutputParameterGenerator;
+		this.errorLogger = errorLogger;
 	}
 
 	@Override
@@ -40,11 +45,16 @@ public class LogValidationError extends AbstractServiceDelegate
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(errorOutputParameterGenerator, "errorOutputParameterGenerator");
+		Objects.requireNonNull(errorLogger, "errorLogger");
 	}
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
+		logger.info("Validation error while adding resources to CRR FHIR repository");
+		errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
+				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
+
 		logger.debug("Setting Task.status failed, adding validation errors");
 
 		Task task = getLeadingTaskFromExecutionVariables();

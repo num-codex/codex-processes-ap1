@@ -66,7 +66,8 @@ public class ReceiveConfig
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator(),
+				transferDataConfig.errorLogger());
 	}
 
 	@Bean
@@ -112,6 +113,7 @@ public class ReceiveConfig
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator(),
+				transferDataConfig.errorLogger());
 	}
 }
