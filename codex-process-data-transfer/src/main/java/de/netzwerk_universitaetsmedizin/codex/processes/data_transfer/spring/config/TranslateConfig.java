@@ -17,7 +17,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.tr
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.LogSuccess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.LogValidationError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.ReplacePseudonym;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.ReplacePseudonymBack;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.SetTimeoutError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.StoreDataForCrr;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.translate.StoreValidationErrorForDic;
@@ -102,17 +101,10 @@ public class TranslateConfig
 	}
 
 	@Bean
-	public ReplacePseudonymBack replacePseudonymBack()
-	{
-		return new ReplacePseudonymBack(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
-	}
-
-	@Bean
 	public StoreValidationErrorForDic storeValidationErrorForDic()
 	{
 		return new StoreValidationErrorForDic(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider());
 	}
 
 	@Bean
@@ -127,7 +119,7 @@ public class TranslateConfig
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 
 	@Bean
@@ -150,6 +142,6 @@ public class TranslateConfig
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 }

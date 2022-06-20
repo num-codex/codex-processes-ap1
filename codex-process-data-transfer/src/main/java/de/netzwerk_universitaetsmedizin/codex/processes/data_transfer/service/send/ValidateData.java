@@ -67,6 +67,12 @@ public class ValidateData extends AbstractServiceDelegate
 		if (!bundleValidatorSupplier.isEnabled())
 		{
 			logger.warn("Validation disabled, skipping validation. Modify configuration to enable validation");
+
+			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+
+			Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(bundle);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
+
 			return;
 		}
 

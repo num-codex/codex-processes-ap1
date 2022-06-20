@@ -41,5 +41,15 @@
 		<display value="Insert Into CRR FHIR Repository Failed" />
 		<definition value="Error while inserting data into CRR FHIR repository, not a validation error" />
 	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-crr" />
+		<display value="Timeout While Waiting For a Response Task From CRR" />
+		<definition value="Timeout while waiting for a response (process continue) task from CRR" />
+	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-gth" />
+		<display value="Timeout While Waiting For a Response Task From GTH" />
+		<definition value="Timeout while waiting for a response (process continue) task from GTH" />
+	</concept>
 	<!-- TODO add additional error codes -->
 </CodeSystem> 

@@ -22,7 +22,6 @@ public class LogSuccess extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		// TODO log success
-		logger.debug("TODO log success");
+		logger.info("All resources successfully added to CRR FHIR repository");
 	}
 }

@@ -72,17 +72,18 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private Optional<Patient> createOrUpdatePatient(Bundle bundle)
 	{
-		Optional<Patient> bundlePatient = bundle.getEntry().stream()
-				.filter(entry -> isEntrySupported(entry, e -> e.getResource() instanceof Patient)).findFirst()
-				.map(e -> (Patient) e.getResource());
+		Optional<BundleEntryComponent> bundlePatientEntry = bundle.getEntry().stream()
+				.filter(entry -> isEntrySupported(entry, e -> e.getResource() instanceof Patient)).findFirst();
 
-		if (bundlePatient.isPresent())
+		if (bundlePatientEntry.isPresent())
 		{
-			String pseudonym = getPseudonym(bundlePatient.get());
+			Patient newPatient = (Patient) bundlePatientEntry.get().getResource();
+			String pseudonym = getPseudonym(newPatient);
 			Optional<Patient> existingPatient = findPatientInLocalFhirStore(pseudonym);
 
-			return existingPatient.map(existing -> update(existing, bundlePatient.get(), pseudonym))
-					.orElseGet(() -> create(bundlePatient.get(), pseudonym));
+			return existingPatient
+					.map(existing -> update(existing, newPatient, pseudonym, bundlePatientEntry.get().getFullUrl()))
+					.orElseGet(() -> create(newPatient, pseudonym, bundlePatientEntry.get().getFullUrl()));
 		}
 		else
 		{
@@ -91,7 +92,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private Optional<Patient> update(Patient existingPatient, Patient newPatient, String pseudonym)
+	private Optional<Patient> update(Patient existingPatient, Patient newPatient, String pseudonym,
+			String bundleFullUrl)
 	{
 		logger.debug("Updating Patient with pseudonym {}", pseudonym);
 
@@ -126,7 +128,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+				throw new ValidationException(newPatient.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -141,7 +144,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+				throw new ValidationException(newPatient.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -153,7 +157,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private Optional<Patient> create(Patient newPatient, String pseudonym)
+	private Optional<Patient> create(Patient newPatient, String pseudonym, String bundleFullUrl)
 	{
 		logger.debug("Creating Patient with pseudonym {}", pseudonym);
 
@@ -187,7 +191,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+				throw new ValidationException(newPatient.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -202,7 +207,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+				throw new ValidationException(newPatient.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -220,7 +226,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		String url = entry.getRequest().getUrl();
 
 		Optional<Resource> existingResource = findResourceInLocalFhirStore(url, resource.getClass());
-		existingResource.ifPresentOrElse(existing -> update(existing, resource), () -> create(resource));
+		existingResource.ifPresentOrElse(existing -> update(existing, resource, entry.getFullUrl()),
+				() -> create(resource, entry.getFullUrl()));
 	}
 
 	private Optional<Resource> findResourceInLocalFhirStore(String url, Class<? extends Resource> resourceType)
@@ -289,7 +296,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private void update(Resource existingResource, Resource newResource)
+	private void update(Resource existingResource, Resource newResource, String bundleFullUrl)
 	{
 		logger.debug("Updating {}", newResource.getResourceType().name());
 
@@ -323,7 +330,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newResource, (OperationOutcome) outcome);
+				throw new ValidationException(newResource.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -339,7 +347,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newResource, (OperationOutcome) outcome);
+				throw new ValidationException(newResource.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -352,7 +361,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private void create(Resource newResource)
+	private void create(Resource newResource, String bundleFullUrl)
 	{
 		logger.debug("Creating {}", newResource.getResourceType().name());
 
@@ -384,7 +393,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newResource, (OperationOutcome) outcome);
+				throw new ValidationException(newResource.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;
@@ -400,7 +410,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			if (outcome != null && outcome instanceof OperationOutcome)
 			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
-				throw new ValidationException(newResource, (OperationOutcome) outcome);
+				throw new ValidationException(newResource.getResourceType().name(), bundleFullUrl,
+						(OperationOutcome) outcome);
 			}
 
 			throw e;

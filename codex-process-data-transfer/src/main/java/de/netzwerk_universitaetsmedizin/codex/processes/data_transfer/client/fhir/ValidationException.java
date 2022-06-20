@@ -4,27 +4,32 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
 
 public class ValidationException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
-	private final Resource resource;
+	private final String resourceType;
+	private final String fullUrl;
 	private final OperationOutcome outcome;
 
-	public ValidationException(Resource resource, OperationOutcome outcome)
+	public ValidationException(String resourceType, String fullUrl, OperationOutcome outcome)
 	{
-		super("Validation failed for " + resource.getResourceType().name() + " with id "
-				+ resource.getIdElement().getValue());
+		super("Validation failed for " + resourceType + " with id " + fullUrl);
 
-		this.resource = resource;
+		this.resourceType = resourceType;
+		this.fullUrl = fullUrl;
 		this.outcome = outcome;
 	}
 
-	public Resource getResource()
+	public String getResourceType()
 	{
-		return resource;
+		return resourceType;
+	}
+
+	public String getFullUrl()
+	{
+		return fullUrl;
 	}
 
 	public OperationOutcome getOutcome()
@@ -41,7 +46,7 @@ public class ValidationException extends RuntimeException
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTIONRESPONSE);
 		BundleEntryComponent entry = bundle.addEntry();
-		entry.setFullUrl(resource.getIdElement().getValue());
+		entry.setFullUrl(fullUrl);
 		entry.getResponse().setOutcome(outcome);
 		return bundle;
 	}

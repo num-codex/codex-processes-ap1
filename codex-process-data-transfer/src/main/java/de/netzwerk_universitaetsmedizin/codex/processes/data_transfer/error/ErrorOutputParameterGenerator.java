@@ -26,12 +26,20 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 
 public class ErrorOutputParameterGenerator
 {
-	public Stream<TaskOutputComponent> createMeDicValidationError(IdType sourceId, OperationOutcome outcome)
+	public Stream<TaskOutputComponent> createMeDicValidationError(IdType reference, OperationOutcome outcome)
 	{
 		return outcome.getIssue().stream()
 				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
-				.map(i -> createValidationError(sourceId, i,
+				.map(i -> createValidationError(reference, i,
 						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC));
+	}
+
+	public Stream<TaskOutputComponent> createCrrValidationError(IdType reference, OperationOutcome outcome)
+	{
+		return outcome.getIssue().stream()
+				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
+				.map(i -> createValidationError(reference, i,
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR));
 	}
 
 	public Stream<TaskOutputComponent> createCrrValidationError(OperationOutcome outcome)
@@ -41,7 +49,7 @@ public class ErrorOutputParameterGenerator
 				.map(i -> createValidationError(null, i, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR));
 	}
 
-	private TaskOutputComponent createValidationError(IdType sourceId, OperationOutcomeIssueComponent i, String source)
+	private TaskOutputComponent createValidationError(IdType reference, OperationOutcomeIssueComponent i, String source)
 	{
 		TaskOutputComponent output = new TaskOutputComponent();
 		output.getType().getCodingFirstRep().setSystem(CODESYSTEM_HIGHMED_BPMN)
@@ -55,9 +63,9 @@ public class ErrorOutputParameterGenerator
 		metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_SOURCE)
 				.setValue(new Coding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE).setCode(source));
 
-		if (sourceId != null)
+		if (reference != null)
 			metaData.addExtension().setUrl(EXTENSION_ERROR_METADATA_REFERENCE)
-					.setValue(new Reference().setReferenceElement(sourceId));
+					.setValue(new Reference().setReferenceElement(reference));
 
 		output.setValue(new StringType(
 				"Validation faild at " + i.getLocation().stream().map(StringType::getValue).findFirst().orElse("?")));

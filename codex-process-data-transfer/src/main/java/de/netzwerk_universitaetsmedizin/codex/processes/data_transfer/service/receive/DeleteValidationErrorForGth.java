@@ -29,7 +29,7 @@ public class DeleteValidationErrorForGth extends AbstractServiceDelegate
 		String binaryUrl = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL);
 		IdType binaryId = new IdType(binaryUrl);
 
-		logger.info("Deleting binary {} permanently", binaryId.getValue());
+		logger.info("Deleting validation error binary {} permanently", binaryId.getValue());
 		getFhirWebserviceClientProvider().getLocalWebserviceClient().delete(Binary.class, binaryId.getIdPart());
 		getFhirWebserviceClientProvider().getLocalWebserviceClient().deletePermanently(Binary.class,
 				binaryId.getIdPart());

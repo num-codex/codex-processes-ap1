@@ -90,7 +90,9 @@ public interface ConstantsDataTransfer
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED = "validation-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_CRR = "timeout-waiting-for-response-from-crr";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_DIC_FAILED = "download-data-from-dic-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_GTH = "timeout-waiting-for-response-from-gth";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_GTH_FAILED = "download-data-from-gth-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED = "insert-into-crr-fhir-respository-failed";
 

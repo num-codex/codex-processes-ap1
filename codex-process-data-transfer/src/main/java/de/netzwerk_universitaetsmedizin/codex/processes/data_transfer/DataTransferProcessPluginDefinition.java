@@ -118,13 +118,13 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of(
 				"wwwnetzwerk-universitaetsmedizinde_dataTrigger/" + VERSION,
 				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD),
-				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION,
-				Arrays.asList(aSen, cD, cDeS, cDe, nB, nD, sTexErMe, sTstaDsen, sTconDsen, sTconDsenWvE, sTconDsenWe,
-						vD, vDeS, vDe),
+				"wwwnetzwerk-universitaetsmedizinde_dataSend/" + VERSION, Arrays.asList(aSen, cD, cDeS, cDe, nB, nD,
+						sTexErMe, sTstaDsen, sTconDsen, sTconDsenWvE, sTconDsenWe, vD, vDeS, vDe),
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate/" + VERSION,
-				Arrays.asList(aTra, cD, nD, nC, sTexErMe, sTstaDtra, sTconDtra, sTconDtraWvE, sTconDtraWe, vD),
+				Arrays.asList(aTra, cD, cDeS, cDe, nD, nC, sTexErMe, sTstaDtra, sTconDtra, sTconDtraWvE, sTconDtraWe,
+						vD),
 				"wwwnetzwerk-universitaetsmedizinde_dataReceive/" + VERSION,
-				Arrays.asList(aRec, cD, nC, sTstaDrec, vD));
+				Arrays.asList(aRec, cD, cDeS, cDe, nC, sTexErMe, sTstaDrec, vD));
 
 		return ResourceProvider.read(VERSION, DATE,
 				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader, propertyResolver,

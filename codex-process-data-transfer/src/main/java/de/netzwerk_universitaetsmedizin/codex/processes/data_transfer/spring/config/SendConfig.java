@@ -131,14 +131,16 @@ public class SendConfig
 	public DownloadValidationErrorFromGth downloadValidationErrorFromGth()
 	{
 		return new DownloadValidationErrorFromGth(transferDataConfig.fhirClientProvider(),
-				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper());
+				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
+				transferDataConfig.endpointProvider(), transferDataConfig.gthIdentifierValue());
 	}
 
 	@Bean
 	public DecryptValidationErrorFromGth decryptValidationErrorFromGth()
 	{
 		return new DecryptValidationErrorFromGth(transferDataConfig.fhirClientProvider(),
-				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper());
+				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
+				transferDataConfig.fhirContext());
 	}
 
 	@Bean(name = "Send-logSuccess") // prefix to force distinct bean names
@@ -152,7 +154,7 @@ public class SendConfig
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 
 	@Bean(name = "Send-logError") // prefix to force distinct bean names
