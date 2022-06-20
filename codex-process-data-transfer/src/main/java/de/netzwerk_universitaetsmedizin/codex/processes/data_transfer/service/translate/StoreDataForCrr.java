@@ -64,7 +64,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 	{
 		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-		String downloadUrl = saveBinaryForCrr(encrypted, crrIdentifierValue);
+		String downloadUrl = saveBinary(encrypted, crrIdentifierValue);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BINARY_URL, Variables.stringValue(downloadUrl));
 
@@ -74,11 +74,11 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 						getEndpointIdentifier(targetEndpoint), targetEndpoint.getAddress())));
 	}
 
-	protected String saveBinaryForCrr(byte[] encryptedContent, String geccoTransferHubIdentifierValue)
+	protected String saveBinary(byte[] encryptedContent, String crrIdentifierValue)
 	{
 		Reference securityContext = new Reference();
 		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue(geccoTransferHubIdentifierValue);
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue(crrIdentifierValue);
 		Binary binary = new Binary().setContentType(MediaType.APPLICATION_OCTET_STREAM)
 				.setSecurityContext(securityContext).setData(encryptedContent);
 

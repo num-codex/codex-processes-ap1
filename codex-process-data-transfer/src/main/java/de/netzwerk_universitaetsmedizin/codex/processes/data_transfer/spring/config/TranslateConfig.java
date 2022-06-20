@@ -142,7 +142,8 @@ public class TranslateConfig
 	{
 		return new ContinueSendProcessWithError(transferDataConfig.fhirClientProvider(),
 				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
-				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
+				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext(),
+				transferDataConfig.errorInputParameterGenerator());
 	}
 
 	@Bean(name = "Translate-logError") // prefix to force distinct bean names

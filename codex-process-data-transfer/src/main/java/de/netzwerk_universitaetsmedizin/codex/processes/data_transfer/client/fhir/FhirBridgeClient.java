@@ -124,7 +124,10 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
 
 			if (outcome != null && outcome instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+			}
 
 			throw e;
 		}
@@ -132,6 +135,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		{
 			logger.warn("Could not update patient {}, message: {}, status: {}, body: {}",
 					newPatient.getIdElement().toString(), e.getMessage(), e.getStatusCode(), e.getResponseBody());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+			{
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+			}
+
 			throw e;
 		}
 		catch (Exception e)
@@ -173,7 +185,10 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
 
 			if (outcome != null && outcome instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+			}
 
 			throw e;
 		}
@@ -181,6 +196,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		{
 			logger.warn("Could not create patient {}, message: {}, status: {}, body: {}",
 					newPatient.getIdElement().toString(), e.getMessage(), e.getStatusCode(), e.getResponseBody());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+			{
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newPatient, (OperationOutcome) outcome);
+			}
+
 			throw e;
 		}
 		catch (Exception e)
@@ -297,7 +321,10 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
 
 			if (outcome != null && outcome instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newResource, (OperationOutcome) outcome);
+			}
 
 			throw e;
 		}
@@ -306,6 +333,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			logger.warn("Could not update {} {}, message: {}, status: {}, body: {}",
 					newResource.getResourceType().name(), newResource.getIdElement().toString(), e.getMessage(),
 					e.getStatusCode(), e.getResponseBody());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+			{
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newResource, (OperationOutcome) outcome);
+			}
+
 			throw e;
 		}
 		catch (Exception e)
@@ -346,7 +382,10 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
 
 			if (outcome != null && outcome instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newResource, (OperationOutcome) outcome);
+			}
 
 			throw e;
 		}
@@ -355,6 +394,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			logger.warn("Could not create {} {}, message: {}, status: {}, body: {}",
 					newResource.getResourceType().name(), newResource.getIdElement().toString(), e.getMessage(),
 					e.getStatusCode(), e.getResponseBody());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+			{
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+				throw new ValidationException(newResource, (OperationOutcome) outcome);
+			}
+
 			throw e;
 		}
 		catch (Exception e)

@@ -36,5 +36,10 @@
 		<display value="Download Data From GTH Failed" />
 		<definition value="Error while downloading encrypted GECCO data from GTH" />
 	</concept>
+	<concept>
+		<code value="insert-into-crr-fhir-respository-failed" />
+		<display value="Insert Into CRR FHIR Repository Failed" />
+		<definition value="Error while inserting data into CRR FHIR repository, not a validation error" />
+	</concept>
 	<!-- TODO add additional error codes -->
 </CodeSystem> 

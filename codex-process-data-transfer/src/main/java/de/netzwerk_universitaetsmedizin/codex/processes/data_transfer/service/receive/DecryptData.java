@@ -1,6 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PLACEHOLDER;
@@ -13,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -57,11 +60,19 @@ public class DecryptData extends AbstractServiceDelegate
 		Optional<String> pseudonym = getPseudonym(task);
 
 		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
-		byte[] deencrypted = RsaAesGcmUtil.decrypt(crrKeyProvider.getPrivateKey(), encrypted);
+		byte[] decrypted = RsaAesGcmUtil.decrypt(crrKeyProvider.getPrivateKey(), encrypted);
 
-		Bundle bundle = fromByteArray(pseudonym.get(), deencrypted);
+		byte[] returnKey = new byte[32];
+		byte[] bundleData = new byte[decrypted.length - 32];
+
+		System.arraycopy(decrypted, 0, returnKey, 0, 32);
+		System.arraycopy(decrypted, 32, bundleData, 0, decrypted.length - 32);
+
+		Bundle bundle = fromByteArray(pseudonym.get(), bundleData);
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY, Variables.byteArrayValue(returnKey));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym.get()));
 	}
 
 	private Optional<String> getPseudonym(Task task)

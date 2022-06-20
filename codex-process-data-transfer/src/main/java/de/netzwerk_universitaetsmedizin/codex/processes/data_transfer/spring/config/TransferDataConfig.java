@@ -23,6 +23,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Gec
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorInputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
@@ -390,6 +391,12 @@ public class TransferDataConfig
 	public ConsentClientFactory consentClientFactory()
 	{
 		return new ConsentClientFactory();
+	}
+
+	@Bean
+	public ErrorInputParameterGenerator errorInputParameterGenerator()
+	{
+		return new ErrorInputParameterGenerator();
 	}
 
 	@Bean

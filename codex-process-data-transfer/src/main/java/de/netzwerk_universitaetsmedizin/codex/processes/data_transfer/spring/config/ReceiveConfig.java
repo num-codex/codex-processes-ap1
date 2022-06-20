@@ -66,21 +66,22 @@ public class ReceiveConfig
 	public LogValidationError logValidationError()
 	{
 		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 
 	@Bean
 	public EncryptValidationError encryptValidationError()
 	{
 		return new EncryptValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext());
 	}
 
 	@Bean
 	public StoreValidationErrorForGth storeValidationErrorForGth()
 	{
 		return new StoreValidationErrorForGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider(),
+				transferDataConfig.gthIdentifierValue());
 	}
 
 	@Bean
@@ -103,13 +104,14 @@ public class ReceiveConfig
 	{
 		return new ContinueTranslateProcessWithError(transferDataConfig.fhirClientProvider(),
 				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
-				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
+				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext(),
+				transferDataConfig.errorInputParameterGenerator());
 	}
 
 	@Bean(name = "Receive-logError") // prefix to force distinct bean names
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 }

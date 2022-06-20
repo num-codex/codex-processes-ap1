@@ -2,6 +2,8 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
 
+import java.nio.charset.StandardCharsets;
+
 public interface ConstantsDataTransfer
 {
 	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST = "patientReferenceList";
@@ -13,13 +15,16 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_EXPORT_FROM_PRECISION = "exportFromPrecision";
 	String BPMN_EXECUTION_VARIABLE_EXPORT_TO = "exportTo";
 	String BPMN_EXECUTION_VARIABLE_BUNDLE = "bundle";
+	String BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY = "aes-return-key";
 	String BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED = "idatMergeGranted";
 	String BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED = "usageAndTransferGranted";
 	String BPMN_EXECUTION_VARIABLE_BINARY_URL = "binaryUrl";
 	String BPMN_EXECUTION_VARIABLE_ERROR_CODE = "errorCode";
 	String BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE = "errorMessage";
+	String BPMN_EXECUTION_VARIABLE_ERROR_SOURCE = "errorSource";
 	String BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS = "continueStatus";
 	String BPMN_EXECUTION_VARIABLE_RETURN_TARGET = "returnTarget";
+	String BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID = "sourceIdsByBundleUuid";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/crr-pseudonym";
@@ -87,6 +92,7 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED = "validation-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_DIC_FAILED = "download-data-from-dic-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_DATA_FROM_GTH_FAILED = "download-data-from-gth-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED = "insert-into-crr-fhir-respository-failed";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-source";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC = "MeDIC";
@@ -98,4 +104,6 @@ public interface ConstantsDataTransfer
 	String EXTENSION_ERROR_METADATA_TYPE = "type";
 	String EXTENSION_ERROR_METADATA_SOURCE = "source";
 	String EXTENSION_ERROR_METADATA_REFERENCE = "reference";
+
+	byte[] RETURN_AAD = "aLCdSbI55VAv2BaKs4ypnDw3AaRfSBWXa8Bxl78BJw".getBytes(StandardCharsets.UTF_8);
 }

@@ -159,6 +159,6 @@ public class SendConfig
 	public LogError logError()
 	{
 		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator());
 	}
 }

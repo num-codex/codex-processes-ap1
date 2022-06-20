@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.r
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED;
 
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
@@ -49,23 +51,30 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-		// TODO set status variable (SUCCESS, VALIDATION_ERROR)
-		logger.debug("set status variable (SUCCESS, VALIDATION_ERROR)");
-
 		try
 		{
-			logger.info("Executing bundle against FHIR store ...");
-			if (logger.isDebugEnabled())
-				logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+			try
+			{
+				logger.info("Executing bundle against FHIR store ...");
+				if (logger.isDebugEnabled())
+					logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
-			geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
+				geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
 
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
+			}
+			catch (ValidationException e)
+			{
+				logger.info("Validation error");
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.VALIDATION_ERROR);
+				execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, e.getResultBundle());
+			}
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while executing bundle", e);
-			throw e;
+			logger.warn("Unable to insert data into CRR: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED,
+					"Unable to insert data into CRR");
 		}
 	}
 }

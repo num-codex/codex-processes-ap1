@@ -1,9 +1,12 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.HAPI_USER_DATA_SOURCE_ID_ELEMENT;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -22,7 +25,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +105,7 @@ public class ValidateData extends AbstractServiceDelegate
 						logger.error("Validation of transfer bundle failed, {} resource{} with error",
 								resourcesWithErrorCount, resourcesWithErrorCount != 1 ? "s" : "");
 
-						addErrorsToTaskAndSetFailed(bundle);
+						addErrorsToTask(bundle);
 						errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 								.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(),
 										getLeadingTaskFromExecutionVariables().getIdElement().getResourceType()));
@@ -114,7 +116,9 @@ public class ValidateData extends AbstractServiceDelegate
 					}
 					else
 					{
-						removeValidationResultsAndUserData(bundle);
+						Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(
+								bundle);
+						execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
 					}
 				}
 			}
@@ -180,11 +184,10 @@ public class ValidateData extends AbstractServiceDelegate
 		}
 	}
 
-	private void addErrorsToTaskAndSetFailed(Bundle bundle)
+	private void addErrorsToTask(Bundle bundle)
 	{
 		Task task = getLeadingTaskFromExecutionVariables();
 
-		task.setStatus(TaskStatus.FAILED);
 		bundle.getEntry().stream()
 				.filter(e -> e.hasResponse() && e.getResponse().hasOutcome()
 						&& (e.getResponse().getOutcome() instanceof OperationOutcome)
@@ -201,13 +204,19 @@ public class ValidateData extends AbstractServiceDelegate
 				});
 	}
 
-	private void removeValidationResultsAndUserData(Bundle bundle)
+	private Map<String, String> removeValidationResultsCollectSourceIdsIntoMap(Bundle bundle)
 	{
+		Map<String, String> sourceIdByBundleUuid = new HashMap<>();
 		bundle.getEntry().stream().forEach(e ->
 		{
+			IdType sourceId = (IdType) e.getUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT);
+			sourceIdByBundleUuid.put(e.getFullUrl(), sourceId.getValue());
+
 			e.clearUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT);
 			e.setResponse(null);
 		});
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
+
+		return sourceIdByBundleUuid;
 	}
 }
