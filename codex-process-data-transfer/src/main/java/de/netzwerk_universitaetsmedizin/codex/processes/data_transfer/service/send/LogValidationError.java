@@ -17,6 +17,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
@@ -55,6 +57,7 @@ public class LogValidationError extends AbstractServiceDelegate
 		Map<String, String> sourceIdsByBundleUuid = (Map<String, String>) execution
 				.getVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID);
 
+		logValidationDetails(bundle, sourceIdsByBundleUuid);
 		addErrorsToTask(bundle, sourceIdsByBundleUuid);
 	}
 
@@ -80,4 +83,56 @@ public class LogValidationError extends AbstractServiceDelegate
 					errorOutputParameterGenerator.createCrrValidationError(sourceId, outcome).forEach(task::addOutput);
 				});
 	}
+
+	private void logValidationDetails(Bundle bundle, Map<String, String> sourceIdsByBundleUuid)
+	{
+		bundle.getEntry().stream().filter(e -> e.hasResponse() && e.getResponse().hasOutcome()
+				&& (e.getResponse().getOutcome() instanceof OperationOutcome)).forEach(entry ->
+				{
+					IdType sourceId = Optional.ofNullable(sourceIdsByBundleUuid.get(entry.getFullUrl()))
+							.map(IdType::new).orElse(null);
+					OperationOutcome outcome = (OperationOutcome) entry.getResponse().getOutcome();
+
+					outcome.getIssue().forEach(i -> logValidationDetails(sourceId, i));
+				});
+	}
+
+	private void logValidationDetails(IdType sourceId, OperationOutcomeIssueComponent i)
+	{
+		if (i.getSeverity() != null)
+		{
+			switch (i.getSeverity())
+			{
+				case FATAL:
+				case ERROR:
+					logger.error(
+							"CRR validation error for {}{}: {}", sourceId.getValue(), i.getLocation().stream()
+									.map(StringType::getValue).findFirst().map(l -> " location " + l).orElse(""),
+							i.getDiagnostics());
+					break;
+				case WARNING:
+					logger.warn(
+							"CRR validation warning for {}{}: {}", sourceId.getValue(), i.getLocation().stream()
+									.map(StringType::getValue).findFirst().map(l -> " location " + l).orElse(""),
+							i.getDiagnostics());
+					break;
+				case INFORMATION:
+				case NULL:
+				default:
+					logger.info(
+							"CRR validation info for {}{}: {}", sourceId.getValue(), i.getLocation().stream()
+									.map(StringType::getValue).findFirst().map(l -> " location " + l).orElse(""),
+							i.getDiagnostics());
+					break;
+			}
+		}
+		else
+		{
+			logger.info(
+					"Validation info for {}{}: {}", sourceId.getValue(), i.getLocation().stream()
+							.map(StringType::getValue).findFirst().map(l -> " location " + l).orElse(""),
+					i.getDiagnostics());
+		}
+	}
+
 }
