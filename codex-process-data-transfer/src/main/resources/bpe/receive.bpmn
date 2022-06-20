@@ -139,7 +139,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/#{version}</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">continueDataSendWithError</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">continueDataTranslateWithError</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-error|#{version}</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -164,7 +164,7 @@ Codex PSN</bpmn:text>
     <bpmn:association id="Association_0yv2t9r" sourceRef="ContinueTranslateProcessWithValidationError" targetRef="TextAnnotation_1i70xep" />
   </bpmn:process>
   <bpmn:message id="Message_157qpi8" name="startDataReceive" />
-  <bpmn:message id="Message_07a8kee" name="continueDataSendWithError" />
+  <bpmn:message id="Message_07a8kee" name="continueDataTranslateWithError" />
   <bpmn:message id="Message_09jqglx" name="continueDataTranslateWithValidationError" />
   <bpmn:message id="Message_03q34kp" name="continueDataTranslate" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
