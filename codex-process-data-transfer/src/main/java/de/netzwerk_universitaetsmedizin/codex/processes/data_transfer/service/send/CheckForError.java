@@ -43,7 +43,7 @@ public class CheckForError extends AbstractServiceDelegate
 
 		// continue ERROR / Timeout
 		else
-			continueStatus = ContinueStatus.VALIDATION_ERROR;
+			continueStatus = ContinueStatus.ERROR;
 
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, continueStatus);
 
