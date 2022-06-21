@@ -19,6 +19,7 @@ public class PatientReferenceList
 			this.references.addAll(references);
 	}
 
+	@JsonProperty("references")
 	public List<PatientReference> getReferences()
 	{
 		return Collections.unmodifiableList(references);

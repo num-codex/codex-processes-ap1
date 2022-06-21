@@ -8,6 +8,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhi
 
 public interface GeccoClient
 {
+	String getServerBase();
+
 	FhirContext getFhirContext();
 
 	void testConnection();

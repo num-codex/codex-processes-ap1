@@ -1,0 +1,1 @@
+empty directory for StructureDefinition Snapshots cache

@@ -1,5 +1,7 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
 import java.util.Date;
@@ -55,13 +57,22 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
 		logger.warn("Returning demo pseudonyms for {}", geccoClient.getLocalIdentifierValue());
-		return new PatientReferenceList(List.of(
-				PatientReference.from(
-						new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("dic_foo/bar")),
-				PatientReference.from(
-						new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("dic_foo/baz")),
-				PatientReference.from("http://dic-foo/fhir/Patient/3"),
-				PatientReference.from("http://dic-foo/fhir/Patient/4")));
+
+		PatientReference reference1 = PatientReference
+				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("dic_foo/bar"));
+		reference1.getIdentifier().getType().getCodingFirstRep()
+				.setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
+
+		PatientReference reference2 = PatientReference
+				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("dic_foo/baz"));
+		reference2.getIdentifier().getType().getCodingFirstRep()
+				.setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
+
+		return new PatientReferenceList(
+				List.of(reference1, reference2, PatientReference.from("http://dic-foo/fhir/Patient/3"),
+						PatientReference.from("http://dic-foo/fhir/Patient/4")));
 	}
 
 	@Override
@@ -70,7 +81,9 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 		logger.warn("Returning demo resources for {}", pseudonym);
 
 		Patient p = geccoClient.getFhirContext().newJsonParser().parseResource(Patient.class, patient);
-		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym);
+		p.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym).getType()
+				.getCodingFirstRep().setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
 		p.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
 
 		Condition c = geccoClient.getFhirContext().newJsonParser().parseResource(Condition.class, condition);
@@ -87,7 +100,10 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	{
 		Patient p = geccoClient.getFhirContext().newJsonParser().parseResource(Patient.class, patient);
 		p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER).setValue(
-				"J75gYl+RiKSsxeu33tixBEEtFGCZwIEsWIKgvESaluvpSGBte/SBNZilz+sLSZdHSDKTL2J2d1yZsakqjtV5U2SMMJZ5IF3gEk1MT3sCRkxXEo1aJWKpnqndUTR+fvtSeMFj0y/O5yqrLV9zU79CNiTfZN5t1/6XGxZUXq2DovfCRrrpRxWjFwjKIDo0OkRANf7Mqp+Fsu0Un53JF57p/p1RLpWcJkC3xO+UslGbDo3mjgczdvxz0aLmWNA7/NIhk+Q50gxCX3B4QrntPfLLlBkrmIpsKRcLFVuYZik7pYZ9prd0qCLQ9tc8qiw1ry5kMfIvLnIS/FV36w==");
+				"J75gYl+RiKSsxeu33tixBEEtFGCZwIEsWIKgvESaluvpSGBte/SBNZilz+sLSZdHSDKTL2J2d1yZsakqjtV5U2SMMJZ5IF3gEk1MT3sCRkxXEo1aJWKpnqndUTR+fvtSeMFj0y/O5yqrLV9zU79CNiTfZN5t1/6XGxZUXq2DovfCRrrpRxWjFwjKIDo0OkRANf7Mqp+Fsu0Un53JF57p/p1RLpWcJkC3xO+UslGbDo3mjgczdvxz0aLmWNA7/NIhk+Q50gxCX3B4QrntPfLLlBkrmIpsKRcLFVuYZik7pYZ9prd0qCLQ9tc8qiw1ry5kMfIvLnIS/FV36w==")
+				.getType().getCodingFirstRep().setSystem(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM)
+				.setCode(IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE);
+
 		p.setIdElement(new IdType("Patient", UUID.randomUUID().toString()));
 		return Optional.of(p);
 	}

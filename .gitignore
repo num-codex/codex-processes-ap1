@@ -32,9 +32,17 @@ codex-processes-ap1-docker-test-setup/**/bpe/last_event/time.file
 codex-processes-ap1-docker-test-setup/**/bpe/plugin/*.jar
 codex-processes-ap1-docker-test-setup/**/bpe/process/*.jar
 
+codex-processes-ap1-docker-test-setup/dic/bpe/cache/**/*.json.gz
+
 codex-processes-ap1-docker-test-setup/**/fhir/conf/bundle.xml
 codex-processes-ap1-docker-test-setup/**/fhir/log/*.log
 codex-processes-ap1-docker-test-setup/**/fhir/log/*.log.gz
 
 codex-processes-ap1-docker-test-setup/secrets/*.pem
 codex-processes-ap1-docker-test-setup/.env
+codex-processes-ap1-docker-test-setup/docker-compose.override.yml
+
+###
+# codex-process-data-transfer ignores
+###
+codex-process-data-transfer/application.properties

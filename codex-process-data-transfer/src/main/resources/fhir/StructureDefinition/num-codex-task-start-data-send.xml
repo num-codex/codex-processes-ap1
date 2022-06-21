@@ -6,11 +6,12 @@
     </tag>
   </meta>
   <url value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send" />
-  <version value="${version}" />
+  <version value="#{version}" />
   <name value="TaskStartDataSend" />
   <status value="unknown" />
   <experimental value="false" />
-  <date value="2021-09-06" />
+  <!-- date managed by bpe -->
+  <date value="#{date}" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -20,7 +21,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/${version}" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/#{version}" />
     </element>
     <element id="Task.input">
       <path value="Task.input" />
@@ -142,6 +143,31 @@
       <type>
         <code value="instant" />
       </type>
+    </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="0" />
+    </element>
+    <element id="Task.output:error.extension:error-metadata">
+      <path value="Task.output.extension" />
+      <sliceName value="error-metadata" />
+      <min value="0" />
+      <type>
+        <code value="Extension" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata" />
+      </type>
+      <isModifier value="false" />
     </element>
   </differential>
 </StructureDefinition>

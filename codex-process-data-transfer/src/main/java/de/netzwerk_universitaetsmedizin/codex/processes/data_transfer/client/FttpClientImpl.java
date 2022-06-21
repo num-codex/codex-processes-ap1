@@ -1,5 +1,6 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client;
 
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PATTERN_STRING;
 
 import java.net.MalformedURLException;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Identifier;
@@ -128,8 +130,8 @@ public class FttpClientImpl implements FttpClient
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while retrieving CRR pseudonym", e);
-			return Optional.empty();
+			logger.error("Error while retrieving CRR pseudonym: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE, e.getMessage());
 		}
 	}
 
@@ -171,8 +173,8 @@ public class FttpClientImpl implements FttpClient
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while retrieving DIC pseudonym", e);
-			return Optional.empty();
+			logger.error("Error while retrieving DIC pseudonym: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE, e.getMessage());
 		}
 	}
 
