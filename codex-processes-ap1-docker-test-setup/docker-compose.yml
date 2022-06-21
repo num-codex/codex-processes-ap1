@@ -66,7 +66,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0-RC1
+    image: ghcr.io/highmed/fhir:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5000:5000
@@ -113,7 +113,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0-RC1
+    image: ghcr.io/highmed/bpe:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5003:5003
@@ -201,7 +201,7 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0-RC1
+    image: ghcr.io/highmed/fhir:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5001:5001
@@ -248,7 +248,7 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0-RC1
+    image: ghcr.io/highmed/bpe:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5004:5004
@@ -305,7 +305,7 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0-RC1
+    image: ghcr.io/highmed/fhir:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5002:5002
@@ -352,7 +352,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0-RC1
+    image: ghcr.io/highmed/bpe:0.7.0
     restart: "no"
     ports:
       - 127.0.0.1:5005:5005
