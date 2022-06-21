@@ -19,7 +19,7 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 		<hapi.version>5.1.0</hapi.version>
-		<dsf.version>0.7.0-SNAPSHOT</dsf.version>
+		<dsf.version>0.7.0-RC1</dsf.version>
 	</properties>
 
 	<description>Business processes for the NUM CODEX project (AP1) as plugins for the HiGHmed Data Sharing Framework.</description>
