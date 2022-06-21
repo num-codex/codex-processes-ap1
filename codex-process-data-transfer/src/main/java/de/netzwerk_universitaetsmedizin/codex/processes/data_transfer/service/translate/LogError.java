@@ -64,13 +64,17 @@ public class LogError extends AbstractServiceDelegate
 
 		if (!CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED.equals(errorCode))
 		{
-			TaskOutputComponent output = errorOutputParameterGenerator.createError(
-					errorSource != null ? errorSource : CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH,
-					errorCode, errorMessage);
+			errorSource = errorSource != null ? errorSource : CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH;
+			TaskOutputComponent output = errorOutputParameterGenerator.createError(errorSource, errorCode,
+					errorMessage);
 
 			task.addOutput(output);
 
-			logger.warn("Error while transfering data to CRR: {} - {}", errorCode, errorMessage);
+			if (CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH.equals(errorSource))
+				logger.warn("Error while executing local process: code: '{}', message: {}", errorCode, errorMessage);
+			else
+				logger.warn("Error while executing process at {}: code: '{}', message: {}", errorSource, errorCode,
+						errorMessage);
 
 			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));

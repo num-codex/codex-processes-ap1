@@ -49,7 +49,7 @@ public class LogValidationError extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		logger.info("Validation error while adding resources to CRR FHIR repository");
+		logger.warn("Validation error while adding resources to CRR FHIR repository");
 		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables().getIdElement()
 				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 

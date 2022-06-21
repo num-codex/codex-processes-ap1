@@ -4,14 +4,22 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PLACEHOLDER;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -55,6 +63,22 @@ public class DecryptData extends AbstractServiceDelegate
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	{
+		try
+		{
+			decryptGeccoData(execution);
+		}
+		catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
+				| NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e)
+		{
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED,
+					"Error while decrypting GECCO data from DIC");
+		}
+	}
+
+	private void decryptGeccoData(DelegateExecution execution)
+			throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException,
+			NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 		Optional<String> pseudonym = getPseudonym(task);

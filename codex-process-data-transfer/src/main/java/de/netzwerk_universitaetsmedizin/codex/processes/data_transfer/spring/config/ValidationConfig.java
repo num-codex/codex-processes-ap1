@@ -458,17 +458,28 @@ public class ValidationConfig
 
 	public TerminologyServerConnectionTestStatus testConnectionToTerminologyServer()
 	{
-		logger.info(
-				"{}esting connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}{}",
-				validationEnabled ? "T" : "Not t", valueSetExpansionClientTrustCertificates,
-				valueSetExpansionClientCertificate, valueSetExpansionClientCertificatePrivateKey,
-				valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
-				valueSetExpansionClientBasicAuthUsername,
-				valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
-				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
-				valueSetExpansionClientProxyPassword != null ? "***" : "null",
-				validationEnabled ? "" : ", validation disabled");
+		if (validationEnabled)
+			logger.info(
+					"Testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}{}",
+					valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
+					valueSetExpansionClientCertificatePrivateKey,
+					valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
+					valueSetExpansionClientBasicAuthUsername,
+					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
+					valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
+					valueSetExpansionClientProxyPassword != null ? "***" : "null");
+		else
+			logger.warn(
+					"Not testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}, validation disabled",
+					valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
+					valueSetExpansionClientCertificatePrivateKey,
+					valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
+					valueSetExpansionClientBasicAuthUsername,
+					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
+					valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
+					valueSetExpansionClientProxyPassword != null ? "***" : "null");
 
 		if (!validationEnabled)
 			return TerminologyServerConnectionTestStatus.DISABLED;
