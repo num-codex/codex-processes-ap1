@@ -171,7 +171,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		}
 		catch (UnprocessableEntityException e)
 		{
-			logger.warn("Error while search for Patient with pseudonym {}|{}, message: {}, status: {}",
+			logger.warn("Error while searching for Patient with pseudonym {}|{}, message: {}, status: {}",
 					NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym, e.getMessage(), e.getStatusCode());
 
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
@@ -183,13 +183,19 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		}
 		catch (BaseServerResponseException e)
 		{
-			logger.warn("Error while search for Patient with pseudonym {}|{}, message: {}, status: {}",
+			logger.warn("Error while searching for Patient with pseudonym {}|{}, message: {}, status: {}",
 					NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym, e.getMessage(), e.getStatusCode());
+			
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+			
 			throw e;
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while search for Patient with pseudonym " + NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM + "|"
+			logger.warn("Error while searching for Patient with pseudonym " + NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM + "|"
 					+ pseudonym, e);
 			throw e;
 		}

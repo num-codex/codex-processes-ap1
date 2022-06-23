@@ -254,7 +254,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 					return Optional.of(resultBundle.getEntryFirstRep().getResource());
 				else
 				{
-					logger.warn("Error while search for Resource with url {}, bundle has no {} resource", url,
+					logger.warn("Error while searching for Resource with url {}, bundle has no {} resource", url,
 							resourceType.getAnnotation(ResourceDef.class).name());
 
 					if (resultBundle.getEntryFirstRep().getResponse().hasOutcome()
@@ -273,7 +273,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (UnprocessableEntityException e)
 		{
-			logger.warn("Error while search for Resource with url {}, message: {}, status: {}", url, e.getMessage(),
+			logger.warn("Error while searching for Resource with url {}, message: {}, status: {}", url, e.getMessage(),
 					e.getStatusCode());
 
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
@@ -285,13 +285,19 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (BaseServerResponseException e)
 		{
-			logger.warn("Error while search for Resource with url {}, message: {}, status: {}", url, e.getMessage(),
+			logger.warn("Error while searching for Resource with url {}, message: {}, status: {}", url, e.getMessage(),
 					e.getStatusCode());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+
 			throw e;
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while search for Resource with url " + url, e);
+			logger.warn("Error while searching for Resource with url " + url, e);
 			throw e;
 		}
 	}
