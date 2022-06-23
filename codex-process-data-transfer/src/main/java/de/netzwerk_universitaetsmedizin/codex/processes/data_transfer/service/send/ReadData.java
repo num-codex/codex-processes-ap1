@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Consent.provisionComponent;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -190,8 +191,132 @@ public class ReadData extends AbstractServiceDelegate
 						|| MII_LAB_STRUCTURED_DEFINITION.equals(p.getValue()))
 				.collect(Collectors.toList());
 		r.setMeta(new Meta().setProfile(profiles));
+		r.setText(null);
+
+		cleanUnsupportedReferences(r);
 
 		return r;
+	}
+
+	private void cleanUnsupportedReferences(DomainResource resource)
+	{
+		if (resource == null)
+		{
+			return;
+		}
+		else if (resource instanceof Condition)
+		{
+			Condition condition = (Condition) resource;
+			condition.setEncounter(null);
+			condition.setRecorder(null);
+			condition.setAsserter(null);
+			if (condition.hasStage())
+				condition.getStage().forEach(s -> s.setAssessment(null));
+			if (condition.hasEvidence())
+				condition.getEvidence().forEach(e -> e.setDetail(null));
+		}
+		else if (resource instanceof Consent)
+		{
+			Consent consent = (Consent) resource;
+			consent.setPerformer(null);
+			consent.setOrganization(null);
+			if (consent.hasVerification())
+				consent.getVerification().forEach(v -> v.setVerifiedWith(null));
+			if (consent.hasProvision())
+			{
+				// class name starts with lower case p
+				provisionComponent provision = consent.getProvision();
+				if (provision.hasActor())
+					provision.getActor().forEach(a -> a.setReference(null));
+				if (provision.hasData())
+					provision.getData().forEach(d -> d.setReference(null));
+			}
+		}
+		else if (resource instanceof DiagnosticReport)
+		{
+			DiagnosticReport report = (DiagnosticReport) resource;
+			report.setBasedOn(null);
+			report.setEncounter(null);
+			report.setPerformer(null);
+			report.setResultsInterpreter(null);
+			report.setSpecimen(null);
+			report.setImagingStudy(null);
+			if (report.hasMedia())
+				report.getMedia().forEach(m -> m.setLink(null));
+		}
+		else if (resource instanceof Immunization)
+		{
+			Immunization immunization = (Immunization) resource;
+			immunization.setEncounter(null);
+			immunization.setLocation(null);
+			immunization.setManufacturer(null);
+			if (immunization.hasPerformer())
+				immunization.getPerformer().forEach(p -> p.setActor(null));
+			immunization.setReasonReference(null);
+			if (immunization.hasReaction())
+				immunization.getReaction().forEach(r -> r.setDetail(null));
+			if (immunization.hasProtocolApplied())
+				immunization.getProtocolApplied().forEach(p -> p.setAuthority(null));
+		}
+		else if (resource instanceof MedicationStatement)
+		{
+			MedicationStatement medication = (MedicationStatement) resource;
+			medication.setBasedOn(null);
+			medication.setPartOf(null);
+			if (medication.hasMedicationReference())
+				medication.setMedication(null);
+			medication.setContext(null);
+			medication.setInformationSource(null);
+			medication.setDerivedFrom(null);
+			medication.setReasonReference(null);
+		}
+		else if (resource instanceof Observation)
+		{
+			Observation observation = (Observation) resource;
+			observation.setBasedOn(null);
+			observation.setPartOf(null);
+			observation.setFocus(null);
+			observation.setEncounter(null);
+			observation.setPerformer(null);
+			observation.setSpecimen(null);
+			observation.setDevice(null);
+
+			// Do not remove blood-gas-panel member references
+			// TODO fix blood-gas-panel member references, to bundle internal temporary urn:uuid:... IDs
+			if (!resource.getMeta().getProfile().stream().map(CanonicalType::getValue).anyMatch(
+					url -> "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"
+							.equals(url)))
+			{
+				observation.setHasMember(null);
+			}
+
+			observation.setDerivedFrom(null);
+		}
+		else if (resource instanceof Procedure)
+		{
+			Procedure procedure = (Procedure) resource;
+			procedure.setInstantiatesCanonical(null);
+			procedure.setBasedOn(null);
+			procedure.setPartOf(null);
+			procedure.setEncounter(null);
+			procedure.setRecorder(null);
+			procedure.setAsserter(null);
+			if (procedure.hasPerformer())
+				procedure.getPerformer().forEach(p ->
+				{
+					p.setActor(null);
+					p.setOnBehalfOf(null);
+				});
+			procedure.setLocation(null);
+			procedure.setReasonReference(null);
+			procedure.setReport(null);
+			procedure.setComplicationDetail(null);
+			if (procedure.hasFocalDevice())
+				procedure.getFocalDevice().forEach(d -> d.setManipulated(null));
+			procedure.setUsedReference(null);
+		}
+		else
+			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
 	}
 
 	private Resource setSubjectOrIdentifier(Resource resource, String pseudonym)
