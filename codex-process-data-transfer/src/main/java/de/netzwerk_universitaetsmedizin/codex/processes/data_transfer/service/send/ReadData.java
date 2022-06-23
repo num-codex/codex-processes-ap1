@@ -358,7 +358,7 @@ public class ReadData extends AbstractServiceDelegate
 					patientIdentifier);
 
 			if (ms.hasEffectiveDateTimeType() && ms.getEffectiveDateTimeType().getValueAsString() != null)
-				updateUrl = updateUrl + "&effective=" + ms.getEffectiveDateTimeType();
+				updateUrl = updateUrl + "&effective=" + ms.getEffectiveDateTimeType().getValueAsString();
 
 			if (ms.hasMedicationCodeableConcept() && ms.getMedicationCodeableConcept().hasCoding())
 				updateUrl = updateUrl + "&code="
