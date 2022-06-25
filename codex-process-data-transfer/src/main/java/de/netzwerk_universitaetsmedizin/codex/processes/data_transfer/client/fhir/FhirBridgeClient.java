@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -250,6 +251,9 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		if (geccoClient.shouldUseChainedParameterNotLogicalReference())
 			url = url.replace("patient:identifier", "patient.identifier");
 
+		UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromUriString(url);
+		url = urlBuilder.encode().build().toString();
+
 		try
 		{
 			Bundle resultBundle = geccoClient.getGenericFhirClient().search().byUrl(url).sort()
@@ -343,7 +347,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 							logger.debug(
 									"Replacing reference at Observation.hasMember[{}] from bundle resource {} with existing resource id",
 									i, resource.getIdElement().getValue());
-							member.setReferenceElement(resourceId);
+							member.setReferenceElement(resourceId.toUnqualifiedVersionless());
 						}
 					}
 				}
