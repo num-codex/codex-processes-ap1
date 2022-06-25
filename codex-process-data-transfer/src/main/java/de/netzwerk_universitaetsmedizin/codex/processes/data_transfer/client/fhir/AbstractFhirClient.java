@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -58,6 +59,54 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
+
+	private static final class DomainResourceUniqueByUnqualifiedVersionlessId
+	{
+		private final DomainResource resource;
+		private final String unqualifiedVersionlessIdValue;
+
+		public DomainResourceUniqueByUnqualifiedVersionlessId(DomainResource resource)
+		{
+			this.resource = resource;
+
+			unqualifiedVersionlessIdValue = resource.getIdElement().toUnqualifiedVersionless().getValue();
+		}
+
+		public DomainResource getResource()
+		{
+			return resource;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((unqualifiedVersionlessIdValue == null) ? 0 : unqualifiedVersionlessIdValue.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DomainResourceUniqueByUnqualifiedVersionlessId other = (DomainResourceUniqueByUnqualifiedVersionlessId) obj;
+			if (unqualifiedVersionlessIdValue == null)
+			{
+				if (other.unqualifiedVersionlessIdValue != null)
+					return false;
+			}
+			else if (!unqualifiedVersionlessIdValue.equals(other.unqualifiedVersionlessIdValue))
+				return false;
+			return true;
+		}
+	}
 
 	private static final List<String> RESOURCES_WITH_PATIENT_REF = Arrays.asList("AllergyIntolerance", "CarePlan",
 			"CareTeam", "ClinicalImpression", "Composition", "Condition", "Consent", "DetectedIssue", "DeviceRequest",
@@ -539,9 +588,16 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 
 	private Stream<DomainResource> getDomainResourcesFromBundle(Bundle bundle)
 	{
-		return bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
-				.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
-				.map(r -> (DomainResource) r);
+		// includes first
+		return Stream.concat(
+				bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+						.filter(e -> e.hasSearch() && SearchEntryMode.INCLUDE.equals(e.getSearch().getMode()))
+						.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
+						.map(r -> (DomainResource) r),
+				bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+						.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
+						.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
+						.map(r -> (DomainResource) r));
 	}
 
 	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
@@ -623,5 +679,11 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 			logger.warn("Could not update patient " + id, e);
 			throw e;
 		}
+	}
+
+	protected Stream<DomainResource> distinctById(Stream<DomainResource> resources)
+	{
+		return resources.map(DomainResourceUniqueByUnqualifiedVersionlessId::new).distinct()
+				.map(DomainResourceUniqueByUnqualifiedVersionlessId::getResource);
 	}
 }

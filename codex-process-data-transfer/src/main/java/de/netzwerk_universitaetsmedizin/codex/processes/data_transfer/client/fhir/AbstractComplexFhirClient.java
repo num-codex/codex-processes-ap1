@@ -171,7 +171,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		}
 		catch (UnprocessableEntityException e)
 		{
-			logger.warn("Error while search for Patient with pseudonym {}|{}, message: {}, status: {}",
+			logger.warn("Error while searching for Patient with pseudonym {}|{}, message: {}, status: {}",
 					NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym, e.getMessage(), e.getStatusCode());
 
 			IBaseOperationOutcome outcome = e.getOperationOutcome();
@@ -183,14 +183,20 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		}
 		catch (BaseServerResponseException e)
 		{
-			logger.warn("Error while search for Patient with pseudonym {}|{}, message: {}, status: {}",
+			logger.warn("Error while searching for Patient with pseudonym {}|{}, message: {}, status: {}",
 					NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym, e.getMessage(), e.getStatusCode());
+
+			IBaseOperationOutcome outcome = e.getOperationOutcome();
+
+			if (outcome != null && outcome instanceof OperationOutcome)
+				outcomeLogger.logOutcome((OperationOutcome) outcome);
+
 			throw e;
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while search for Patient with pseudonym " + NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM + "|"
-					+ pseudonym, e);
+			logger.warn("Error while searching for Patient with pseudonym " + NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM
+					+ "|" + pseudonym, e);
 			throw e;
 		}
 	}
@@ -221,10 +227,10 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 			logger.debug("Search-Bundle result: {}",
 					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
 
-		return Stream.concat(Stream.of(localPatient.get()),
+		return distinctById(Stream.concat(Stream.of(localPatient.get()),
 				resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
 						.map(BundleEntryComponent::getResource).filter(r -> r instanceof Bundle).map(r -> (Bundle) r)
-						.flatMap(this::getDomainResources));
+						.flatMap(this::getDomainResources)));
 	}
 
 	private Optional<Patient> findPatientInLocalFhirStore(String system, String pseudonym)
