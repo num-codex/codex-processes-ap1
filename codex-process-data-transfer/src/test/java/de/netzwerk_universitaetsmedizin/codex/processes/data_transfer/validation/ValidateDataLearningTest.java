@@ -1,14 +1,23 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,6 +36,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -38,6 +48,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.validation.ValidationResult;
+import de.rwh.utils.crypto.CertificateHelper;
+import de.rwh.utils.crypto.io.PemIo;
 
 public class ValidateDataLearningTest
 {
@@ -47,8 +60,20 @@ public class ValidateDataLearningTest
 	private static final FhirContext fhirContext = FhirContext.forR4();
 	private static final ObjectMapper mapper = ObjectMapperFactory.createObjectMapper(fhirContext);
 
+	private static final class ResourceAndFilename
+	{
+		final Resource resource;
+		final String filename;
+
+		ResourceAndFilename(Resource resource, String filename)
+		{
+			this.resource = resource;
+			this.filename = filename;
+		}
+	}
+
 	@Test
-	public void testDownloadTagGz() throws Exception
+	public void testDownloadTarGzAndParseDescriptor() throws Exception
 	{
 		ValidationPackageClient client = new ValidationPackageClientJersey("https://packages.simplifier.net");
 
@@ -63,6 +88,121 @@ public class ValidateDataLearningTest
 		ValidationPackageDescriptor descriptor = validationPackage.getDescriptor(mapper);
 		logger.debug(descriptor.getName() + "/" + descriptor.getVersion() + ":");
 		descriptor.getDependencies().forEach((k, v) -> logger.debug("\t" + k + "/" + v));
+	}
+
+	@Test
+	public void testDownloadTarGzAndListExampleResources() throws Exception
+	{
+		ValidationPackageClient client = new ValidationPackageClientJersey("https://packages.simplifier.net");
+
+		ValidationPackage validationPackage = client.download("de.gecco", "1.0.5");
+
+		validationPackage.getEntries().forEach(e ->
+		{
+			if (e.getFileName() != null && e.getFileName().startsWith("package/examples/"))
+				logger.debug(e.getFileName());
+		});
+	}
+
+	@Test
+	public void testDownloadTarGzAndValidateExampleResources() throws Exception
+	{
+		ValidationPackageClient client = new ValidationPackageClientJersey("https://packages.simplifier.net");
+		ValidationPackage validationPackage = client.download("de.gecco", "1.0.5");
+
+		List<ResourceAndFilename> examples = validationPackage.getEntries().stream().map(e ->
+		{
+			if (e.getFileName() != null && e.getFileName().startsWith("package/examples/"))
+			{
+				logger.debug("Reading {}", e.getFileName());
+				try
+				{
+					return new ResourceAndFilename((Resource) fhirContext.newJsonParser()
+							.parseResource(new ByteArrayInputStream(e.getContent())), e.getFileName());
+				}
+				catch (Exception ex)
+				{
+					logger.error("Error while reading {}: {}", e.getFileName(), ex.getMessage());
+					return null;
+				}
+			}
+			else
+				return null;
+		}).filter(e -> e != null).collect(Collectors.toList());
+
+		Properties properties = new Properties();
+		try (InputStream appProperties = Files.newInputStream(Paths.get("application.properties")))
+		{
+			properties.load(appProperties);
+		}
+
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
+		char[] keyStorePassword = properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
+				.toCharArray();
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
+				keyStorePassword);
+		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
+				UUID.randomUUID().toString(), keyStorePassword);
+
+		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
+				"https://packages.simplifier.net");
+		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
+				cacheFolder, mapper, validationPackageClient);
+		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
+				"https://terminology-highmed.medic.medfak.uni-koeln.de/fhir", null, keyStore, keyStorePassword, null,
+				null, null, null, null, 0, 0, false, mapper, fhirContext);
+		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
+				cacheFolder, fhirContext, valueSetExpansionClient);
+		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
+				valueSetExpansionClientWithCache, mapper, fhirContext,
+				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
+						new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs))),
+				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
+
+		BundleValidator validator = manager.createBundleValidator("de.gecco", "1.0.5");
+
+		examples.forEach(r ->
+		{
+			ValidationResult result;
+			try
+			{
+				logger.debug("Validating resource of type {} from {}", r.resource.getResourceType().name(), r.filename);
+				result = validator.validate(r.resource);
+			}
+			catch (Exception ex)
+			{
+				logger.error("Unable to validate resource of type {} from {}: {}", r.resource.getResourceType().name(),
+						r.filename, ex.getMessage());
+				return;
+			}
+
+			OperationOutcome outcome = (OperationOutcome) result.toOperationOutcome();
+
+			outcome.getIssue().forEach(issue ->
+			{
+				if (OperationOutcome.IssueSeverity.FATAL.equals(issue.getSeverity()))
+					logger.error("Bundle fatal validation error ({}): {}",
+							issue.getLocation().stream().map(StringType::getValue).collect(Collectors.joining(", ")),
+							issue.getDiagnostics());
+				else if (OperationOutcome.IssueSeverity.ERROR.equals(issue.getSeverity()))
+					logger.error("Bundle validation error ({}): {}",
+							issue.getLocation().stream().map(StringType::getValue).collect(Collectors.joining(", ")),
+							issue.getDiagnostics());
+				else if (OperationOutcome.IssueSeverity.WARNING.equals(issue.getSeverity()))
+					logger.warn("Bundle validation warning ({}): {}",
+							issue.getLocation().stream().map(StringType::getValue).collect(Collectors.joining(", ")),
+							issue.getDiagnostics());
+				else if (issue.hasLocation())
+					logger.info("Bundle validation info ({}): {}",
+							issue.getLocation().stream().map(StringType::getValue).collect(Collectors.joining(", ")),
+							issue.getDiagnostics());
+				else
+					logger.info("Bundle validation info: {}", issue.getDiagnostics());
+			});
+		});
 	}
 
 	@Test

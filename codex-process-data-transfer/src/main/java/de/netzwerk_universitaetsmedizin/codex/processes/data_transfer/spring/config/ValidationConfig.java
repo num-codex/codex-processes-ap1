@@ -202,7 +202,7 @@ public class ValidationConfig
 	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.modifierClasses:"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover,"
-			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.GeccoRadiologyProceduresCodingSliceMinFixer"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer"
 			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> structureDefinitionModifierClasses;
 
