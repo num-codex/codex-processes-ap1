@@ -11,23 +11,22 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.GeccoRadiologyProceduresCodingSliceMinFixer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.MiiModuleLabObservationLab10IdentifierRemover;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ObservationIdentifierRemover;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.StructureDefinitionModifier;
 
 public class PluginSnapshotGeneratorWithModifiers implements SnapshotGenerator, InitializingBean
 {
 	public static final StructureDefinitionModifier CLOSED_TYPE_SLICING_REMOVER = new ClosedTypeSlicingRemover();
-	public static final StructureDefinitionModifier MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER = new MiiModuleLabObservationLab10IdentifierRemover();
-	public static final StructureDefinitionModifier GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER = new GeccoRadiologyProceduresCodingSliceMinFixer();
+	public static final StructureDefinitionModifier OBSERVATION_IDENTIFIER_REMOVER = new ObservationIdentifierRemover();
+	public static final StructureDefinitionModifier SLICE_MIN_FIXER = new SliceMinFixer();
 
 	private final SnapshotGenerator delegate;
 	private final List<StructureDefinitionModifier> structureDefinitionModifiers = new ArrayList<>();
 
 	public PluginSnapshotGeneratorWithModifiers(SnapshotGenerator delegate)
 	{
-		this(delegate, Arrays.asList(CLOSED_TYPE_SLICING_REMOVER, MII_MODULE_LAB_OBSERVATION_LAB_1_0_IDENTIFIER_REMOVER,
-				GECCO_RADIOLOGY_PROCEDURES_CODING_SLICE_MIN_FIXER));
+		this(delegate, Arrays.asList(CLOSED_TYPE_SLICING_REMOVER, OBSERVATION_IDENTIFIER_REMOVER, SLICE_MIN_FIXER));
 	}
 
 	public PluginSnapshotGeneratorWithModifiers(SnapshotGenerator delegate,

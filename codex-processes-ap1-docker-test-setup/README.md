@@ -97,7 +97,7 @@ Console 6: Start Data Trigger Process at DIC using the following command
 curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+xml" \
 -d @codex-process-data-transfer/src/test/resources/fhir/Task/TaskStartDataTrigger.xml \
 --ssl-no-revoke --cacert codex-processes-ap1-test-data-generator/cert/ca/testca_certificate.pem \
---cert codex-processes-ap1-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.pem \
+--cert codex-processes-ap1-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.pem:password \
 --key codex-processes-ap1-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_private-key.pem \
 https://dic/fhir/Task
 ```

@@ -161,7 +161,9 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.5.0,wwwnetzwerk-universitaetsmedizinde_dataReceive/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.5.1
+        wwwnetzwerk-universitaetsmedizinde_dataReceive/0.5.1
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
@@ -292,7 +294,10 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: gth_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://gth/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.5.0,wwwnetzwerk-universitaetsmedizinde_dataSend/0.5.0,wwwnetzwerk-universitaetsmedizinde_dataReceive/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.5.1
+        wwwnetzwerk-universitaetsmedizinde_dataSend/0.5.1
+        wwwnetzwerk-universitaetsmedizinde_dataReceive/0.5.1
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
     networks:
@@ -397,7 +402,10 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: crr_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://crr/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.5.0,wwwnetzwerk-universitaetsmedizinde_dataSend/0.5.0,wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTrigger/0.5.1
+        wwwnetzwerk-universitaetsmedizinde_dataSend/0.5.1
+        wwwnetzwerk-universitaetsmedizinde_dataTranslate/0.5.1
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PRIVATE_KEY: /run/secrets/codex_crr_private_key.pem

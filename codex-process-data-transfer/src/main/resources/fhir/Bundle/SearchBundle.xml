@@ -147,7 +147,7 @@
    <entry>
       <request>
          <method value="GET"/>
-         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel&amp;_include=Observation:has-member"/>
       </request>
    </entry>
    <entry>
@@ -237,13 +237,13 @@
    <entry>
       <request>
          <method value="GET"/>
-         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pH"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/patient-in-icu"/>
       </request>
    </entry>
    <entry>
       <request>
          <method value="GET"/>
-         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/patient-in-icu"/>
+         <url value="Observation?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/pH"/>
       </request>
    </entry>
    <entry>

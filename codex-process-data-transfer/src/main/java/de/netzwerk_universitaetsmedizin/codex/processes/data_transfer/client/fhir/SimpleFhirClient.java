@@ -49,8 +49,8 @@ public class SimpleFhirClient extends AbstractFhirClient
 			logger.debug("Search-Bundle result: {}",
 					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
 
-		return resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+		return distinctById(resultBundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
 				.map(BundleEntryComponent::getResource).filter(r -> r instanceof Bundle).map(r -> (Bundle) r)
-				.flatMap(this::getDomainResources);
+				.flatMap(this::getDomainResources));
 	}
 }

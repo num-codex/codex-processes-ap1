@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>de.netzwerk-universitaetsmedizin.codex</groupId>
 		<artifactId>codex-processes-ap1</artifactId>
-		<version>0.5.0</version>
+		<version>0.5.1</version>
 	</parent>
 
 	<properties>
@@ -234,6 +234,7 @@
 					<descriptors>
 						<descriptor>src/assembly/zip.xml</descriptor>
 					</descriptors>
+					<finalName>codex-process-data-transfer-validator-${project.version}</finalName>
 				</configuration>
 				<executions>
 					<execution>

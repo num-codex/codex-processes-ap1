@@ -16,6 +16,13 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<directory>${project.basedir}/src/assembly</directory>
+			<outputDirectory></outputDirectory>
+			<includes>
+				<include>application.properties</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<directory>${project.build.directory}/lib</directory>
 			<outputDirectory>lib</outputDirectory>
 			<includes>
