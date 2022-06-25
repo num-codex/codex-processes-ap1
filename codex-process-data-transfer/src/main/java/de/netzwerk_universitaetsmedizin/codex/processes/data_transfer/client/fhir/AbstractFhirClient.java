@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -587,9 +588,16 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 
 	private Stream<DomainResource> getDomainResourcesFromBundle(Bundle bundle)
 	{
-		return bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
-				.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
-				.map(r -> (DomainResource) r);
+		// includes first
+		return Stream.concat(
+				bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+						.filter(e -> e.hasSearch() && SearchEntryMode.INCLUDE.equals(e.getSearch().getMode()))
+						.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
+						.map(r -> (DomainResource) r),
+				bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+						.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()))
+						.map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
+						.map(r -> (DomainResource) r));
 	}
 
 	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
