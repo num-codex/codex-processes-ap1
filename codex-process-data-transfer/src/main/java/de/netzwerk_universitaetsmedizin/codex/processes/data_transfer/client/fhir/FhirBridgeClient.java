@@ -2,6 +2,9 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fh
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -9,8 +12,12 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +35,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	private static final Logger logger = LoggerFactory.getLogger(FhirBridgeClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
 
+	private static final String NUM_CODEX_BLOOD_GAS_PANEL = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel";
+
 	/**
 	 * @param geccoClient
 	 *            not <code>null</code>
@@ -43,14 +52,16 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		// either bundle has a patient, or patient should already exists
 		Patient patient = createOrUpdatePatient(bundle).orElseGet(() -> getExistingPatientOrThrow(bundle));
 
+		Map<String, IdType> resourceIdsByUuid = new HashMap<>();
 		for (int i = 0; i < bundle.getEntry().size(); i++)
 		{
 			BundleEntryComponent entry = bundle.getEntry().get(i);
 
 			if (isEntrySupported(entry, e -> !(e.getResource() instanceof Patient)))
-				createOrUpdateEntry(i, entry, patient);
+				createOrUpdateEntry(i, entry, patient, resourceIdsByUuid);
+
+			// only log for non Patients
 			else if (!entry.hasResource() || !(entry.getResource() instanceof Patient))
-				// only log for non Patients
 				logger.warn("Bundle entry at index {} not supported, ignoring entry", i);
 		}
 	}
@@ -220,14 +231,18 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private void createOrUpdateEntry(int index, BundleEntryComponent entry, Patient patient)
+	private void createOrUpdateEntry(int index, BundleEntryComponent entry, Patient patient,
+			Map<String, IdType> resourceIdsByUuid)
 	{
 		Resource resource = entry.getResource();
 		String url = entry.getRequest().getUrl();
 
 		Optional<Resource> existingResource = findResourceInLocalFhirStore(url, resource.getClass());
-		existingResource.ifPresentOrElse(existing -> update(existing, resource, entry.getFullUrl()),
-				() -> create(resource, entry.getFullUrl()));
+		IdType resourceId = existingResource.map(
+				existing -> update(existing, fixTemporaryReferences(resource, resourceIdsByUuid), entry.getFullUrl()))
+				.orElseGet(() -> create(fixTemporaryReferences(resource, resourceIdsByUuid), entry.getFullUrl()));
+
+		resourceIdsByUuid.put(entry.getFullUrl(), resourceId);
 	}
 
 	private Optional<Resource> findResourceInLocalFhirStore(String url, Class<? extends Resource> resourceType)
@@ -302,7 +317,43 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private void update(Resource existingResource, Resource newResource, String bundleFullUrl)
+	private Resource fixTemporaryReferences(Resource resource, Map<String, IdType> resourceIdsByUuid)
+	{
+		if (resource == null)
+			return null;
+
+		else if (resource instanceof Observation)
+		{
+			if (resource.getMeta().getProfile().stream().map(CanonicalType::getValue)
+					.anyMatch(url -> NUM_CODEX_BLOOD_GAS_PANEL.equals(url)
+							|| (url != null && url.startsWith(NUM_CODEX_BLOOD_GAS_PANEL + "|"))))
+			{
+				Observation observation = (Observation) resource;
+				List<Reference> members = observation.getHasMember();
+				for (int i = 0; i < members.size(); i++)
+				{
+					Reference member = members.get(i);
+					if (member.hasReference())
+					{
+						String uuid = member.getReference();
+						IdType resourceId = resourceIdsByUuid.get(uuid);
+
+						if (resourceId != null)
+						{
+							logger.debug(
+									"Replacing reference at Observation.hasMember[{}] from bundle resource {} with existing resource id",
+									i, resource.getIdElement().getValue());
+							member.setReferenceElement(resourceId);
+						}
+					}
+				}
+			}
+		}
+
+		return resource;
+	}
+
+	private IdType update(Resource existingResource, Resource newResource, String bundleFullUrl)
 	{
 		logger.debug("Updating {}", newResource.getResourceType().name());
 
@@ -315,7 +366,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 			if (outcome.getId() == null)
 			{
-				logger.warn("Could not update {} {}", newResource.getResourceType().name(),
+				logger.warn("Could not update {} {}: unknown reason", newResource.getResourceType().name(),
 						newResource.getIdElement().toString());
 				if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
 					outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
@@ -324,7 +375,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 						+ newResource.getIdElement().toString());
 			}
 			else if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
+				logger.warn("Could not update {} {}: unknown reason", newResource.getResourceType().name(),
+						newResource.getIdElement().toString());
+				throw new RuntimeException("Could not create " + newResource.getResourceType().name() + " "
+						+ newResource.getIdElement().toString() + ": unknown reason");
+			}
+			else
+				return (IdType) outcome.getId();
 		}
 		catch (UnprocessableEntityException e)
 		{
@@ -367,7 +426,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 	}
 
-	private void create(Resource newResource, String bundleFullUrl)
+	private IdType create(Resource newResource, String bundleFullUrl)
 	{
 		logger.debug("Creating {}", newResource.getResourceType().name());
 
@@ -387,7 +446,15 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 						+ newResource.getIdElement().toString());
 			}
 			else if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
+			{
 				outcomeLogger.logOutcome((OperationOutcome) outcome.getOperationOutcome());
+				logger.warn("Could not create {} {}: unknown reason", newResource.getResourceType().name(),
+						newResource.getIdElement().toString());
+				throw new RuntimeException("Could not create " + newResource.getResourceType().name() + " "
+						+ newResource.getIdElement().toString() + ": unknown reason");
+			}
+			else
+				return (IdType) outcome.getId();
 		}
 		catch (UnprocessableEntityException e)
 		{

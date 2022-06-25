@@ -10,11 +10,15 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,20 +37,33 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
+import org.hl7.fhir.r4.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Consent.ConsentVerificationComponent;
+import org.hl7.fhir.r4.model.Consent.provisionActorComponent;
 import org.hl7.fhir.r4.model.Consent.provisionComponent;
+import org.hl7.fhir.r4.model.Consent.provisionDataComponent;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportMediaComponent;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
+import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
+import org.hl7.fhir.r4.model.Immunization.ImmunizationReactionComponent;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Patient.ContactComponent;
+import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent;
+import org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -66,6 +83,7 @@ public class ReadData extends AbstractServiceDelegate
 	private static final String NUM_CODEX_STRUCTURE_DEFINITION_PREFIX = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition";
 	private static final String MII_LAB_STRUCTURED_DEFINITION = "https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab";
 	private static final String NUM_CODEX_DO_NOT_RESUSCITAT_ORDER = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/do-not-resuscitate-order";
+	private static final String NUM_CODEX_BLOOD_GAS_PANEL = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel";
 
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
@@ -151,19 +169,28 @@ public class ReadData extends AbstractServiceDelegate
 				.map(c -> type.cast(c.getValue()));
 	}
 
-	protected Bundle toBundle(String pseudonym, Stream<DomainResource> resources)
+	protected Bundle toBundle(String pseudonym, Stream<DomainResource> resourcesStream)
 	{
 		Bundle b = new Bundle();
 		b.setType(BundleType.TRANSACTION);
 
-		List<BundleEntryComponent> entries = resources.map(r ->
+		List<DomainResource> resources = resourcesStream.collect(Collectors.toList());
+
+		Map<String, DomainResource> resourcesById = resources.stream().collect(
+				Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless().getValue(), Function.identity()));
+		Map<String, UUID> uuidsById = resources.stream().collect(
+				Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless().getValue(), r -> UUID.randomUUID()));
+
+		List<DomainResource> resourcesWithTemporaryReferences = fixReferences(resources, resourcesById, uuidsById);
+		List<BundleEntryComponent> entries = resourcesWithTemporaryReferences.stream().map(r ->
 		{
 			BundleEntryComponent entry = b.addEntry();
 
 			// storing original resource reference for validation error tracking
 			entry.setUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT, getAbsoluteId(r));
 
-			entry.setFullUrl("urn:uuid:" + UUID.randomUUID());
+			entry.setFullUrl(
+					"urn:uuid:" + uuidsById.get(r.getIdElement().toUnqualifiedVersionless().getValue()).toString());
 			entry.getRequest().setMethod(HTTPVerb.PUT).setUrl(getConditionalUpdateUrl(pseudonym, r));
 			entry.setResource(setSubjectOrIdentifier(clean(r), pseudonym));
 
@@ -172,6 +199,45 @@ public class ReadData extends AbstractServiceDelegate
 
 		b.setEntry(entries);
 		return b;
+	}
+
+	private List<DomainResource> fixReferences(List<DomainResource> resources,
+			Map<String, DomainResource> resourcesById, Map<String, UUID> uuidsById)
+	{
+		return resources.stream().map(r -> fixReferences(r, resourcesById, uuidsById)).collect(Collectors.toList());
+	}
+
+	private DomainResource fixReferences(DomainResource resource, Map<String, DomainResource> resourcesById,
+			Map<String, UUID> uuidsById)
+	{
+		if (resource instanceof Observation && resource.getMeta().getProfile().stream().map(CanonicalType::getValue)
+				.anyMatch(url -> NUM_CODEX_BLOOD_GAS_PANEL.equals(url)
+						|| (url != null && url.startsWith(NUM_CODEX_BLOOD_GAS_PANEL + "|"))))
+		{
+			Observation observation = (Observation) resource;
+			List<Reference> oldReferences = observation.getHasMember();
+			List<Reference> fixedReferences = new ArrayList<>();
+
+			for (int i = 0; i < oldReferences.size(); i++)
+			{
+				if (uuidsById.containsKey(oldReferences.get(i).getReference()))
+				{
+					logger.debug(
+							"Replacing reference at Observation.hasMember[{}] from resource {} with bundle temporary id",
+							i, resource.getIdElement().getValue());
+					fixedReferences.add(oldReferences.get(i).copy()
+							.setReference("urn:uuid:" + uuidsById.get(oldReferences.get(i).getReference()).toString()));
+				}
+				else
+					logger.warn("Removing reference at Observation.hasMember[{}] from resource {}", i,
+							resource.getIdElement().getValue());
+			}
+
+			observation.setHasMember(fixedReferences);
+			return observation;
+		}
+
+		return resource;
 	}
 
 	private IdType getAbsoluteId(DomainResource r)
@@ -198,122 +264,261 @@ public class ReadData extends AbstractServiceDelegate
 		return r;
 	}
 
+	private <R extends DomainResource> void cleanUnsupportedReference(R resource, String path,
+			Function<R, Boolean> hasReference, BiFunction<R, Reference, R> setReference)
+	{
+		if (hasReference.apply(resource))
+		{
+			logger.warn("Removing reference at {} from resource {}", path, resource.getIdElement().getValue());
+			setReference.apply(resource, (Reference) null);
+		}
+	}
+
+	private <R extends DomainResource> void cleanUnsupportedReferences(R resource, String path,
+			Function<R, Boolean> hasReferences, BiFunction<R, List<Reference>, R> setReferences)
+	{
+		if (hasReferences.apply(resource))
+		{
+			logger.warn("Removing reference at {} from resource {}", path, resource.getIdElement().getValue());
+			setReferences.apply(resource, (List<Reference>) null);
+		}
+	}
+
+	private <R extends DomainResource, C> void cleanUnsupportedReferenceFromComponents(R resource, String path,
+			Function<R, Boolean> hasComponents, Function<R, List<C>> getComponents, Function<C, Boolean> hasReference,
+			BiFunction<C, Reference, C> setReference)
+	{
+		if (hasComponents.apply(resource))
+		{
+			List<C> components = getComponents.apply(resource);
+			for (int i = 0; i < components.size(); i++)
+			{
+				C component = components.get(i);
+				if (hasReference.apply(component))
+				{
+					logger.warn("Removing reference at " + path + " from resource {}", i,
+							resource.getIdElement().getValue());
+					setReference.apply(component, null);
+				}
+			}
+		}
+	}
+
+	private <R extends DomainResource, C> void cleanUnsupportedReferencesFromComponents(R resource, String path,
+			Function<R, Boolean> hasComponents, Function<R, List<C>> getComponents, Function<C, Boolean> hasReferences,
+			BiFunction<C, List<Reference>, C> setReferences)
+	{
+		if (hasComponents.apply(resource))
+		{
+			List<C> components = getComponents.apply(resource);
+			for (int i = 0; i < components.size(); i++)
+			{
+				C component = components.get(i);
+				if (hasReferences.apply(component))
+				{
+					logger.warn("Removing references at " + path + " from resource {}", i,
+							resource.getIdElement().getValue());
+					setReferences.apply(component, null);
+				}
+			}
+		}
+	}
+
+	private <R extends DomainResource, C1, C2> void cleanUnsupportedReferencesFromComponentComponents(R resource,
+			String path, Function<R, Boolean> hasComponent1, Function<R, C1> getComponent1,
+			Function<C1, Boolean> hasComponents2, Function<C1, List<C2>> getComponents2,
+			Function<C2, Boolean> hasReference, BiFunction<C2, Reference, C2> setReference)
+	{
+		if (hasComponent1.apply(resource))
+		{
+			C1 component1 = getComponent1.apply(resource);
+			if (hasComponents2.apply(component1))
+			{
+				List<C2> components2 = getComponents2.apply(component1);
+				for (int i = 0; i < components2.size(); i++)
+				{
+					C2 component2 = components2.get(i);
+					if (hasReference.apply(component2))
+					{
+						logger.warn("Removing reference at " + path + " from resource {}", i,
+								resource.getIdElement().getValue());
+						setReference.apply(component2, null);
+					}
+				}
+			}
+		}
+	}
+
 	private void cleanUnsupportedReferences(DomainResource resource)
 	{
 		if (resource == null)
 		{
 			return;
 		}
+		else if (resource instanceof Patient)
+		{
+			Patient patient = (Patient) resource;
+			cleanUnsupportedReferenceFromComponents(patient, "Patient.contact[{}].organization", Patient::hasContact,
+					Patient::getContact, ContactComponent::hasOrganization, ContactComponent::setOrganization);
+			cleanUnsupportedReferences(patient, "Patient.generalPractitioner", Patient::hasGeneralPractitioner,
+					Patient::setGeneralPractitioner);
+			cleanUnsupportedReference(patient, "Patient.managingOrganization", Patient::hasManagingOrganization,
+					Patient::setManagingOrganization);
+			cleanUnsupportedReferenceFromComponents(patient, "Patient.link[{}].other", Patient::hasLink,
+					Patient::getLink, PatientLinkComponent::hasOther, PatientLinkComponent::setOther);
+		}
 		else if (resource instanceof Condition)
 		{
 			Condition condition = (Condition) resource;
-			condition.setEncounter(null);
-			condition.setRecorder(null);
-			condition.setAsserter(null);
-			if (condition.hasStage())
-				condition.getStage().forEach(s -> s.setAssessment(null));
-			if (condition.hasEvidence())
-				condition.getEvidence().forEach(e -> e.setDetail(null));
+			cleanUnsupportedReference(condition, "Condition.encounter", Condition::hasEncounter,
+					Condition::setEncounter);
+			cleanUnsupportedReference(condition, "Condition.recorder", Condition::hasRecorder, Condition::setRecorder);
+			cleanUnsupportedReference(condition, "Condition.asserter", Condition::hasAsserter, Condition::setAsserter);
+			cleanUnsupportedReferencesFromComponents(condition, "Condition.stage[{}].assessment", Condition::hasStage,
+					Condition::getStage, ConditionStageComponent::hasAssessment,
+					ConditionStageComponent::setAssessment);
+			cleanUnsupportedReferencesFromComponents(condition, "Condition.evidence[{}].detail", Condition::hasEvidence,
+					Condition::getEvidence, ConditionEvidenceComponent::hasDetail,
+					ConditionEvidenceComponent::setDetail);
 		}
 		else if (resource instanceof Consent)
 		{
 			Consent consent = (Consent) resource;
-			consent.setPerformer(null);
-			consent.setOrganization(null);
-			if (consent.hasVerification())
-				consent.getVerification().forEach(v -> v.setVerifiedWith(null));
-			if (consent.hasProvision())
-			{
-				// class name starts with lower case p
-				provisionComponent provision = consent.getProvision();
-				if (provision.hasActor())
-					provision.getActor().forEach(a -> a.setReference(null));
-				if (provision.hasData())
-					provision.getData().forEach(d -> d.setReference(null));
-			}
+			cleanUnsupportedReferences(consent, "Consent.performer", Consent::hasPerformer, Consent::setPerformer);
+			cleanUnsupportedReferences(consent, "Consent.organization", Consent::hasOrganization,
+					Consent::setOrganization);
+			cleanUnsupportedReferenceFromComponents(consent, "Consent.verification.verifiedWith",
+					Consent::hasVerification, Consent::getVerification, ConsentVerificationComponent::hasVerifiedWith,
+					ConsentVerificationComponent::setVerifiedWith);
+			// provisionComponent and provisionActorComponent class names starts with lower case p
+			cleanUnsupportedReferencesFromComponentComponents(consent, "Consent.provision.actor[{}].reference",
+					Consent::hasProvision, Consent::getProvision, provisionComponent::hasActor,
+					provisionComponent::getActor, provisionActorComponent::hasReference,
+					provisionActorComponent::setReference);
+			// provisionComponent and provisionDataComponent class names starts with lower case p
+			cleanUnsupportedReferencesFromComponentComponents(consent, "Consent.provision.data[{}].reference",
+					Consent::hasProvision, Consent::getProvision, provisionComponent::hasData,
+					provisionComponent::getData, provisionDataComponent::hasReference,
+					provisionDataComponent::setReference);
 		}
 		else if (resource instanceof DiagnosticReport)
 		{
 			DiagnosticReport report = (DiagnosticReport) resource;
-			report.setBasedOn(null);
-			report.setEncounter(null);
-			report.setPerformer(null);
-			report.setResultsInterpreter(null);
-			report.setSpecimen(null);
-			report.setImagingStudy(null);
-			if (report.hasMedia())
-				report.getMedia().forEach(m -> m.setLink(null));
+
+			cleanUnsupportedReferences(report, "DiagnosticReport.basedOn", DiagnosticReport::hasBasedOn,
+					DiagnosticReport::setBasedOn);
+			cleanUnsupportedReference(report, "DiagnosticReport.encounter", DiagnosticReport::hasEncounter,
+					DiagnosticReport::setEncounter);
+			cleanUnsupportedReferences(report, "DiagnosticReport.performer", DiagnosticReport::hasPerformer,
+					DiagnosticReport::setPerformer);
+			cleanUnsupportedReferences(report, "DiagnosticReport.resultsInterpreter",
+					DiagnosticReport::hasResultsInterpreter, DiagnosticReport::setResultsInterpreter);
+			cleanUnsupportedReferences(report, "DiagnosticReport.specimen", DiagnosticReport::hasSpecimen,
+					DiagnosticReport::setSpecimen);
+			cleanUnsupportedReferences(report, "DiagnosticReport.result", DiagnosticReport::hasResult,
+					DiagnosticReport::setResult);
+			cleanUnsupportedReferences(report, "DiagnosticReport.imagingStudy", DiagnosticReport::hasImagingStudy,
+					DiagnosticReport::setImagingStudy);
+			cleanUnsupportedReferenceFromComponents(report, "DiagnosticReport.media[{}].link",
+					DiagnosticReport::hasMedia, DiagnosticReport::getMedia, DiagnosticReportMediaComponent::hasLink,
+					DiagnosticReportMediaComponent::setLink);
 		}
 		else if (resource instanceof Immunization)
 		{
 			Immunization immunization = (Immunization) resource;
-			immunization.setEncounter(null);
-			immunization.setLocation(null);
-			immunization.setManufacturer(null);
-			if (immunization.hasPerformer())
-				immunization.getPerformer().forEach(p -> p.setActor(null));
-			immunization.setReasonReference(null);
-			if (immunization.hasReaction())
-				immunization.getReaction().forEach(r -> r.setDetail(null));
-			if (immunization.hasProtocolApplied())
-				immunization.getProtocolApplied().forEach(p -> p.setAuthority(null));
+
+			cleanUnsupportedReference(immunization, "Immunization.encounter", Immunization::hasEncounter,
+					Immunization::setEncounter);
+			cleanUnsupportedReference(immunization, "Immunization.location", Immunization::hasLocation,
+					Immunization::setLocation);
+			cleanUnsupportedReference(immunization, "Immunization.manufacturer", Immunization::hasManufacturer,
+					Immunization::setManufacturer);
+			cleanUnsupportedReferenceFromComponents(immunization, "Immunization.performer.actor",
+					Immunization::hasPerformer, Immunization::getPerformer, ImmunizationPerformerComponent::hasActor,
+					ImmunizationPerformerComponent::setActor);
+			cleanUnsupportedReferences(immunization, "Immunization.reasonReference", Immunization::hasReasonReference,
+					Immunization::setReasonReference);
+			cleanUnsupportedReferenceFromComponents(immunization, "Immunization.reaction.detail",
+					Immunization::hasReaction, Immunization::getReaction, ImmunizationReactionComponent::hasDetail,
+					ImmunizationReactionComponent::setDetail);
+			cleanUnsupportedReferenceFromComponents(immunization, "Immunization.protocolApplied.authority",
+					Immunization::hasProtocolApplied, Immunization::getProtocolApplied,
+					ImmunizationProtocolAppliedComponent::hasAuthority,
+					ImmunizationProtocolAppliedComponent::setAuthority);
 		}
 		else if (resource instanceof MedicationStatement)
 		{
 			MedicationStatement medication = (MedicationStatement) resource;
-			medication.setBasedOn(null);
-			medication.setPartOf(null);
-			if (medication.hasMedicationReference())
-				medication.setMedication(null);
-			medication.setContext(null);
-			medication.setInformationSource(null);
-			medication.setDerivedFrom(null);
-			medication.setReasonReference(null);
+			cleanUnsupportedReferences(medication, "MedicationStatement.basedOn", MedicationStatement::hasBasedOn,
+					MedicationStatement::setBasedOn);
+			cleanUnsupportedReferences(medication, "MedicationStatement.partOf", MedicationStatement::hasPartOf,
+					MedicationStatement::setPartOf);
+			cleanUnsupportedReference(medication, "MedicationStatement.medicationReference",
+					MedicationStatement::hasMedicationReference, MedicationStatement::setMedication);
+			cleanUnsupportedReference(medication, "MedicationStatement.context", MedicationStatement::hasContext,
+					MedicationStatement::setContext);
+			cleanUnsupportedReference(medication, "MedicationStatement.informationSource",
+					MedicationStatement::hasInformationSource, MedicationStatement::setInformationSource);
+			cleanUnsupportedReferences(medication, "MedicationStatement.derivedFrom",
+					MedicationStatement::hasDerivedFrom, MedicationStatement::setDerivedFrom);
+			cleanUnsupportedReferences(medication, "MedicationStatement.reasonReference",
+					MedicationStatement::hasReasonReference, MedicationStatement::setReasonReference);
 		}
 		else if (resource instanceof Observation)
 		{
 			Observation observation = (Observation) resource;
-			observation.setBasedOn(null);
-			observation.setPartOf(null);
-			observation.setFocus(null);
-			observation.setEncounter(null);
-			observation.setPerformer(null);
-			observation.setSpecimen(null);
-			observation.setDevice(null);
+
+			cleanUnsupportedReferences(observation, "Observation.basedOn", Observation::hasBasedOn,
+					Observation::setBasedOn);
+			cleanUnsupportedReferences(observation, "Observation.partOf", Observation::hasPartOf,
+					Observation::setPartOf);
+			cleanUnsupportedReferences(observation, "Observation.focus", Observation::hasFocus, Observation::setFocus);
+			cleanUnsupportedReference(observation, "Observation.encounter", Observation::hasEncounter,
+					Observation::setEncounter);
+			cleanUnsupportedReferences(observation, "Observation.performer", Observation::hasPerformer,
+					Observation::setPerformer);
+			cleanUnsupportedReference(observation, "Observation.specimen", Observation::hasSpecimen,
+					Observation::setSpecimen);
+			cleanUnsupportedReference(observation, "Observation.device", Observation::hasDevice,
+					Observation::setDevice);
 
 			// Do not remove blood-gas-panel member references
-			// TODO fix blood-gas-panel member references, to bundle internal temporary urn:uuid:... IDs
-			if (!resource.getMeta().getProfile().stream().map(CanonicalType::getValue).anyMatch(
-					url -> "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"
-							.equals(url)))
+			if (!resource.getMeta().getProfile().stream().map(CanonicalType::getValue)
+					.anyMatch(url -> NUM_CODEX_BLOOD_GAS_PANEL.equals(url)
+							|| (url != null && url.startsWith(NUM_CODEX_BLOOD_GAS_PANEL + "|"))))
 			{
-				observation.setHasMember(null);
+				cleanUnsupportedReferences(observation, "Observation.hasMember", Observation::hasHasMember,
+						Observation::setHasMember);
 			}
 
-			observation.setDerivedFrom(null);
+			cleanUnsupportedReferences(observation, "Observation.derivedFrom", Observation::hasDerivedFrom,
+					Observation::setDerivedFrom);
 		}
 		else if (resource instanceof Procedure)
 		{
 			Procedure procedure = (Procedure) resource;
-			procedure.setInstantiatesCanonical(null);
-			procedure.setBasedOn(null);
-			procedure.setPartOf(null);
-			procedure.setEncounter(null);
-			procedure.setRecorder(null);
-			procedure.setAsserter(null);
-			if (procedure.hasPerformer())
-				procedure.getPerformer().forEach(p ->
-				{
-					p.setActor(null);
-					p.setOnBehalfOf(null);
-				});
-			procedure.setLocation(null);
-			procedure.setReasonReference(null);
-			procedure.setReport(null);
-			procedure.setComplicationDetail(null);
-			if (procedure.hasFocalDevice())
-				procedure.getFocalDevice().forEach(d -> d.setManipulated(null));
-			procedure.setUsedReference(null);
+
+			cleanUnsupportedReferences(procedure, "Procedure.basedOn", Procedure::hasBasedOn, Procedure::setBasedOn);
+			cleanUnsupportedReferences(procedure, "Procedure.partOf", Procedure::hasPartOf, Procedure::setPartOf);
+			cleanUnsupportedReference(procedure, "Procedure.encounter", Procedure::hasEncounter,
+					Procedure::setEncounter);
+			cleanUnsupportedReference(procedure, "Procedure.recorder", Procedure::hasRecorder, Procedure::setRecorder);
+			cleanUnsupportedReference(procedure, "Procedure.asserter", Procedure::hasAsserter, Procedure::setAsserter);
+			cleanUnsupportedReferenceFromComponents(procedure, "", Procedure::hasPerformer, Procedure::getPerformer,
+					ProcedurePerformerComponent::hasActor, ProcedurePerformerComponent::setActor);
+			cleanUnsupportedReferenceFromComponents(procedure, "", Procedure::hasPerformer, Procedure::getPerformer,
+					ProcedurePerformerComponent::hasOnBehalfOf, ProcedurePerformerComponent::setOnBehalfOf);
+			cleanUnsupportedReference(procedure, "Procedure.location", Procedure::hasLocation, Procedure::setLocation);
+			cleanUnsupportedReferences(procedure, "Procedure.reasonReference", Procedure::hasReasonReference,
+					Procedure::setReasonReference);
+			cleanUnsupportedReferences(procedure, "Procedure.report", Procedure::hasReport, Procedure::setReport);
+			cleanUnsupportedReferences(procedure, "Procedure.complicationDetail", Procedure::hasComplicationDetail,
+					Procedure::setComplicationDetail);
+			cleanUnsupportedReferenceFromComponents(procedure, "Procedure.focalDevice.manipulated",
+					Procedure::hasFocalDevice, Procedure::getFocalDevice, ProcedureFocalDeviceComponent::hasManipulated,
+					ProcedureFocalDeviceComponent::setManipulated);
+			cleanUnsupportedReferences(procedure, "Procedure.usedReference", Procedure::hasUsedReference,
+					Procedure::setUsedReference);
 		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");

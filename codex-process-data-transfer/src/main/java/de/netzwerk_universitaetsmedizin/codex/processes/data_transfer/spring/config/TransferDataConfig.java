@@ -226,7 +226,8 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.basicauth.password:#{null}}")
 	private String fttpBasicAuthPassword;
 
-	@ProcessDocumentation(description = "The base URL of the fTTP server", processNames = { "wwwnetzwerk-universitaetsmedizinde_dataSend",
+	@ProcessDocumentation(description = "The base URL of the fTTP server", processNames = {
+			"wwwnetzwerk-universitaetsmedizinde_dataSend",
 			"wwwnetzwerk-universitaetsmedizinde_dataTranslate" }, recommendation = "Specify if you are using the send process to request pseudonyms from the fTTP. Caution: The fTTP client is unable to follow redirects, specify the final url if the server redirects requests")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.server.base.url:#{null}}")
 	private String fttpServerBase;
