@@ -10,17 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Mandatory identifier on ObservationLab not compatible with data protection rules with current pseudonymization.
+ * Mandatory identifier on Observation not compatible with data protection rules and current pseudonymization
+ * implementation.
  */
-public class MiiModuleLabObservationLab10IdentifierRemover implements StructureDefinitionModifier
+public class ObservationIdentifierRemover implements StructureDefinitionModifier
 {
-	private static final Logger logger = LoggerFactory.getLogger(MiiModuleLabObservationLab10IdentifierRemover.class);
+	private static final Logger logger = LoggerFactory.getLogger(ObservationIdentifierRemover.class);
 
 	@Override
 	public StructureDefinition modify(StructureDefinition sd)
 	{
 		if ("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"
-				.equals(sd.getUrl()) && "1.0".equals(sd.getVersion()))
+				.equals(sd.getUrl())
+				|| "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"
+						.equals(sd.getUrl()))
 		{
 			Predicate<? super ElementDefinition> toRemove = e -> e.hasPath()
 					&& e.getPath().startsWith("Observation.identifier");
