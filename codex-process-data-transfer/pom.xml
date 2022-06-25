@@ -234,6 +234,7 @@
 					<descriptors>
 						<descriptor>src/assembly/zip.xml</descriptor>
 					</descriptors>
+					<finalName>codex-process-data-transfer-validator-${project.version}</finalName>
 				</configuration>
 				<executions>
 					<execution>
