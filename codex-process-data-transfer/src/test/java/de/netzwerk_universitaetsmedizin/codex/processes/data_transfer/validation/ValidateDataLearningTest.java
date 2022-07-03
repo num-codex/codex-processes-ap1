@@ -84,6 +84,45 @@ public class ValidateDataLearningTest
 		}
 	}
 
+	private ValidationPackageManager createValidationPackageManager()
+			throws IOException, CertificateException, PKCSException, KeyStoreException, NoSuchAlgorithmException
+	{
+		Properties properties = new Properties();
+		try (InputStream appProperties = Files.newInputStream(Paths.get("application.properties")))
+		{
+			properties.load(appProperties);
+		}
+
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
+		char[] keyStorePassword = properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
+				.toCharArray();
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
+				keyStorePassword);
+		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
+				UUID.randomUUID().toString(), keyStorePassword);
+
+		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
+				"https://packages.simplifier.net");
+		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
+				cacheFolder, mapper, validationPackageClient);
+		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
+				"https://terminology-highmed.medic.medfak.uni-koeln.de/fhir", null, keyStore, keyStorePassword, null,
+				null, null, null, null, 0, 0, false, mapper, fhirContext);
+		ValueSetExpansionClient valueSetExpansionClientWithModifiers = new ValueSetExpansionClientWithModifiers(
+				valueSetExpansionClient);
+		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
+				cacheFolder, fhirContext, valueSetExpansionClientWithModifiers);
+		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
+				valueSetExpansionClientWithCache, mapper, fhirContext,
+				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
+						new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs))),
+				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
+		return manager;
+	}
+
 	@Test
 	public void testCheckValueSetForComplexeSnomedCtCodes() throws Exception
 	{
@@ -236,62 +275,10 @@ public class ValidateDataLearningTest
 		});
 	}
 
-	private ValidationPackageManager createValidationPackageManager()
-			throws IOException, CertificateException, PKCSException, KeyStoreException, NoSuchAlgorithmException
-	{
-		Properties properties = new Properties();
-		try (InputStream appProperties = Files.newInputStream(Paths.get("application.properties")))
-		{
-			properties.load(appProperties);
-		}
-
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
-		char[] keyStorePassword = properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
-				.toCharArray();
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
-				keyStorePassword);
-		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
-				UUID.randomUUID().toString(), keyStorePassword);
-
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://terminology-highmed.medic.medfak.uni-koeln.de/fhir", null, keyStore, keyStorePassword, null,
-				null, null, null, null, 0, 0, false, mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithModifiers = new ValueSetExpansionClientWithModifiers(
-				valueSetExpansionClient);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClientWithModifiers);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext,
-				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
-						new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs))),
-				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
-		return manager;
-	}
-
 	@Test
 	public void testDownloadWithDependencies() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
-				ValueSetExpanderImpl::new);
-
+		ValidationPackageManager manager = createValidationPackageManager();
 		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
 				"1.0.5");
 		packageWithDependencies.parseResources(fhirContext);
@@ -300,20 +287,7 @@ public class ValidateDataLearningTest
 	@Test
 	public void testValidate() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext,
-				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
-						new PluginSnapshotGeneratorImpl(fc, vs)),
-				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
-
+		ValidationPackageManager manager = createValidationPackageManager();
 		BundleValidator validator = manager.createBundleValidator("de.gecco", "1.0.5");
 
 		logger.debug("---------- executing validation tests ----------");
@@ -385,17 +359,7 @@ public class ValidateDataLearningTest
 	@Test
 	public void testGenerateSnapshots() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
-				ValueSetExpanderImpl::new);
+		ValidationPackageManager manager = createValidationPackageManager();
 
 		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
 				"1.0.5");

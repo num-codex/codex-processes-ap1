@@ -209,7 +209,7 @@ public class ValidationConfig
 	@ProcessDocumentation(description = "List of StructureDefinition modifier classes, modifiers are executed before atempting to generate a StructureDefinition snapshot", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.modifierClasses:"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,"
-			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ObservationIdentifierRemover,"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.IdentifierRemover,"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer"
 			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> structureDefinitionModifierClasses;

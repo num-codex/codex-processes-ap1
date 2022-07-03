@@ -5,28 +5,30 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Mandatory identifier on Observation not compatible with data protection rules and current pseudonymization
- * implementation.
+ * Mandatory identifier on resources other then Patient not compatible with data protection rules and current
+ * pseudonymization implementation.
  */
-public class ObservationIdentifierRemover implements StructureDefinitionModifier
+public class IdentifierRemover implements StructureDefinitionModifier
 {
-	private static final Logger logger = LoggerFactory.getLogger(ObservationIdentifierRemover.class);
+	private static final Logger logger = LoggerFactory.getLogger(IdentifierRemover.class);
 
 	@Override
 	public StructureDefinition modify(StructureDefinition sd)
 	{
-		if ("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"
-				.equals(sd.getUrl())
-				|| "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel"
-						.equals(sd.getUrl()))
+		String type = sd.getType();
+
+		if (StructureDefinitionKind.RESOURCE.equals(sd.getKind()) && type != null
+				&& !ResourceType.Patient.name().equals(type))
 		{
 			Predicate<? super ElementDefinition> toRemove = e -> e.hasPath()
-					&& e.getPath().startsWith("Observation.identifier");
+					&& e.getPath().startsWith(type + ".identifier");
 
 			List<ElementDefinition> filteredRules = sd.getDifferential().getElement().stream().filter(toRemove.negate())
 					.collect(Collectors.toList());
