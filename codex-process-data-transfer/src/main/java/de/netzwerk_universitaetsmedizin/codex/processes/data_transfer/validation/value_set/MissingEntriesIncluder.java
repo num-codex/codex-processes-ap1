@@ -2,7 +2,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -26,8 +25,7 @@ public class MissingEntriesIncluder implements ValueSetModifier
 				&& vsWithComposition.getCompose().getInclude().stream().anyMatch(ConceptSetComponent::hasConcept))
 		{
 			Set<String> expandedEntries = vsWithExpansion.getExpansion().getContains().stream()
-					.map(c -> toEntry(c.getSystem(), c.getVersion(), c.getCode())).distinct()
-					.collect(Collectors.toSet());
+					.map(c -> toEntry(c.getSystem(), c.getCode())).distinct().collect(Collectors.toSet());
 
 			vsWithComposition.getCompose().getInclude().stream().filter(ConceptSetComponent::hasConcept)
 					.forEach(include ->
@@ -37,18 +35,13 @@ public class MissingEntriesIncluder implements ValueSetModifier
 
 						include.getConcept().forEach(concept ->
 						{
-							if (!expandedEntries.contains(toEntry(system, version, concept.getCode())))
+							if (!expandedEntries.contains(toEntry(system, concept.getCode()))
+									&& !expandedEntries.contains(toEntry(system, concept.getCode())))
 							{
-								if (version != null)
-									logger.warn(
-											"Adding missing concept to ValueSet {}|{}: system: '{}', version: '{}', code: '{}', display: '{}'",
-											vsWithExpansion.getUrl(), vsWithExpansion.getVersion(), system, version,
-											concept.getCode(), concept.getDisplay());
-								else
-									logger.warn(
-											"Adding missing concept to ValueSet {}|{}: system: '{}', code: '{}', display: '{}'",
-											vsWithExpansion.getUrl(), vsWithExpansion.getVersion(), system,
-											concept.getCode(), concept.getDisplay());
+								logger.warn(
+										"Adding missing concept to ValueSet {}|{}: system: '{}', version: '{}', code: '{}', display: '{}'",
+										vsWithExpansion.getUrl(), vsWithExpansion.getVersion(), system, version,
+										concept.getCode(), concept.getDisplay());
 
 								vsWithExpansion.getExpansion()
 										.addContains(new ValueSetExpansionContainsComponent().setSystem(system)
@@ -62,8 +55,8 @@ public class MissingEntriesIncluder implements ValueSetModifier
 		return vsWithExpansion;
 	}
 
-	private String toEntry(String system, String version, String code)
+	private String toEntry(String system, String code)
 	{
-		return Stream.of(system, version, code).filter(e -> e != null).collect(Collectors.joining());
+		return system + code;
 	}
 }
