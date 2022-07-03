@@ -587,7 +587,8 @@
                         "coding":[
                             {
                                 "system":"http://snomed.info/sct",
-                                "code":"118247008:{363713009=263654008,42752001=840539006}"
+                                "code":"118247008:{363713009=263654008,42752001=840539006}",
+                                "display": "Abnormal radiologic finding due to OVID-19"
                             }
                         ]
                     }
@@ -695,7 +696,8 @@
                         "coding":[
                             {
                                 "system":"http://loinc.org",
-                                "code":"26436-6"
+                                "code":"26436-6",
+                                "display":"Laboratory studies"
                             },
                             {
                                 "system":"http://terminology.hl7.org/CodeSystem/observation-category",
