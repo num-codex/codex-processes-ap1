@@ -23,11 +23,16 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionDifferentialComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class ValidationPackageWithDepedencies extends ValidationPackage
 {
+	private static final Logger logger = LoggerFactory.getLogger(ValidationPackageWithDepedencies.class);
+
 	public static ValidationPackageWithDepedencies from(
 			Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion,
 			ValidationPackageIdentifier rootPackageIdentifier)
@@ -216,17 +221,42 @@ public class ValidationPackageWithDepedencies extends ValidationPackage
 				.map(StructureDefinitionDifferentialComponent::getElement).flatMap(List::stream)
 				.filter(ElementDefinition::hasBinding).map(ElementDefinition::getBinding)
 				.filter(b -> bindingStrengths.contains(b.getStrength()))
+				.filter(ElementDefinitionBindingComponent::hasValueSet)
 				.map(ElementDefinitionBindingComponent::getValueSet).collect(Collectors.toSet());
 	}
 
-	public List<ValueSet> getValueSetsIncludingDependencies(EnumSet<BindingStrength> bindingStrengths)
+	public List<ValueSet> getValueSetsIncludingDependencies(EnumSet<BindingStrength> bindingStrengths,
+			FhirContext fhirContext)
 	{
 		Stream<StructureDefinition> sds = getValidationSupportResources().getStructureDefinitions().stream()
 				.flatMap(sd -> Stream.concat(Stream.of(sd), getStructureDefinitionDependencies(sd).stream()))
 				.distinct();
 
 		Set<String> neededValueSets = findValueSetsWithBindingStrength(sds, bindingStrengths);
-		return getAllValueSets().stream().filter(vs -> neededValueSets.contains(vs.getUrl())
+		List<ValueSet> foundValueSets = getAllValueSets().stream().filter(vs -> neededValueSets.contains(vs.getUrl())
 				|| neededValueSets.contains(vs.getUrl() + "|" + vs.getVersion())).collect(Collectors.toList());
+
+		logMissingValueSets(neededValueSets, foundValueSets, fhirContext);
+
+		return foundValueSets;
+	}
+
+	private void logMissingValueSets(Set<String> neededValueSets, List<ValueSet> foundValueSets,
+			FhirContext fhirContext)
+	{
+		Set<String> foundValueSetUrls = foundValueSets.stream()
+				.flatMap(vs -> Stream.of(vs.getUrl(), vs.getUrl() + "|" + vs.getVersion())).collect(Collectors.toSet());
+
+		IValidationSupport validationSupport = fhirContext.getValidationSupport();
+		String missingValueSets = neededValueSets.stream()
+				.filter(e -> !foundValueSetUrls.contains(e) && validationSupport.fetchValueSet(e) == null).distinct()
+				.sorted().collect(Collectors.joining(", ", "[", "]"));
+
+		if (!missingValueSets.isEmpty())
+		{
+			logger.warn(
+					"The following ValueSet are required for validation but could not be found in validation package {}|{} or its dependencies: {}",
+					getName(), getVersion(), missingValueSets);
+		}
 	}
 }

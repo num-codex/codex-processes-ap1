@@ -144,7 +144,7 @@ public class ValidateDataLearningTest
 				.expandValueSetsAndGenerateStructureDefinitionSnapshots(packageWithDepedencies);
 
 		List<ValueSet> valueSets = packageWithDepedencies
-				.getValueSetsIncludingDependencies(EnumSet.allOf(BindingStrength.class));
+				.getValueSetsIncludingDependencies(EnumSet.allOf(BindingStrength.class), fhirContext);
 
 		valueSets.forEach(v ->
 		{
