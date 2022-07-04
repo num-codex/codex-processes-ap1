@@ -33,12 +33,15 @@ public class IdentifierRemover implements StructureDefinitionModifier
 			List<ElementDefinition> filteredRules = sd.getDifferential().getElement().stream().filter(toRemove.negate())
 					.collect(Collectors.toList());
 
-			logger.warn("Removing validation rules with ids {} from StructureDefinition {}|{}",
-					sd.getDifferential().getElement().stream().filter(toRemove).map(ElementDefinition::getId)
-							.collect(Collectors.joining(", ", "[", "]")),
-					sd.getUrl(), sd.getVersion());
+			if (filteredRules.size() < sd.getDifferential().getElement().size())
+			{
+				logger.warn("Removing validation rules with ids {} from StructureDefinition {}|{}",
+						sd.getDifferential().getElement().stream().filter(toRemove).map(ElementDefinition::getId)
+								.collect(Collectors.joining(", ", "[", "]")),
+						sd.getUrl(), sd.getVersion());
 
-			sd.getDifferential().setElement(filteredRules);
+				sd.getDifferential().setElement(filteredRules);
+			}
 		}
 
 		return sd;
