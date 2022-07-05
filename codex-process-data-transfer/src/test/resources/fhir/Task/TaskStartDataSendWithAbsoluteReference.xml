@@ -1,8 +1,8 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.5.1"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.6.0"/>
    </meta>
-   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.5.1"/>
+   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.6.0"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2022-06-25T12:00:00+01:00"/>
@@ -67,5 +67,18 @@
          </coding>
       </type>
       <valueDateTime value="2020-06-25T00:00:00+01:00"/>
+   </input> -->
+   <!-- optional parameter enabling a dry run of the data-send process. Specifying the
+		'dry-run' parameter with value 'true' will result in the data-send process
+		aborting before storing the encrypted transfer bundle in the local DSF FHIR server
+		and sending a Task to start the data-translate process to the GTH -->
+   <!-- <input>
+      <type>
+         <coding>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="dry-run"/>
+         </coding>
+      </type>
+      <valueBoolean value="true"/>
    </input> -->
 </Task>

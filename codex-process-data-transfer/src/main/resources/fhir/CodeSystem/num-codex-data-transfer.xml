@@ -46,4 +46,9 @@
 		<display value="Export To" />
 		<definition value="Date parameter to filter resources last modified until (exclusive) the specified date" />
 	</concept>
+	<concept>
+		<code value="dry-run" />
+		<display value="Dry Run" />
+		<definition value="Boolean parameter to do a data send process dry run only (no actual data transfer to GTH/CRR)" />
+	</concept>
 </CodeSystem> 
