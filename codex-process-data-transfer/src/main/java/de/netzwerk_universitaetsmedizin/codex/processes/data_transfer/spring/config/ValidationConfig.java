@@ -55,7 +55,9 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClientJersey;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClientWithFileSystemCache;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.ValueSetExpansionClientWithModifiers;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.StructureDefinitionModifier;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.ValueSetModifier;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
@@ -198,10 +200,16 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.verbose:false}")
 	private boolean valueSetExpansionClientVerbose;
 
+	@ProcessDocumentation(description = "List of ValueSet modifier classes, modifiers are executed before atempting to expand a ValueSet and after", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.modifierClasses:"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.MissingEntriesIncluder"
+			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> valueSetModifierClasses;
+
 	@ProcessDocumentation(description = "List of StructureDefinition modifier classes, modifiers are executed before atempting to generate a StructureDefinition snapshot", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.modifierClasses:"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,"
-			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ObservationIdentifierRemover,"
+			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.IdentifierRemover,"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer"
 			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> structureDefinitionModifierClasses;
@@ -410,8 +418,29 @@ public class ValidationConfig
 	@Bean
 	public ValueSetExpansionClient valueSetExpansionClient()
 	{
+		List<ValueSetModifier> modifiers = valueSetModifierClasses.stream().map(this::createValueSetModifier)
+				.collect(Collectors.toList());
+
 		return new ValueSetExpansionClientWithFileSystemCache(valueSetCacheFolder(), fhirContext,
-				valueSetExpansionClientJersey());
+				new ValueSetExpansionClientWithModifiers(valueSetExpansionClientJersey(), modifiers));
+	}
+
+	private ValueSetModifier createValueSetModifier(String className)
+	{
+		try
+		{
+			Class<?> modifierClass = Class.forName(className);
+			if (ValueSetModifier.class.isAssignableFrom(modifierClass))
+				return (ValueSetModifier) modifierClass.getConstructor().newInstance();
+			else
+				throw new IllegalArgumentException(
+						"Class " + className + " not compatible with " + ValueSetModifier.class.getName());
+		}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Bean
