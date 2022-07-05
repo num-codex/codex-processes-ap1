@@ -490,7 +490,7 @@ public class ValidationConfig
 		if (validationEnabled)
 			logger.info(
 					"Testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}{}",
+							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}",
 					valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
 					valueSetExpansionClientCertificatePrivateKey,
 					valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
