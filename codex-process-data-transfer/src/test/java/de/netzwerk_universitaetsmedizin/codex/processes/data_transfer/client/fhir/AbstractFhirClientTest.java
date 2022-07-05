@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
 public class AbstractFhirClientTest
 {
@@ -33,11 +34,12 @@ public class AbstractFhirClientTest
 	{
 		FhirContext fhirContext = FhirContext.forR4();
 		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
 		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		Date exportTo = new Date();
 
@@ -65,11 +67,12 @@ public class AbstractFhirClientTest
 	{
 		FhirContext fhirContext = FhirContext.forR4();
 		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
 		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
 		Date exportTo = new Date();
@@ -99,11 +102,12 @@ public class AbstractFhirClientTest
 	{
 		FhirContext fhirContext = FhirContext.forR4();
 		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
 		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String patientId = "some-patient-id";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
@@ -134,11 +138,12 @@ public class AbstractFhirClientTest
 	{
 		FhirContext fhirContext = FhirContext.forR4();
 		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
 		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String pseudonym = "some-pseudonym";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);

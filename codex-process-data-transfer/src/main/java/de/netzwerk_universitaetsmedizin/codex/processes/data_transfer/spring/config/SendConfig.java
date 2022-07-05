@@ -70,8 +70,8 @@ public class SendConfig
 	public ReadData readData()
 	{
 		return new ReadData(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext(),
-				transferDataConfig.geccoClientFactory());
+				transferDataConfig.readAccessHelper(), transferDataConfig.geccoClientFactory(),
+				transferDataConfig.dataLogger());
 	}
 
 	@Bean
