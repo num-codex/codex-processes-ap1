@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>codex-processes-ap1-test-data-generator</artifactId>
@@ -16,6 +14,10 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>de.netzwerk-universitaetsmedizin.codex</groupId>
+			<artifactId>codex-process-data-transfer</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
@@ -61,7 +63,7 @@
 					<executable>java</executable>
 					<arguments>
 						<argument>-classpath</argument>
-						<classpath/>
+						<classpath />
 						<argument>de.netzwerk_universitaetsmedizin.codex.processes.tools.generator.TestDataGenerator</argument>
 					</arguments>
 					<workingDirectory>${project.basedir}</workingDirectory>
