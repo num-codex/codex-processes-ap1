@@ -72,10 +72,10 @@ import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
 public class ReadData extends AbstractServiceDelegate
@@ -87,16 +87,16 @@ public class ReadData extends AbstractServiceDelegate
 
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
-	private final FhirContext fhirContext;
 	private final GeccoClientFactory geccoClientFactory;
+	private final DataLogger dataLogger;
 
 	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory)
+			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory, DataLogger dataLogger)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
 
-		this.fhirContext = fhirContext;
 		this.geccoClientFactory = geccoClientFactory;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -104,8 +104,8 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
@@ -132,8 +132,7 @@ public class ReadData extends AbstractServiceDelegate
 
 		Bundle bundle = toBundle(pseudonym, resources);
 
-		if (logger.isDebugEnabled())
-			logger.debug("Created bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+		dataLogger.logData("Created bundle", bundle);
 
 		return bundle;
 	}
@@ -223,14 +222,14 @@ public class ReadData extends AbstractServiceDelegate
 				if (uuidsById.containsKey(oldReferences.get(i).getReference()))
 				{
 					logger.debug(
-							"Replacing reference at Observation.hasMember[{}] from resource {} with bundle temporary id",
-							i, resource.getIdElement().getValue());
+							"Replacing reference at Observation.hasMember[{}] from resource {} with bundle temporary id in transport bundle",
+							i, getAbsoluteId(resource).getValue());
 					fixedReferences.add(oldReferences.get(i).copy()
 							.setReference("urn:uuid:" + uuidsById.get(oldReferences.get(i).getReference()).toString()));
 				}
 				else
-					logger.warn("Removing reference at Observation.hasMember[{}] from resource {}", i,
-							resource.getIdElement().getValue());
+					logger.warn("Removing reference at Observation.hasMember[{}] from resource {} in transport bundle",
+							i, getAbsoluteId(resource).getValue());
 			}
 
 			observation.setHasMember(fixedReferences);
@@ -251,6 +250,8 @@ public class ReadData extends AbstractServiceDelegate
 
 	private DomainResource clean(DomainResource r)
 	{
+		cleanUnsupportedReferences(r);
+
 		r.setIdElement(null);
 		List<CanonicalType> profiles = r.getMeta().getProfile().stream()
 				.filter(p -> p.getValue().startsWith(NUM_CODEX_STRUCTURE_DEFINITION_PREFIX)
@@ -258,8 +259,6 @@ public class ReadData extends AbstractServiceDelegate
 				.collect(Collectors.toList());
 		r.setMeta(new Meta().setProfile(profiles));
 		r.setText(null);
-
-		cleanUnsupportedReferences(r);
 
 		return r;
 	}
@@ -269,7 +268,8 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		if (hasReference.apply(resource))
 		{
-			logger.warn("Removing reference at {} from resource {}", path, resource.getIdElement().getValue());
+			logger.warn("Removing reference at {} from resource {} in transport bundle", path,
+					getAbsoluteId(resource).getValue());
 			setReference.apply(resource, (Reference) null);
 		}
 	}
@@ -279,7 +279,8 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		if (hasReferences.apply(resource))
 		{
-			logger.warn("Removing reference at {} from resource {}", path, resource.getIdElement().getValue());
+			logger.warn("Removing reference at {} from resource {} in transport bundle", path,
+					getAbsoluteId(resource).getValue());
 			setReferences.apply(resource, (List<Reference>) null);
 		}
 	}
@@ -296,8 +297,8 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReference.apply(component))
 				{
-					logger.warn("Removing reference at " + path + " from resource {}", i,
-							resource.getIdElement().getValue());
+					logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+							getAbsoluteId(resource).getValue());
 					setReference.apply(component, null);
 				}
 			}
@@ -316,8 +317,8 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReferences.apply(component))
 				{
-					logger.warn("Removing references at " + path + " from resource {}", i,
-							resource.getIdElement().getValue());
+					logger.warn("Removing references at " + path + " from resource {} in transport bundle", i,
+							getAbsoluteId(resource).getValue());
 					setReferences.apply(component, null);
 				}
 			}
@@ -340,8 +341,8 @@ public class ReadData extends AbstractServiceDelegate
 					C2 component2 = components2.get(i);
 					if (hasReference.apply(component2))
 					{
-						logger.warn("Removing reference at " + path + " from resource {}", i,
-								resource.getIdElement().getValue());
+						logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+								getAbsoluteId(resource).getValue());
 						setReference.apply(component2, null);
 					}
 				}

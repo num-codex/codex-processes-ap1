@@ -42,6 +42,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 
 public class ReadDataTest
@@ -61,8 +62,9 @@ public class ReadDataTest
 		Mockito.when(geccoClient.getFhirClient()).thenReturn(fhirClient);
 		Mockito.when(fhirClient.getNewData(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(readBundle(fhirContext));
+		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 
-		ReadData readData = new ReadData(clientProvider, taskHelper, readAccessHelper, fhirContext, geccoClientFactory);
+		ReadData readData = new ReadData(clientProvider, taskHelper, readAccessHelper, geccoClientFactory, dataLogger);
 		DelegateExecution execution = Mockito.mock(DelegateExecution.class);
 		Mockito.when(execution.getCurrentActivityId()).thenReturn(UUID.randomUUID().toString());
 		Mockito.when(execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE)).thenReturn(PatientReference

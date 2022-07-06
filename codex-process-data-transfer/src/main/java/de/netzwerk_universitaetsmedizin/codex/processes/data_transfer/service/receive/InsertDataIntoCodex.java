@@ -16,9 +16,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
@@ -26,15 +26,15 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
 	private final GeccoClientFactory geccoClientFactory;
-	private final FhirContext fhirContext;
+	private final DataLogger dataLogger;
 
 	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, GeccoClientFactory geccoClientFactory)
+			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory, DataLogger dataLogger)
 	{
 		super(clientProvider, taskHelper, readAccessHelper);
-		this.fhirContext = fhirContext;
 
 		this.geccoClientFactory = geccoClientFactory;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -42,8 +42,8 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
@@ -56,8 +56,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 			try
 			{
 				logger.info("Executing bundle against FHIR store ...");
-				if (logger.isDebugEnabled())
-					logger.debug("Received bundle: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+				dataLogger.logData("Received bundle", bundle);
 
 				geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
 

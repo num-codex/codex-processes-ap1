@@ -43,8 +43,8 @@ public class ReceiveConfig
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
 		return new InsertDataIntoCodex(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext(),
-				transferDataConfig.geccoClientFactory());
+				transferDataConfig.readAccessHelper(), transferDataConfig.geccoClientFactory(),
+				transferDataConfig.dataLogger());
 	}
 
 	@Bean
