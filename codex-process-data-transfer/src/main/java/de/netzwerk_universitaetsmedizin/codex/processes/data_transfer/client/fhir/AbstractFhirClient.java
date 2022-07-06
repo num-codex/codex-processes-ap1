@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
@@ -207,18 +208,18 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	}
 
 	protected final GeccoClient geccoClient;
+	protected final DataLogger dataLogger;
 
 	/**
 	 * @param geccoClient
 	 *            not <code>null</code>
-	 * @param clientFactory
+	 * @param dataLogger
 	 *            not <code>null</code>
-	 * @param searchBundleOverride
-	 *            may be <code>null</code>
 	 */
-	public AbstractFhirClient(GeccoClient geccoClient)
+	public AbstractFhirClient(GeccoClient geccoClient, DataLogger dataLogger)
 	{
 		this.geccoClient = geccoClient;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -228,16 +229,12 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		BundleType expectedResponseType = BundleType.BATCH.equals(searchBundle.getType()) ? BundleType.BATCHRESPONSE
 				: BundleType.TRANSACTIONRESPONSE;
 
-		if (logger.isDebugEnabled())
-			logger.debug("Executing Search-Bundle: {}",
-					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(searchBundle));
+		dataLogger.logData("Executing Search-Bundle", searchBundle);
 
 		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
-		if (logger.isDebugEnabled())
-			logger.debug("Search-Bundle result: {}",
-					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
+		dataLogger.logData("Search-Bundle result", resultBundle);
 
 		if (!resultBundle.hasType() || !expectedResponseType.equals(resultBundle.getType()) || !resultBundle.hasEntry())
 		{
@@ -257,8 +254,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 						"Error in Search-Bundle at index {}: entry has no Bundle resource or response is not 200 OK",
 						i);
 				if (entry.hasResource() && !(entry.getResource() instanceof Bundle))
-					logger.debug("Unexpected entry resource: {}",
-							geccoClient.getFhirContext().newJsonParser().encodeResourceToString(entry.getResource()));
+					dataLogger.logData("Unexpected entry resource", entry.getResource());
 			}
 		}
 
@@ -326,9 +322,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		Bundle resultBundle = (Bundle) geccoClient.getGenericFhirClient().search().byUrl(url)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
-		if (logger.isDebugEnabled())
-			logger.debug("Search-Bundle result: {}",
-					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
+		dataLogger.logData("Search-Bundle result", resultBundle);
 
 		return resultBundle;
 	}

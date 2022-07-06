@@ -25,6 +25,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.Crr
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorInputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
 
@@ -143,6 +144,12 @@ public class TransferDataConfig
 	@ProcessDocumentation(description = "To enable the use of logical references instead of chained parameters (`patient:identifier` instead of `patient.identifier`) while searching for Patients in the GECCO FHIR server set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataReceive")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.use.chained.parameter.not.logical.reference:true}")
 	private boolean fhirStoreUseChainedParameterNotLogicalReference;
+
+	@ProcessDocumentation(description = "To enable debug logging of search, result and transfer bundles set to `true`", processNames = {
+			"wwwnetzwerk-universitaetsmedizinde_dataTrigger", "wwwnetzwerk-universitaetsmedizinde_dataSend",
+			"wwwnetzwerk-universitaetsmedizinde_dataReceive" })
+	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.dataLoggingEnabled:false}")
+	private boolean dataLoggingEnabled;
 
 	@ProcessDocumentation(description = "Location of a FHIR batch bundle used to override the internally provided bundle used to search for GECCO FHIR ressources", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.server.search.bundle.override:#{null}}")
@@ -349,6 +356,12 @@ public class TransferDataConfig
 	}
 
 	@Bean
+	public DataLogger dataLogger()
+	{
+		return new DataLogger(dataLoggingEnabled, fhirContext());
+	}
+
+	@Bean
 	@SuppressWarnings("unchecked")
 	public GeccoClientFactory geccoClientFactory()
 	{
@@ -365,7 +378,7 @@ public class TransferDataConfig
 					fhirStoreProxyUsername, fhirStoreProxyPassword, fhirStoreHapiClientVerbose, fhirContext,
 					searchBundleOverride, localIdentifierValue,
 					(Class<GeccoFhirClient>) Class.forName(fhirStoreClientClass),
-					fhirStoreUseChainedParameterNotLogicalReference);
+					fhirStoreUseChainedParameterNotLogicalReference, dataLogger());
 		}
 		catch (ClassNotFoundException e)
 		{
