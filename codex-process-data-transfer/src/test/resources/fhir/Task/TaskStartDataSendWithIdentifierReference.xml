@@ -73,4 +73,17 @@
       </type>
       <valueDateTime value="2020-06-25T00:00:00+01:00"/>
    </input> -->
+   <!-- optional parameter enabling a dry run of the data-send process. Specifying the
+		'dry-run' parameter with value 'true' will result in the data-send process
+		aborting before storing the encrypted transfer bundle in the local DSF FHIR server
+		and sending a Task to start the data-translate process to the GTH -->
+   <!-- <input>
+      <type>
+         <coding>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="dry-run"/>
+         </coding>
+      </type>
+      <valueBoolean value="true"/>
+   </input> -->
 </Task>

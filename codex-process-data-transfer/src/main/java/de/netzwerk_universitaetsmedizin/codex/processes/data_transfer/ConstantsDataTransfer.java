@@ -25,6 +25,7 @@ public interface ConstantsDataTransfer
 	String BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS = "continueStatus";
 	String BPMN_EXECUTION_VARIABLE_RETURN_TARGET = "returnTarget";
 	String BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID = "sourceIdsByBundleUuid";
+	String BPMN_EXECUTION_VARIABLE_DRY_RUN = "dryRun";
 
 	String NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym";
 	String NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM = "http://www.netzwerk-universitaetsmedizin.de/sid/crr-pseudonym";
@@ -41,6 +42,7 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM = "export-from";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO = "export-to";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE = "data-reference";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DRY_RUN = "dry-run";
 
 	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/";
 	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI

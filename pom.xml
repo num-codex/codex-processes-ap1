@@ -56,6 +56,12 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>codex-process-data-transfer</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- highmed-dsf -->
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
