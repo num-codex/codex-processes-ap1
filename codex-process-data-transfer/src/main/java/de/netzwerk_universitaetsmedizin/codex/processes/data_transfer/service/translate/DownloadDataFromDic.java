@@ -63,6 +63,10 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
+		/*
+		 * need to use leading task not current task, since changes to current task variable will not survive
+		 * intermediate message catch events later in the process flow
+		 */
 		Task task = getLeadingTaskFromExecutionVariables();
 		String dicIdentifierValue = task.getRequester().getIdentifier().getValue();
 
@@ -85,6 +89,7 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 					.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE);
 		}
 
+		// see comment above on leading vs current task
 		updateLeadingTaskInExecutionVariables(task);
 	}
 
