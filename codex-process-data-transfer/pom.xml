@@ -45,7 +45,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/ValidateDataLearningTest.java</exclude>
+						<exclude>**/*LearningTest.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
