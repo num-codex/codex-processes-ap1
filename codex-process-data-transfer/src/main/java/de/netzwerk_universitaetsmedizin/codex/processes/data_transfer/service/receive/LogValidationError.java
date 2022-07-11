@@ -73,5 +73,7 @@ public class LogValidationError extends AbstractServiceDelegate
 					OperationOutcome outcome = (OperationOutcome) entry.getResponse().getOutcome();
 					errorOutputParameterGenerator.createCrrValidationError(outcome).forEach(task::addOutput);
 				});
+
+		updateLeadingTaskInExecutionVariables(task);
 	}
 }

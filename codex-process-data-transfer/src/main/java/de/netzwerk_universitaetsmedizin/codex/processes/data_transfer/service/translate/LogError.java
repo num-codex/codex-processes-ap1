@@ -56,11 +56,14 @@ public class LogError extends AbstractServiceDelegate
 		logger.debug("Setting Task.status failed, adding error");
 
 		Task task = getLeadingTaskFromExecutionVariables();
-		task.setStatus(TaskStatus.FAILED);
 
 		String errorCode = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_CODE);
 		String errorMessage = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE);
 		String errorSource = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_SOURCE);
+
+		// only fail if local error
+		if (errorSource == null || CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH.equals(errorSource))
+			task.setStatus(TaskStatus.FAILED);
 
 		if (!CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED.equals(errorCode))
 		{
@@ -71,13 +74,15 @@ public class LogError extends AbstractServiceDelegate
 			task.addOutput(output);
 
 			if (CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH.equals(errorSource))
-				logger.warn("Error while executing local process: code: '{}', message: {}", errorCode, errorMessage);
-			else
-				logger.warn("Error while executing process at {}: code: '{}', message: {}", errorSource, errorCode,
+				logger.error("Error while executing local process; code: '{}', message: {}", errorCode, errorMessage);
+			else // not an error if error source remote
+				logger.warn("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
 			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 		}
+
+		updateLeadingTaskInExecutionVariables(task);
 	}
 }
