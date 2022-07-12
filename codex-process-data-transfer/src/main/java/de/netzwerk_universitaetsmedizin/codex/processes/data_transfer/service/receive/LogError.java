@@ -71,13 +71,15 @@ public class LogError extends AbstractServiceDelegate
 			task.addOutput(output);
 
 			if (CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR.equals(errorSource))
-				logger.warn("Error while executing local process: code: '{}', message: {}", errorCode, errorMessage);
+				logger.error("Error while executing local process; code: '{}', message: {}", errorCode, errorMessage);
 			else
-				logger.warn("Error while executing process at {}: code: '{}', message: {}", errorSource, errorCode,
+				logger.error("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
 			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 		}
+
+		updateLeadingTaskInExecutionVariables(task);
 	}
 }

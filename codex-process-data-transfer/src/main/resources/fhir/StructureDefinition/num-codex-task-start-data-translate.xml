@@ -134,5 +134,64 @@
       <path value="Task.input.value[x].identifier" />
       <max value="0" />
     </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="0" />
+    </element>
+    <element id="Task.output:error.extension:error-metadata">
+      <path value="Task.output.extension" />
+      <sliceName value="error-metadata" />
+      <min value="0" />
+      <type>
+        <code value="Extension" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata" />
+      </type>
+      <isModifier value="false" />
+    </element>
+    <element id="Task.output:encryptedBundleSize">
+      <path value="Task.output" />
+      <sliceName value="encryptedBundleSize" />
+      <min value="0" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type">
+      <path value="Task.output.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="encrypted-bundle-size" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="integer" />
+      </type>
+    </element>
   </differential>
 </StructureDefinition>
