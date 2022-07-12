@@ -46,4 +46,14 @@
 		<display value="Export To" />
 		<definition value="Date parameter to filter resources last modified until (exclusive) the specified date" />
 	</concept>
+	<concept>
+		<code value="dry-run" />
+		<display value="Dry Run" />
+		<definition value="Boolean parameter to instruct the data-send process to abort after validating the generated transfer bundle but before transferring data to GTH/CRR" />
+	</concept>
+	<concept>
+		<code value="encrypted-bundle-size" />
+		<display value="Encrypted Bundle Size" />
+		<definition value="Output parameter describing the encrypted transfer bundle size in byte" />
+	</concept>
 </CodeSystem> 

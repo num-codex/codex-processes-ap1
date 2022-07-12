@@ -26,7 +26,7 @@
     <element id="Task.input">
       <path value="Task.input" />
       <min value="3" />
-      <max value="5" />
+      <max value="6" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
@@ -142,6 +142,40 @@
       <path value="Task.input.value[x]" />
       <type>
         <code value="instant" />
+      </type>
+    </element>
+    <element id="Task.input:dry-run">
+      <path value="Task.input" />
+      <sliceName value="dry-run" />
+      <min value="0" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:dry-run.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+      </binding>
+    </element>
+    <element id="Task.input:dry-run.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:dry-run.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.input:dry-run.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="dry-run" />
+    </element>
+    <element id="Task.input:dry-run.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="boolean" />
       </type>
     </element>
     <element id="Task.output:error">

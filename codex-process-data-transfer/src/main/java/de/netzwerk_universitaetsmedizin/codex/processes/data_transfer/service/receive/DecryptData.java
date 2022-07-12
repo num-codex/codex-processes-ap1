@@ -4,7 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_GECCO_DATA_FROM_DIC_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PLACEHOLDER;
 
@@ -33,6 +33,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
@@ -40,6 +42,8 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.Rsa
 
 public class DecryptData extends AbstractServiceDelegate
 {
+	private static final Logger logger = LoggerFactory.getLogger(DecryptData.class);
+
 	private final FhirContext fhirContext;
 	private final CrrKeyProvider crrKeyProvider;
 
@@ -71,7 +75,8 @@ public class DecryptData extends AbstractServiceDelegate
 		catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
 				| NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e)
 		{
-			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED,
+			logger.warn("Unable to decrypt GECCO data from DIC: " + e.getMessage(), e);
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_GECCO_DATA_FROM_DIC_FAILED,
 					"Error while decrypting GECCO data from DIC");
 		}
 	}

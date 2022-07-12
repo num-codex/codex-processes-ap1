@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClientStub;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
@@ -31,11 +32,13 @@ public class GeccoClientFactory
 	{
 		final FhirContext fhirContext;
 		final String localIdentifierValue;
+		final DataLogger dataLogger;
 
-		GeccoClientStub(FhirContext fhirContext, String localIdentifierValue)
+		GeccoClientStub(FhirContext fhirContext, String localIdentifierValue, DataLogger dataLogger)
 		{
 			this.fhirContext = fhirContext;
 			this.localIdentifierValue = localIdentifierValue;
+			this.dataLogger = dataLogger;
 		}
 
 		@Override
@@ -59,7 +62,7 @@ public class GeccoClientFactory
 		@Override
 		public GeccoFhirClient getFhirClient()
 		{
-			return new GeccoFhirClientStub(this);
+			return new GeccoFhirClientStub(this, dataLogger);
 		}
 
 		@Override
@@ -113,14 +116,16 @@ public class GeccoClientFactory
 	private final Class<GeccoFhirClient> geccoFhirClientClass;
 	private final boolean useChainedParameterNotLogicalReference;
 
+	private final DataLogger dataLogger;
+
 	public GeccoClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath, char[] privateKeyPassword,
 			int connectTimeout, int socketTimeout, int connectionRequestTimeout, String geccoServerBase,
 			String geccoServerBasicAuthUsername, String geccoServerBasicAuthPassword, String geccoServerBearerToken,
 			String proxyUrl, String proxyUsername, String proxyPassword, boolean hapiClientVerbose,
 			FhirContext fhirContext, Path searchBundleOverride, String localIdentifierValue,
-			Class<GeccoFhirClient> geccoFhirClientClass, boolean useChainedParameterNotLogicalReference)
+			Class<GeccoFhirClient> geccoFhirClientClass, boolean useChainedParameterNotLogicalReference,
+			DataLogger dataLogger)
 	{
-		super();
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
 		this.privateKeyPath = privateKeyPath;
@@ -145,6 +150,8 @@ public class GeccoClientFactory
 		this.localIdentifierValue = localIdentifierValue;
 		this.geccoFhirClientClass = geccoFhirClientClass;
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
+
+		this.dataLogger = dataLogger;
 	}
 
 	public String getServerBase()
@@ -177,7 +184,7 @@ public class GeccoClientFactory
 		if (configured())
 			return createGeccoClient();
 		else
-			return new GeccoClientStub(fhirContext, localIdentifierValue);
+			return new GeccoClientStub(fhirContext, localIdentifierValue, dataLogger);
 	}
 
 	private boolean configured()
@@ -208,7 +215,7 @@ public class GeccoClientFactory
 				connectionRequestTimeout, geccoServerBasicAuthUsername, geccoServerBasicAuthPassword,
 				geccoServerBearerToken, geccoServerBase, proxyUrl, proxyUsername, proxyPassword, hapiClientVerbose,
 				fhirContext, searchBundleOverride, localIdentifierValue, geccoFhirClientClass,
-				useChainedParameterNotLogicalReference);
+				useChainedParameterNotLogicalReference, dataLogger);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

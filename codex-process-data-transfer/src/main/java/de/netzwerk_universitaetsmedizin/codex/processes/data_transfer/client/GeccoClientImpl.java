@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
 public class GeccoClientImpl implements GeccoClient
 {
@@ -40,12 +41,14 @@ public class GeccoClientImpl implements GeccoClient
 	private final Class<GeccoFhirClient> geccoFhirClientClass;
 	private final boolean useChainedParameterNotLogicalReference;
 
+	private final DataLogger dataLogger;
+
 	public GeccoClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
 			int socketTimeout, int connectionRequestTimeout, String geccoServerBasicAuthUsername,
 			String geccoServerBasicAuthPassword, String geccoServerBearerToken, String geccoServerBase, String proxyUrl,
 			String proxyUsername, String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext,
 			Path searchBundleOverride, String localIdentifierValue, Class<GeccoFhirClient> geccoFhirClientClass,
-			boolean useChainedParameterNotLogicalReference)
+			boolean useChainedParameterNotLogicalReference, DataLogger dataLogger)
 	{
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout);
@@ -65,6 +68,8 @@ public class GeccoClientImpl implements GeccoClient
 		this.localIdentifierValue = localIdentifierValue;
 		this.geccoFhirClientClass = geccoFhirClientClass;
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
+
+		this.dataLogger = dataLogger;
 	}
 
 	private void configureProxy(IRestfulClientFactory clientFactory, String proxyUrl, String proxyUsername,
@@ -154,9 +159,10 @@ public class GeccoClientImpl implements GeccoClient
 	{
 		try
 		{
-			Constructor<GeccoFhirClient> constructor = geccoFhirClientClass.getConstructor(GeccoClient.class);
+			Constructor<GeccoFhirClient> constructor = geccoFhirClientClass.getConstructor(GeccoClient.class,
+					DataLogger.class);
 
-			return constructor.newInstance(this);
+			return constructor.newInstance(this, dataLogger);
 		}
 		catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e)

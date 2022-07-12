@@ -1,17 +1,22 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.fhir.json.ObjectMapperFactory;
 import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
@@ -35,19 +41,25 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.ValidationResult;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.PemIo;
@@ -70,6 +82,94 @@ public class ValidateDataLearningTest
 			this.resource = resource;
 			this.filename = filename;
 		}
+	}
+
+	private ValidationPackageManager createValidationPackageManager()
+			throws IOException, CertificateException, PKCSException, KeyStoreException, NoSuchAlgorithmException
+	{
+		Properties properties = new Properties();
+		try (InputStream appProperties = Files.newInputStream(Paths.get("application.properties")))
+		{
+			properties.load(appProperties);
+		}
+
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
+		char[] keyStorePassword = properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
+				.toCharArray();
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
+				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
+				keyStorePassword);
+		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
+				UUID.randomUUID().toString(), keyStorePassword);
+
+		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
+				"https://packages.simplifier.net");
+		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
+				cacheFolder, mapper, validationPackageClient);
+		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
+				"https://terminology-highmed.medic.medfak.uni-koeln.de/fhir", null, keyStore, keyStorePassword, null,
+				null, null, null, null, 0, 0, false, mapper, fhirContext);
+		ValueSetExpansionClient valueSetExpansionClientWithModifiers = new ValueSetExpansionClientWithModifiers(
+				valueSetExpansionClient);
+		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
+				cacheFolder, fhirContext, valueSetExpansionClientWithModifiers);
+		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
+				valueSetExpansionClientWithCache, mapper, fhirContext,
+				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
+						new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs))),
+				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
+		return manager;
+	}
+
+	@Test
+	public void testCheckValueSetForComplexeSnomedCtCodes() throws Exception
+	{
+		ValidationPackageManager validationPackageManager = createValidationPackageManager();
+		ValidationPackageWithDepedencies packageWithDepedencies = validationPackageManager
+				.downloadPackageWithDependencies("de.gecco", "1.0.5");
+
+		// packageWithDepedencies.parseResources(fhirContext);
+		//
+		// List<ValueSet> valueSets = packageWithDepedencies
+		// .getValueSetsIncludingDependencies(EnumSet.allOf(BindingStrength.class));
+		//
+		// valueSets.stream()
+		// .filter(v -> v.getCompose().getInclude().stream().flatMap(c -> c.getConcept().stream()).anyMatch(
+		// c -> c.getCode().contains("+") || c.getCode().contains(":") || c.getCode().contains("=")))
+		// .forEach(v -> System.out.println(v.getUrl() + "|" + v.getVersion()));
+
+		IValidationSupport validationSupport = validationPackageManager
+				.expandValueSetsAndGenerateStructureDefinitionSnapshots(packageWithDepedencies);
+
+		List<ValueSet> valueSets = packageWithDepedencies
+				.getValueSetsIncludingDependencies(EnumSet.allOf(BindingStrength.class), fhirContext);
+
+		valueSets.forEach(v ->
+		{
+			System.out.println(v.getUrl() + "|" + v.getVersion() + " " + v.hasCompose() + " " + v.hasExpansion());
+			ValueSet expandedV = (ValueSet) validationSupport.fetchValueSet(v.getUrl());
+
+			if (expandedV != null)
+				System.out.println(expandedV.getUrl() + "|" + expandedV.getVersion() + " " + expandedV.hasCompose()
+						+ " " + expandedV.hasExpansion());
+			else
+				System.out.println("null");
+
+			if (v.hasCompose() && !v.hasExpansion() && !expandedV.hasCompose() && expandedV.hasExpansion())
+				testContainsAllFromCompose(v.getCompose(), expandedV.getExpansion());
+		});
+	}
+
+	private void testContainsAllFromCompose(ValueSetComposeComponent compose, ValueSetExpansionComponent expansion)
+	{
+		compose.getInclude().stream().filter(i -> i.hasConcept()).flatMap(c -> c.getConcept().stream())
+				.filter(c -> c.hasCode()).map(c -> c.getCode()).forEach(code ->
+				{
+					if (!expansion.getContains().stream().anyMatch(c -> Objects.equal(c.getCode(), code)))
+						System.out.println("Missing code in expansion: " + code);
+				});
 	}
 
 	@Test
@@ -130,37 +230,7 @@ public class ValidateDataLearningTest
 				return null;
 		}).filter(e -> e != null).collect(Collectors.toList());
 
-		Properties properties = new Properties();
-		try (InputStream appProperties = Files.newInputStream(Paths.get("application.properties")))
-		{
-			properties.load(appProperties);
-		}
-
-		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
-		char[] keyStorePassword = properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
-				.toCharArray();
-		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
-				keyStorePassword);
-		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
-				UUID.randomUUID().toString(), keyStorePassword);
-
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://terminology-highmed.medic.medfak.uni-koeln.de/fhir", null, keyStore, keyStorePassword, null,
-				null, null, null, null, 0, 0, false, mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext,
-				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
-						new PluginSnapshotGeneratorWithModifiers(new PluginSnapshotGeneratorImpl(fc, vs))),
-				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
+		ValidationPackageManager manager = createValidationPackageManager();
 
 		BundleValidator validator = manager.createBundleValidator("de.gecco", "1.0.5");
 
@@ -208,20 +278,7 @@ public class ValidateDataLearningTest
 	@Test
 	public void testDownloadWithDependencies() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
-				ValueSetExpanderImpl::new);
-
+		ValidationPackageManager manager = createValidationPackageManager();
 		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
 				"1.0.5");
 		packageWithDependencies.parseResources(fhirContext);
@@ -230,20 +287,7 @@ public class ValidateDataLearningTest
 	@Test
 	public void testValidate() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext,
-				(fc, vs) -> new PluginSnapshotGeneratorWithFileSystemCache(cacheFolder, fc,
-						new PluginSnapshotGeneratorImpl(fc, vs)),
-				(fc, vs) -> new ValueSetExpanderWithFileSystemCache(cacheFolder, fc, new ValueSetExpanderImpl(fc, vs)));
-
+		ValidationPackageManager manager = createValidationPackageManager();
 		BundleValidator validator = manager.createBundleValidator("de.gecco", "1.0.5");
 
 		logger.debug("---------- executing validation tests ----------");
@@ -315,17 +359,7 @@ public class ValidateDataLearningTest
 	@Test
 	public void testGenerateSnapshots() throws Exception
 	{
-		ValidationPackageClient validationPackageClient = new ValidationPackageClientJersey(
-				"https://packages.simplifier.net");
-		ValidationPackageClient validationPackageClientWithCache = new ValidationPackageClientWithFileSystemCache(
-				cacheFolder, mapper, validationPackageClient);
-		ValueSetExpansionClient valueSetExpansionClient = new ValueSetExpansionClientJersey(
-				"https://r4.ontoserver.csiro.au/fhir", mapper, fhirContext);
-		ValueSetExpansionClient valueSetExpansionClientWithCache = new ValueSetExpansionClientWithFileSystemCache(
-				cacheFolder, fhirContext, valueSetExpansionClient);
-		ValidationPackageManager manager = new ValidationPackageManagerImpl(validationPackageClientWithCache,
-				valueSetExpansionClientWithCache, mapper, fhirContext, PluginSnapshotGeneratorImpl::new,
-				ValueSetExpanderImpl::new);
+		ValidationPackageManager manager = createValidationPackageManager();
 
 		ValidationPackageWithDepedencies packageWithDependencies = manager.downloadPackageWithDependencies("de.gecco",
 				"1.0.5");

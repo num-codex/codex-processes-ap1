@@ -3,7 +3,9 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.t
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_RETURN_TARGET;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_DIC_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
@@ -30,6 +32,7 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
@@ -61,7 +64,11 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		/*
+		 * need to use leading task not current task, since changes to current task variable will not survive
+		 * intermediate message catch events later in the process flow
+		 */
+		Task task = getLeadingTaskFromExecutionVariables();
 		String dicIdentifierValue = task.getRequester().getIdentifier().getValue();
 
 		Endpoint targetEndpoint = getEndpoint(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC, dicIdentifierValue);
@@ -77,7 +84,20 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 		{
 			byte[] encrypted = binary.readAllBytes();
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
+
+			task.addOutput().setValue(new IntegerType(encrypted.length)).getType().getCodingFirstRep()
+					.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
+					.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE);
 		}
+		catch (Exception e)
+		{
+			throw new BpmnError(
+					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_DIC_FAILED,
+					"Unable to download Binary resource with encrypted GECCO data from DIC");
+		}
+
+		// see comment above on leading vs current task
+		updateLeadingTaskInExecutionVariables(task);
 	}
 
 	private Optional<String> getDataReference(Task task)

@@ -92,6 +92,8 @@ public class LogValidationError extends AbstractServiceDelegate
 
 					errorOutputParameterGenerator.createCrrValidationError(sourceId, outcome).forEach(task::addOutput);
 				});
+
+		updateLeadingTaskInExecutionVariables(task);
 	}
 
 	private void logValidationDetails(Bundle bundle, Map<String, String> sourceIdsByBundleUuid)

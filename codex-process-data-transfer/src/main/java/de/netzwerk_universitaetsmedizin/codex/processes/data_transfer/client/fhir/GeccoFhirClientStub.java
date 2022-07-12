@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
@@ -35,11 +36,13 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	private static final String patient = "{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/Patient\"]},\"extension\":[{\"url\":\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/ethnic-group\",\"valueCoding\":{\"system\":\"http://snomed.info/sct\",\"code\":\"186019001\",\"display\":\"Other ethnic, mixed origin\"}},{\"url\":\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/age\",\"extension\":[{\"url\":\"dateTimeOfDocumentation\",\"valueDateTime\":\"2020-10-01\"},{\"url\":\"age\",\"valueAge\":{\"value\":67,\"unit\":\"years\",\"system\":\"http://unitsofmeasure.org\",\"code\":\"a\"}}]}],\"birthDate\":\"1953-09-30\"}";
 	private static final String observation = "{\"resourceType\":\"Observation\",\"meta\":{\"profile\":[\"https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/sars-cov-2-rt-pcr\"]},\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"OBI\"}]}}],\"status\":\"final\",\"category\":[{\"coding\":[{\"system\":\"http://loinc.org\",\"code\":\"26436-6\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/observation-category\",\"code\":\"laboratory\"}]}],\"code\":{\"coding\":[{\"system\":\"http://loinc.org\",\"code\":\"94500-6\",\"display\":\"SARS-CoV-2 (COVID-19) RNA [Presence] in Respiratory specimen by NAA with probe detection\"}],\"text\":\"SARS-CoV-2-RNA (PCR)\"},\"effectiveDateTime\":\"2020-11-10T15:50:41.000+01:00\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"http://snomed.info/sct\",\"code\":\"260373001\",\"display\":\"Detected (qualifier value)\"}],\"text\":\"SARS-CoV-2-RNA positiv\"}}";
 
-	private GeccoClient geccoClient;
+	private final GeccoClient geccoClient;
+	private final DataLogger dataLogger;
 
-	public GeccoFhirClientStub(GeccoClient geccoClient)
+	public GeccoFhirClientStub(GeccoClient geccoClient, DataLogger dataLogger)
 	{
 		this.geccoClient = geccoClient;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -48,9 +51,7 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 		logger.warn("Ignoring bundle with {} {}", bundle.getEntry().size(),
 				bundle.getEntry().size() != 1 ? "entries" : "entry");
 
-		if (logger.isDebugEnabled())
-			logger.debug("Ignored bundle: {}",
-					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(bundle));
+		dataLogger.logData("Ignored bundle", bundle);
 	}
 
 	@Override

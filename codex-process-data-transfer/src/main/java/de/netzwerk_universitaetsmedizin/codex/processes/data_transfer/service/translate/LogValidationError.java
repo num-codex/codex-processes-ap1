@@ -59,5 +59,6 @@ public class LogValidationError extends AbstractServiceDelegate
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
 				"Validation failed while inserting into CRR");
 		task.addOutput(output);
+		updateLeadingTaskInExecutionVariables(task);
 	}
 }

@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.r
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BINARY_URL;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS;
@@ -97,7 +98,9 @@ public class StoreValidationErrorForGth extends AbstractServiceDelegate
 		{
 			logger.debug("Binary to create {}", FhirContext.forR4().newJsonParser().encodeResourceToString(binary));
 			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
-			throw e;
+			throw new BpmnError(
+					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR,
+					"Unable to create Binary resource with encrypted validation error for GTH in local DSF FHIR server");
 		}
 	}
 

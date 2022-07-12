@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
 public class FhirBridgeClient extends AbstractComplexFhirClient
 {
@@ -41,10 +42,12 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	/**
 	 * @param geccoClient
 	 *            not <code>null</code>
+	 * @param dataLogger
+	 *            not <code>null</code>
 	 */
-	public FhirBridgeClient(GeccoClient geccoClient)
+	public FhirBridgeClient(GeccoClient geccoClient, DataLogger dataLogger)
 	{
-		super(geccoClient);
+		super(geccoClient, dataLogger);
 	}
 
 	@Override
@@ -259,9 +262,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 			Bundle resultBundle = geccoClient.getGenericFhirClient().search().byUrl(url).sort()
 					.descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
-			if (logger.isDebugEnabled())
-				logger.debug("{} search-bundle result: {}", resourceType.getAnnotation(ResourceDef.class).name(),
-						geccoClient.getFhirContext().newJsonParser().encodeResourceToString(resultBundle));
+			dataLogger.logData(resourceType.getAnnotation(ResourceDef.class).name() + " search-bundle result: {}",
+					resultBundle);
 
 			if (resultBundle.getTotal() > 0)
 			{

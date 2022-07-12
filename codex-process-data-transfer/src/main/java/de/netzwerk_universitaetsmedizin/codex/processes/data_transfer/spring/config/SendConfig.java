@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Configuration;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckConsent;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckDryRun;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckForError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.DecryptValidationErrorFromGth;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.DeleteDataForGth;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.DownloadValidationErrorFromGth;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.EncryptData;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.ExtractPatientReference;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.LogDryRunSuccess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.LogError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.LogSuccess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.LogValidationError;
@@ -70,8 +72,8 @@ public class SendConfig
 	public ReadData readData()
 	{
 		return new ReadData(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext(),
-				transferDataConfig.geccoClientFactory());
+				transferDataConfig.readAccessHelper(), transferDataConfig.geccoClientFactory(),
+				transferDataConfig.dataLogger());
 	}
 
 	@Bean
@@ -88,6 +90,20 @@ public class SendConfig
 		return new EncryptData(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext(),
 				transferDataConfig.crrKeyProvider());
+	}
+
+	@Bean
+	public CheckDryRun checkDryRun()
+	{
+		return new CheckDryRun(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
+				transferDataConfig.readAccessHelper());
+	}
+
+	@Bean
+	public LogDryRunSuccess logDryRunSuccess()
+	{
+		return new LogDryRunSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
+				transferDataConfig.readAccessHelper());
 	}
 
 	@Bean

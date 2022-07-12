@@ -13,18 +13,21 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
 public class HapiClient extends AbstractComplexFhirClient
 {
-	static final Logger logger = LoggerFactory.getLogger(HapiClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(HapiClient.class);
 
 	/**
 	 * @param geccoClient
 	 *            not <code>null</code>
+	 * @param dataLogger
+	 *            not <code>null</code>
 	 */
-	public HapiClient(GeccoClient geccoClient)
+	public HapiClient(GeccoClient geccoClient, DataLogger dataLogger)
 	{
-		super(geccoClient);
+		super(geccoClient, dataLogger);
 	}
 
 	@Override
@@ -81,9 +84,7 @@ public class HapiClient extends AbstractComplexFhirClient
 			});
 		}
 
-		if (logger.isDebugEnabled())
-			logger.debug("Modified bundle: {}",
-					geccoClient.getFhirContext().newJsonParser().encodeResourceToString(bundle));
+		dataLogger.logData("Modified bundle", bundle);
 	}
 
 	private void modifyBundleWithPatientId(Bundle bundle, String pseudonym, String patientId)

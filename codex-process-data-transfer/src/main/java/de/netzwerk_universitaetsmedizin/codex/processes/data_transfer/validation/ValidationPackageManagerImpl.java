@@ -202,7 +202,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		ValueSetExpander expander = internalValueSetExpanderFactory.apply(fhirContext,
 				createSupportChain(fhirContext, packageWithDependencies, Collections.emptyList(), expandedValueSets));
 
-		packageWithDependencies.getValueSetsIncludingDependencies(valueSetBindingStrengths).forEach(v ->
+		packageWithDependencies.getValueSetsIncludingDependencies(valueSetBindingStrengths, fhirContext).forEach(v ->
 		{
 			logger.debug("Expanding ValueSet {}|{}", v.getUrl(), v.getVersion());
 
