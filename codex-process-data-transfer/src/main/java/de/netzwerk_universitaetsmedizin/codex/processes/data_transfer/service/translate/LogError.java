@@ -79,7 +79,7 @@ public class LogError extends AbstractServiceDelegate
 				logger.warn("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
-			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables().getIdElement()
+			errorLogger.logDataTranslateFailed(getLeadingTaskFromExecutionVariables().getIdElement()
 					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 		}
 
