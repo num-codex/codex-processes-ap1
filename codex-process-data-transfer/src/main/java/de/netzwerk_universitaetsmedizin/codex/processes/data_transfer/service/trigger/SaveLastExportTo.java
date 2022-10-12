@@ -3,7 +3,6 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.t
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
 
 import java.util.Date;
 
@@ -30,10 +29,9 @@ public class SaveLastExportTo extends AbstractServiceDelegate
 	{
 		Date lastExportTo = (Date) execution.getVariable(BPMN_EXECUTION_VARIABLE_LAST_EXPORT_TO);
 
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.addOutput(exportToParameter(lastExportTo));
-
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
 	private TaskOutputComponent exportToParameter(Date exportTo)

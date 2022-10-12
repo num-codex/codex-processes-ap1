@@ -65,17 +65,17 @@ public class LogValidationError extends AbstractServiceDelegate
 		Map<String, String> sourceIdsByBundleUuid = (Map<String, String>) execution
 				.getVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID);
 
-		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables().getIdElement()
+		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables(execution).getIdElement()
 				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 		logValidationDetails(bundle, sourceIdsByBundleUuid);
-		addErrorsToTask(bundle, sourceIdsByBundleUuid);
+		addErrorsToTask(execution, bundle, sourceIdsByBundleUuid);
 	}
 
-	private void addErrorsToTask(Bundle bundle, Map<String, String> sourceIdsByBundleUuid)
+	private void addErrorsToTask(DelegateExecution execution, Bundle bundle, Map<String, String> sourceIdsByBundleUuid)
 	{
 		logger.debug("Setting Task.status failed, adding validation errors");
 
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.setStatus(TaskStatus.FAILED);
 
 		bundle.getEntry().stream()
@@ -93,7 +93,7 @@ public class LogValidationError extends AbstractServiceDelegate
 					errorOutputParameterGenerator.createCrrValidationError(sourceId, outcome).forEach(task::addOutput);
 				});
 
-		updateLeadingTaskInExecutionVariables(task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
 	private void logValidationDetails(Bundle bundle, Map<String, String> sourceIdsByBundleUuid)

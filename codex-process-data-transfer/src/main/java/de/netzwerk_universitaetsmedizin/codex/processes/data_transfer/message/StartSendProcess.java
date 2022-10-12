@@ -46,11 +46,11 @@ public class StartSendProcess extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
-			String profile, Stream<ParameterComponent> additionalInputParameters)
+	protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
+			String businessKey, String profile, Stream<ParameterComponent> additionalInputParameters)
 	{
 		// can't use same business key as trigger process
-		super.sendTask(target, instantiatesUri, messageName, UUID.randomUUID().toString(), profile,
+		super.sendTask(execution, target, instantiatesUri, messageName, UUID.randomUUID().toString(), profile,
 				additionalInputParameters);
 	}
 

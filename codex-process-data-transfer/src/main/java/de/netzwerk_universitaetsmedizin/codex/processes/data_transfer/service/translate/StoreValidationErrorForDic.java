@@ -63,7 +63,7 @@ public class StoreValidationErrorForDic extends AbstractServiceDelegate
 	{
 		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-		Task leadingTask = getLeadingTaskFromExecutionVariables();
+		Task leadingTask = getLeadingTaskFromExecutionVariables(execution);
 		String medicIdentifierValue = leadingTask.getRequester().getIdentifier().getValue();
 
 		String downloadUrl = saveBinary(encrypted, medicIdentifierValue);
