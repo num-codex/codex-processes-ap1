@@ -31,7 +31,7 @@ public class ContinueSendProcessWithValidationError extends AbstractTaskMessageS
 	@Override
 	protected Target getTarget()
 	{
-		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_RETURN_TARGET);
+		return (Target) getExecution().getVariable(BPMN_EXECUTION_VARIABLE_RETURN_TARGET);
 	}
 
 	@Override

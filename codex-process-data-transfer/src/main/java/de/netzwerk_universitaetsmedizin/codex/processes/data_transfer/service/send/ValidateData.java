@@ -222,7 +222,7 @@ public class ValidateData extends AbstractServiceDelegate
 			e.clearUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT);
 			e.setResponse(null);
 		});
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
+		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
 
 		return sourceIdByBundleUuid;
 	}
