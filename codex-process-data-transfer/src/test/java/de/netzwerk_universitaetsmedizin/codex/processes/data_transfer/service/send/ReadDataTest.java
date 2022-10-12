@@ -5,10 +5,10 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import java.io.FileNotFoundException;
@@ -70,7 +70,7 @@ public class ReadDataTest
 		Mockito.when(execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE)).thenReturn(PatientReference
 				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original")));
 		Task task = createTask();
-		Mockito.when(execution.getVariable(BPMN_EXECUTION_VARIABLE_TASK)).thenReturn(task);
+		Mockito.when(taskHelper.getCurrentTaskFromExecutionVariables(any())).thenReturn(task);
 
 		readData.execute(execution);
 
