@@ -66,7 +66,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5000:5000
@@ -113,7 +113,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5003:5003
@@ -138,9 +138,6 @@ services:
       - type: bind
         source: ./dic/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./dic/bpe/last_event
-        target: /opt/bpe/last_event
       - type: bind
         source: ./dic/bpe/cache
         target: /opt/bpe/cache
@@ -203,7 +200,7 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5001:5001
@@ -250,7 +247,7 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5004:5004
@@ -274,9 +271,6 @@ services:
       - type: bind
         source: ./gth/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./gth/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
@@ -310,7 +304,7 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5002:5002
@@ -357,7 +351,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.8.0
     restart: "no"
     ports:
       - 127.0.0.1:5005:5005
@@ -382,9 +376,6 @@ services:
       - type: bind
         source: ./crr/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./crr/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
