@@ -68,7 +68,7 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected void handleSendTaskError(Exception exception, String errorMessage)
+	protected void handleSendTaskError(DelegateExecution execution, Exception exception, String errorMessage)
 	{
 		throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_GTH_NOT_REACHABLE,
 				"Error while sending Task to GTH: " + exception.getMessage());

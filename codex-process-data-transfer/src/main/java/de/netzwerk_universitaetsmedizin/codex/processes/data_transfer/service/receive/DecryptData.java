@@ -85,7 +85,7 @@ public class DecryptData extends AbstractServiceDelegate
 			throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException,
 			NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		Task task = getCurrentTaskFromExecutionVariables(execution);
 		Optional<String> pseudonym = getPseudonym(task);
 
 		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);

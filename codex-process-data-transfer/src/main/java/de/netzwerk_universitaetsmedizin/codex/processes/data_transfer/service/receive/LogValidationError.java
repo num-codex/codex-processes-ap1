@@ -52,12 +52,12 @@ public class LogValidationError extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		logger.info("Validation error while adding resources to CRR FHIR repository");
-		errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables().getIdElement()
+		errorLogger.logValidationFailed(getLeadingTaskFromExecutionVariables(execution).getIdElement()
 				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 
 		logger.debug("Setting Task.status failed, adding validation errors");
 
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.setStatus(TaskStatus.FAILED);
 
 		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
@@ -74,6 +74,6 @@ public class LogValidationError extends AbstractServiceDelegate
 					errorOutputParameterGenerator.createCrrValidationError(outcome).forEach(task::addOutput);
 				});
 
-		updateLeadingTaskInExecutionVariables(task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 }
