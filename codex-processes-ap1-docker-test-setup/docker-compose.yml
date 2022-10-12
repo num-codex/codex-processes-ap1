@@ -139,9 +139,6 @@ services:
         source: ./dic/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic/bpe/last_event
-        target: /opt/bpe/last_event
-      - type: bind
         source: ./dic/bpe/cache
         target: /opt/bpe/cache
     environment:
@@ -274,9 +271,6 @@ services:
       - type: bind
         source: ./gth/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./gth/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
@@ -382,9 +376,6 @@ services:
       - type: bind
         source: ./crr/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./crr/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
