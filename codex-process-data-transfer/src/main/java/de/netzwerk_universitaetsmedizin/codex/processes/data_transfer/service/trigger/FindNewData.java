@@ -108,7 +108,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		if (lastExportTo != null)
 			return Optional.of(new DateWithPrecision(lastExportTo, TemporalPrecisionEnum.MILLI));
 
-		Optional<DateTimeType> exportFromInput = getExportFromInput(getCurrentTaskFromExecutionVariables());
+		Optional<DateTimeType> exportFromInput = getExportFromInput(getCurrentTaskFromExecutionVariables(execution));
 		return exportFromInput.map(d -> new DateWithPrecision(d.getValue(), d.getPrecision()));
 	}
 

@@ -45,7 +45,7 @@ public class ReplacePseudonym extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		Task task = getCurrentTaskFromExecutionVariables(execution);
 
 		String dicPseudonym = getPseudonym(task).get();
 

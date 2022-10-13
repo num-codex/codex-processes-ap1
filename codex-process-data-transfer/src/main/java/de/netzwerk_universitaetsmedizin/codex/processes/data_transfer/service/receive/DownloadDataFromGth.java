@@ -70,7 +70,7 @@ public class DownloadDataFromGth extends AbstractServiceDelegate
 				TargetValues.create(Target.createUniDirectionalTarget(gthIdentifierValue,
 						getEndpointIdentifier(targetEndpoint), targetEndpoint.getAddress())));
 
-		Task task = getCurrentTaskFromExecutionVariables();
+		Task task = getCurrentTaskFromExecutionVariables(execution);
 
 		IdType id = getDataReference(task).map(ref -> new IdType(ref)).get();
 

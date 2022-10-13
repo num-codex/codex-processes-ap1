@@ -34,7 +34,7 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = getCurrentTaskFromExecutionVariables();
+		Task task = getCurrentTaskFromExecutionVariables(execution);
 		Reference patient = getPatientReference(task);
 
 		if (patient.hasIdentifier() && NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM.equals(patient.getIdentifier().getSystem())
@@ -48,7 +48,7 @@ public class ExtractPatientReference extends AbstractServiceDelegate
 		{
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE,
 					PatientReferenceValues.create(PatientReference.from(patient.getReference())));
-			logger.info("Task contains absolut patient reference {}", patient.getReference());
+			logger.info("Task contains absolute patient reference {}", patient.getReference());
 		}
 		else
 		{
