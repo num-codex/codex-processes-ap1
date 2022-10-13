@@ -38,7 +38,7 @@ public class MissingEntriesIncluder implements ValueSetModifier
 							if (!expandedEntries.contains(toEntry(system, concept.getCode()))
 									&& !expandedEntries.contains(toEntry(system, concept.getCode())))
 							{
-								logger.warn(
+								logger.info(
 										"Adding missing concept to ValueSet {}|{}: system: '{}', version: '{}', code: '{}', display: '{}'",
 										vsWithExpansion.getUrl(), vsWithExpansion.getVersion(), system, version,
 										concept.getCode(), concept.getDisplay());

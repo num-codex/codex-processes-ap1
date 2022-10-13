@@ -27,7 +27,7 @@ public class SliceMinFixer implements StructureDefinitionModifier
 						.anyMatch(e1 -> Objects.equals(e.getPath(), e1.getPath()) && e1.hasSlicing()))
 				.forEach(e ->
 				{
-					logger.warn("Adding min=0 to rule with id {} in StructureDefinition {}|{}", e.getId(), sd.getUrl(),
+					logger.info("Adding min=0 to rule with id {} in StructureDefinition {}|{}", e.getId(), sd.getUrl(),
 							sd.getVersion(), sd.getBaseDefinition(), sd.getDifferential().getElement().stream()
 									.anyMatch(e1 -> Objects.equals(e.getPath(), e1.getPath()) && e1.hasSlicing()));
 					e.setMin(0);
