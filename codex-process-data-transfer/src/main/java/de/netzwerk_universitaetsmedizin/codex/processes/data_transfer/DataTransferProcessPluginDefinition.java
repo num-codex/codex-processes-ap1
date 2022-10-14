@@ -37,7 +37,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	private static final Logger logger = LoggerFactory.getLogger(DataTransferProcessPluginDefinition.class);
 
 	public static final String VERSION = "0.6.0";
-	public static final LocalDate DATE = LocalDate.of(2022, 7, 12);
+	public static final LocalDate DATE = LocalDate.of(2022, 10, 17);
 
 	@Override
 	public String getName()
