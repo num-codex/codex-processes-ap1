@@ -130,10 +130,11 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 		b.append(DataTransferProcessPluginDefinition.VERSION);
 		b.append(" dry-run at organization with identifier '");
 		b.append(localOrganizationIdentifierValue);
-		b.append("' successfuly completed on ");
+		b.append("' successfully completed on ");
 		b.append(DATE_FORMAT.format(finalTask.getMeta().getLastUpdated()));
-		b.append(".\n\nTask ressource is attached as ");
+		b.append(".\n\nTask resource is attached as '");
 		b.append(attachmentFileName);
+		b.append("'");
 
 		return b.toString();
 	}
