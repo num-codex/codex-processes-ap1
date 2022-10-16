@@ -294,6 +294,10 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.mail.sendProcessFailedMails:false}")
 	private boolean sendProcessFailedMail;
 
+	@ProcessDocumentation(description = "To enable a mail being send if a 'send' process dry-run was successful, the success mail will include the 'completed' task resource as an attachment, set to 'true'. This requires the SMPT mail service client to be configured in the DSF", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.mail.sendDryRunSuccessMail:false}")
+	private boolean sendDryRunSuccessMail;
+
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String localIdentifierValue;
 
@@ -350,6 +354,16 @@ public class TransferDataConfig
 	public OrganizationProvider organizationProvider()
 	{
 		return organizationProvider;
+	}
+
+	public MailService mailService()
+	{
+		return mailService;
+	}
+
+	public boolean getSendDryRunSuccessMail()
+	{
+		return sendDryRunSuccessMail;
 	}
 
 	@Bean

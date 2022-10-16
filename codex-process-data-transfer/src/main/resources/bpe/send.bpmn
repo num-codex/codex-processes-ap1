@@ -285,6 +285,9 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${dryRun}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_0ww5gaz">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.listener.AfterDryRunEndListener" event="end" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_13ulpon</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_13ulpon" sourceRef="LogDryRunSuccess" targetRef="Event_0ww5gaz" />
