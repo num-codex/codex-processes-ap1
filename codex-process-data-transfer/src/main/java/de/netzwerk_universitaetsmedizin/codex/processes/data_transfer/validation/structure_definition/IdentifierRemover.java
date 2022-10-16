@@ -35,7 +35,7 @@ public class IdentifierRemover implements StructureDefinitionModifier
 
 			if (filteredRules.size() < sd.getDifferential().getElement().size())
 			{
-				logger.warn("Removing validation rules with ids {} from StructureDefinition {}|{}",
+				logger.info("Removing validation rules with ids {} from StructureDefinition {}|{}",
 						sd.getDifferential().getElement().stream().filter(toRemove).map(ElementDefinition::getId)
 								.collect(Collectors.joining(", ", "[", "]")),
 						sd.getUrl(), sd.getVersion());
