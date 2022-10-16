@@ -32,10 +32,10 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 			byte[] encrypted = binary.readAllBytes();
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
 
-			task.addOutput().setValue(new IntegerType(encrypted.length)).getType().getCodingFirstRep()
+			task.addOutput().setValue(new UnsignedIntType(encrypted.length)).getType().getCodingFirstRep()
 					.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 					.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE);
 		}
