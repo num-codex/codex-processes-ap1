@@ -31,16 +31,6 @@
       </type>
       <valueString value="startDataTrigger"/>
    </input>
-   <input>
-      <type>
-         <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
-            <code value="business-key"/>
-         </coding>
-      </type>
-      <!-- random business-key UUID, value also used in stop data trigger task, do not use the same value twice -->
-      <valueString value="7f7fd1e7-f10f-4aeb-9ac5-c8be86fab21a"/>
-   </input>
    <!-- optional date specifying what data is defined as 'new', if not defined 
 		every GECCO resource is new and triggers the send process -->
    <!-- <input>
