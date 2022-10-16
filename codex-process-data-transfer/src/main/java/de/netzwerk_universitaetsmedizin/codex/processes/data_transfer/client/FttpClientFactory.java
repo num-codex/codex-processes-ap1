@@ -35,6 +35,7 @@ public class FttpClientFactory
 	{
 		private static final Logger logger = LoggerFactory.getLogger(FttpClientStub.class);
 
+		private static final String DIC_PSEUDONYM = "source2/original2";
 		private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(PSEUDONYM_PATTERN_STRING);
 
 		@Override
@@ -64,8 +65,9 @@ public class FttpClientFactory
 		@Override
 		public Optional<String> getDicPseudonym(String bloomFilter)
 		{
-			logger.info("Requesting DIC pseudonym for bloom filter {} ", bloomFilter);
-			return Optional.of("source2/original2");
+			logger.warn("Returning simulated DIC pseudonym '{}' for bloom filter '{}', fTTP connection not configured.",
+					DIC_PSEUDONYM, bloomFilter);
+			return Optional.of(DIC_PSEUDONYM);
 		}
 
 		@Override

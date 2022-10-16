@@ -57,7 +57,9 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	@Override
 	public PatientReferenceList getPatientReferencesWithNewData(DateWithPrecision exportFrom, Date exportTo)
 	{
-		logger.warn("Returning demo pseudonyms for {}", geccoClient.getLocalIdentifierValue());
+		logger.warn(
+				"Returning four simulated patient references for {}, connection to GECCO FHIR server not configured",
+				geccoClient.getLocalIdentifierValue());
 
 		PatientReference reference1 = PatientReference
 				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("dic_foo/bar"));
@@ -79,7 +81,9 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	@Override
 	public Stream<DomainResource> getNewData(String pseudonym, DateWithPrecision exportFrom, Date exportTo)
 	{
-		logger.warn("Returning demo resources for {}", pseudonym);
+		logger.warn(
+				"Returning simulated GECCO FHIR resources (Patient, Condition, Observation) for {}, connection to GECCO FHIR server not configured",
+				pseudonym);
 
 		Patient p = geccoClient.getFhirContext().newJsonParser().parseResource(Patient.class, patient);
 		p.setIdElement(new IdType(UUID.randomUUID().toString()));
@@ -102,6 +106,9 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	@Override
 	public Optional<Patient> getPatient(String reference)
 	{
+		logger.warn("Returning simulated patient resource for {}, connection to GECCO FHIR server not configured",
+				reference);
+
 		Patient p = geccoClient.getFhirContext().newJsonParser().parseResource(Patient.class, patient);
 		p.addIdentifier().setSystem(ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER).setValue(
 				"J75gYl+RiKSsxeu33tixBEEtFGCZwIEsWIKgvESaluvpSGBte/SBNZilz+sLSZdHSDKTL2J2d1yZsakqjtV5U2SMMJZ5IF3gEk1MT3sCRkxXEo1aJWKpnqndUTR+fvtSeMFj0y/O5yqrLV9zU79CNiTfZN5t1/6XGxZUXq2DovfCRrrpRxWjFwjKIDo0OkRANf7Mqp+Fsu0Un53JF57p/p1RLpWcJkC3xO+UslGbDo3mjgczdvxz0aLmWNA7/NIhk+Q50gxCX3B4QrntPfLLlBkrmIpsKRcLFVuYZik7pYZ9prd0qCLQ9tc8qiw1ry5kMfIvLnIS/FV36w==")
@@ -116,5 +123,7 @@ public final class GeccoFhirClientStub implements GeccoFhirClient
 	public void updatePatient(Patient patient)
 	{
 		// Nothing to do in stub client
+		logger.info(
+				"Not updating patient resource in GECCO FHIR server, connection to GECCO FHIR server not configured");
 	}
 }
