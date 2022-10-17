@@ -68,7 +68,7 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 		 * need to use leading task not current task, since changes to current task variable will not survive
 		 * intermediate message catch events later in the process flow
 		 */
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		String dicIdentifierValue = task.getRequester().getIdentifier().getValue();
 
 		Endpoint targetEndpoint = getEndpoint(CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC, dicIdentifierValue);
@@ -97,14 +97,14 @@ public class DownloadDataFromDic extends AbstractServiceDelegate
 		}
 
 		// see comment above on leading vs current task
-		updateLeadingTaskInExecutionVariables(task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
 	private Optional<String> getDataReference(Task task)
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE, Reference.class).findFirst()
-						.map(Reference::getReference);
+				.map(Reference::getReference);
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

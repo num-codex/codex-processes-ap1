@@ -55,7 +55,7 @@ public class LogError extends AbstractServiceDelegate
 	{
 		logger.debug("Setting Task.status failed, adding error");
 
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.setStatus(TaskStatus.FAILED);
 
 		String errorCode = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_CODE);
@@ -77,10 +77,10 @@ public class LogError extends AbstractServiceDelegate
 				logger.error("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
-			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables().getIdElement()
+			errorLogger.logDataSendFailed(getLeadingTaskFromExecutionVariables(execution).getIdElement()
 					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 		}
 
-		updateLeadingTaskInExecutionVariables(task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 }

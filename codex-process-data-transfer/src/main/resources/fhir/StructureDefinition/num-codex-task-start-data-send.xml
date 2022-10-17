@@ -51,7 +51,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
       </binding>
     </element>
     <element id="Task.input:patient.type.coding">
@@ -86,7 +86,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
       </binding>
     </element>
     <element id="Task.input:export-from.type.coding">
@@ -120,7 +120,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
       </binding>
     </element>
     <element id="Task.input:export-to.type.coding">
@@ -154,7 +154,7 @@
       <path value="Task.input.type" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
       </binding>
     </element>
     <element id="Task.input:dry-run.type.coding">
@@ -199,7 +199,7 @@
       <min value="0" />
       <type>
         <code value="Extension" />
-        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata|#{version}" />
       </type>
       <isModifier value="false" />
     </element>

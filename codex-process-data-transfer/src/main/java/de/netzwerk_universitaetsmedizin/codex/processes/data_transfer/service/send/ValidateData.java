@@ -71,7 +71,8 @@ public class ValidateData extends AbstractServiceDelegate
 
 			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-			Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(bundle);
+			Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(execution,
+					bundle);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
 
 			return;
@@ -112,9 +113,9 @@ public class ValidateData extends AbstractServiceDelegate
 						logger.error("Validation of transfer bundle failed, {} resource{} with error",
 								resourcesWithErrorCount, resourcesWithErrorCount != 1 ? "s" : "");
 
-						addErrorsToTask(bundle);
+						addErrorsToTask(execution, bundle);
 						errorLogger.logValidationFailedLocal(
-								getLeadingTaskFromExecutionVariables().getIdElement().withServerBase(
+								getLeadingTaskFromExecutionVariables(execution).getIdElement().withServerBase(
 										getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 
 						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
@@ -124,7 +125,7 @@ public class ValidateData extends AbstractServiceDelegate
 					else
 					{
 						Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(
-								bundle);
+								execution, bundle);
 						execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
 					}
 				}
@@ -136,7 +137,7 @@ public class ValidateData extends AbstractServiceDelegate
 		}, () ->
 		{
 			logger.warn(
-					"{} not initialized, skipping validation. This is likley due to an error during startup of the process plugin",
+					"{} not initialized, skipping validation. This is likely due to an error during startup of the process plugin",
 					BundleValidatorFactory.class.getSimpleName());
 		});
 	}
@@ -191,9 +192,9 @@ public class ValidateData extends AbstractServiceDelegate
 		}
 	}
 
-	private void addErrorsToTask(Bundle bundle)
+	private void addErrorsToTask(DelegateExecution execution, Bundle bundle)
 	{
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		bundle.getEntry().stream()
 				.filter(e -> e.hasResponse() && e.getResponse().hasOutcome()
@@ -211,7 +212,8 @@ public class ValidateData extends AbstractServiceDelegate
 				});
 	}
 
-	private Map<String, String> removeValidationResultsCollectSourceIdsIntoMap(Bundle bundle)
+	private Map<String, String> removeValidationResultsCollectSourceIdsIntoMap(DelegateExecution execution,
+			Bundle bundle)
 	{
 		Map<String, String> sourceIdByBundleUuid = new HashMap<>();
 		bundle.getEntry().stream().forEach(e ->

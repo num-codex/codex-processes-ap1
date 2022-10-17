@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.highmed.dsf.bpe.service.MailService;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.EndpointProvider;
@@ -52,6 +53,9 @@ public class TransferDataConfig
 
 	@Autowired
 	private BundleValidatorFactory bundleValidatorFactory;
+
+	@Autowired
+	private MailService mailService;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the GECCO FHIR server", processNames = {
 			"wwwnetzwerk-universitaetsmedizinde_dataSend",
@@ -278,6 +282,18 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.fttp.proxy.password:#{null}}")
 	private String fttpProxyPassword;
 
+	@ProcessDocumentation(description = "To enable mails being send on validation errors, set to 'true'. This requires the SMPT mail service client to be configured in the DSF", processNames = {
+			"wwwnetzwerk-universitaetsmedizinde_dataSend", "wwwnetzwerk-universitaetsmedizinde_dataTranslate",
+			"wwwnetzwerk-universitaetsmedizinde_dataReceive" })
+	@Value("${de.netzwerk.universitaetsmedizin.codex.mail.sendValidationFailedMails:false}")
+	private boolean sendValidationFailedMail;
+
+	@ProcessDocumentation(description = "To enable a mail being send if a 'send', 'translate' or 'receive' process instance fails, set to 'true'. This requires the SMPT mail service client to be configured in the DSF", processNames = {
+			"wwwnetzwerk-universitaetsmedizinde_dataSend", "wwwnetzwerk-universitaetsmedizinde_dataTranslate",
+			"wwwnetzwerk-universitaetsmedizinde_dataReceive" })
+	@Value("${de.netzwerk.universitaetsmedizin.codex.mail.sendProcessFailedMails:false}")
+	private boolean sendProcessFailedMail;
+
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String localIdentifierValue;
 
@@ -422,6 +438,6 @@ public class TransferDataConfig
 	@Bean
 	public ErrorLogger errorLogger()
 	{
-		return new ErrorLogger();
+		return new ErrorLogger(mailService, sendValidationFailedMail, sendProcessFailedMail);
 	}
 }

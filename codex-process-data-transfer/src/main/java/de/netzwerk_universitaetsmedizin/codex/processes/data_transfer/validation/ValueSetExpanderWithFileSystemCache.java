@@ -26,7 +26,7 @@ public class ValueSetExpanderWithFileSystemCache
 
 	/**
 	 * For JSON content with gzip compression using the <code>.json.xz</code> file name suffix.
-	 * 
+	 *
 	 * @param cacheFolder
 	 *            not <code>null</code>
 	 * @param resourceType
