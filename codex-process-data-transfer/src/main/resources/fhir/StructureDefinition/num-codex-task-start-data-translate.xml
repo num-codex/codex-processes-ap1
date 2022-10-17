@@ -190,7 +190,7 @@
     <element id="Task.output:encryptedBundleSize.value[x]">
       <path value="Task.output.value[x]" />
       <type>
-        <code value="integer" />
+        <code value="unsignedInt" />
       </type>
     </element>
   </differential>
