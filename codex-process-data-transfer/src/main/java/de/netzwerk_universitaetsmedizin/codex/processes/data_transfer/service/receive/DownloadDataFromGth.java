@@ -93,7 +93,7 @@ public class DownloadDataFromGth extends AbstractServiceDelegate
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE, Reference.class).findFirst()
-						.map(Reference::getReference);
+				.map(Reference::getReference);
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
