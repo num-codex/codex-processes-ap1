@@ -49,7 +49,7 @@ public abstract class AbstractFileSystemCache<T> implements InitializingBean
 
 	/**
 	 * For JSON content with gzip compression using the <code>.json.gz</code> file name suffix.
-	 * 
+	 *
 	 * @param cacheFolder
 	 *            not <code>null</code>
 	 * @see #FILENAME_SUFFIX

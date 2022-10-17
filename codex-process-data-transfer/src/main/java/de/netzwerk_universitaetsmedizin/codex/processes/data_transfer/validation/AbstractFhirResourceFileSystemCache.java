@@ -22,7 +22,7 @@ public abstract class AbstractFhirResourceFileSystemCache<T, R extends Resource>
 
 	/**
 	 * For JSON content with gzip compression using the <code>.json.gz</code> file name suffix.
-	 * 
+	 *
 	 * @param cacheFolder
 	 *            not <code>null</code>
 	 * @param resourceType
