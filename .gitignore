@@ -28,7 +28,6 @@ codex-processes-ap1-test-data-generator/rsa/*.pem
 ###
 codex-processes-ap1-docker-test-setup/**/bpe/log/*.log
 codex-processes-ap1-docker-test-setup/**/bpe/log/*.log.gz
-codex-processes-ap1-docker-test-setup/**/bpe/last_event/time.file
 codex-processes-ap1-docker-test-setup/**/bpe/plugin/*.jar
 codex-processes-ap1-docker-test-setup/**/bpe/process/*.jar
 

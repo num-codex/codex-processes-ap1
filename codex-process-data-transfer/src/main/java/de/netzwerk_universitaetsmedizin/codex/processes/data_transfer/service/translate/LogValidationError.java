@@ -50,15 +50,15 @@ public class LogValidationError extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
 		logger.warn("Validation error while adding resources to CRR FHIR repository");
-		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables().getIdElement()
+		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables(execution).getIdElement()
 				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
 
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 		TaskOutputComponent output = errorOutputParameterGenerator.createError(
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
 				"Validation failed while inserting into CRR");
 		task.addOutput(output);
-		updateLeadingTaskInExecutionVariables(task);
+		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 }

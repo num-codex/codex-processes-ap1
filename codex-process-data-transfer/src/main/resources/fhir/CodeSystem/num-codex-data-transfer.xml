@@ -56,4 +56,14 @@
 		<display value="Encrypted Bundle Size" />
 		<definition value="Output parameter describing the encrypted transfer bundle size in byte" />
 	</concept>
+	<concept>
+		<code value="local-validation-successful" />
+		<display value="Local Validation Successful" />
+		<definition value="Output parameter documenting if the local validation was sucessful" />
+	</concept>
+	<concept>
+		<code value="encrypted-bundle-resources-count" />
+		<display value="Encrypted Bundle Resources Count" />
+		<definition value="Output parameter describing the number of resources included in the encrypted transfer bundle" />
+	</concept>
 </CodeSystem> 

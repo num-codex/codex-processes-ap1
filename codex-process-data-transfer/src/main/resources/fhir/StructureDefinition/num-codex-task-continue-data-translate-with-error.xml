@@ -73,7 +73,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata|#{version}" />
       </type>
       <isModifier value="false" />
     </element>

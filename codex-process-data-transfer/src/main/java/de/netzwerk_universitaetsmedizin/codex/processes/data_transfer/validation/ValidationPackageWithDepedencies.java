@@ -255,7 +255,7 @@ public class ValidationPackageWithDepedencies extends ValidationPackage
 		if (!missingValueSets.isEmpty())
 		{
 			logger.warn(
-					"The following ValueSet are required for validation but could not be found in validation package {}|{} or its dependencies: {}",
+					"The following ValueSet are required for validation but could not be found in validation package {}|{} or its dependencies, this may result in incomplete valdidation: {}",
 					getName(), getVersion(), missingValueSets);
 		}
 	}

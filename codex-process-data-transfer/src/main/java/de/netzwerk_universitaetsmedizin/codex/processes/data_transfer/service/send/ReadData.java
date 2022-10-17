@@ -114,7 +114,7 @@ public class ReadData extends AbstractServiceDelegate
 		String pseudonym = getPseudonym(execution)
 				.orElseThrow(() -> new IllegalStateException("Patient reference does not contain identifier"));
 
-		Task task = getCurrentTaskFromExecutionVariables();
+		Task task = getCurrentTaskFromExecutionVariables(execution);
 		DateTimeType exportFrom = getExportFrom(task).orElse(null);
 		InstantType exportTo = getExportTo(task).orElseThrow(() -> new IllegalStateException("No export-to in Task"));
 

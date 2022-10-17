@@ -1,11 +1,11 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger|0.6.0"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger|0.7.0"/>
    </meta>
-   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/0.6.0"/>
+   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/0.7.0"/>
    <status value="requested"/>
    <intent value="order"/>
-   <authoredOn value="2022-06-25T12:00:00+01:00"/>
+   <authoredOn value="2022-10-12T12:00:00+02:00"/>
    <requester>
       <type value="Organization"/>
       <identifier>
@@ -30,16 +30,6 @@
          </coding>
       </type>
       <valueString value="startDataTrigger"/>
-   </input>
-   <input>
-      <type>
-         <coding>
-            <system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
-            <code value="business-key"/>
-         </coding>
-      </type>
-      <!-- random business-key UUID, value also used in stop data trigger task, do not use the same value twice -->
-      <valueString value="7f7fd1e7-f10f-4aeb-9ac5-c8be86fab21a"/>
    </input>
    <!-- optional date specifying what data is defined as 'new', if not defined 
 		every GECCO resource is new and triggers the send process -->

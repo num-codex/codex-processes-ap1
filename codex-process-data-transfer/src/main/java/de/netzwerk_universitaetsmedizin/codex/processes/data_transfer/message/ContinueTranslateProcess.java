@@ -2,24 +2,18 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_RETURN_TARGET;
 
-import java.util.stream.Stream;
-
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Target;
-import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class ContinueTranslateProcess extends AbstractTaskMessageSend
 {
-	private static final Logger logger = LoggerFactory.getLogger(ContinueTranslateProcess.class);
-
 	public ContinueTranslateProcess(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
@@ -27,19 +21,8 @@ public class ContinueTranslateProcess extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected Target getTarget()
+	protected Target getTarget(DelegateExecution execution)
 	{
 		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_RETURN_TARGET);
-	}
-
-	@Override
-	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
-			String profile, Stream<ParameterComponent> additionalInputParameters)
-	{
-
-		// TODO implement continue translate
-		logger.debug("implement continue translate");
-
-		super.sendTask(target, instantiatesUri, messageName, businessKey, profile, additionalInputParameters);
 	}
 }
