@@ -10,7 +10,7 @@ public interface ValidationPackageManager
 {
 	/**
 	 * Downloads the given FHIR package and all its dependencies.
-	 * 
+	 *
 	 * @param name
 	 *            not <code>null</code>
 	 * @param version
@@ -24,7 +24,7 @@ public interface ValidationPackageManager
 
 	/**
 	 * Downloads the given FHIR package and all its dependencies.
-	 * 
+	 *
 	 * @param name
 	 *            not <code>null</code>
 	 * @param version
@@ -38,7 +38,7 @@ public interface ValidationPackageManager
 	 * will try to expand all {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE},
 	 * {@link BindingStrength#PREFERRED} or {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of
 	 * the root package or their dependencies, before returning a {@link IValidationSupport}.
-	 * 
+	 *
 	 * @param packageWithDependencies
 	 *            not <code>null</code>
 	 * @return validation support for the validator
@@ -63,7 +63,7 @@ public interface ValidationPackageManager
 	 * {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE}, {@link BindingStrength#PREFERRED} or
 	 * {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of the specified (root) package or their
 	 * dependencies, before returning a {@link IValidationSupport}.
-	 * 
+	 *
 	 * @param name
 	 *            not <code>null</code>
 	 * @param version
@@ -81,7 +81,7 @@ public interface ValidationPackageManager
 	 * {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE}, {@link BindingStrength#PREFERRED} or
 	 * {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of the specified (root) package or their
 	 * dependencies, before returning a {@link IValidationSupport}.
-	 * 
+	 *
 	 * @param identifier
 	 *            not <code>null</code>
 	 * @return {@link BundleValidator} for the specified FHIR package
