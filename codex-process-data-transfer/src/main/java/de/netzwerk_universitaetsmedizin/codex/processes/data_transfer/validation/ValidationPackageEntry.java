@@ -16,7 +16,7 @@ public class ValidationPackageEntry
 {
 	/**
 	 * Does not close the input stream.
-	 * 
+	 *
 	 * @param entry
 	 *            not <code>null</code>
 	 * @param in

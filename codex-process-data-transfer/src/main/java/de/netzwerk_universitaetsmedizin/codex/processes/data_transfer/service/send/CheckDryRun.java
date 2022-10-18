@@ -26,7 +26,7 @@ public class CheckDryRun extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
 	{
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		Optional<Boolean> dryRun = getTaskHelper().getFirstInputParameterBooleanValue(task,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DRY_RUN);

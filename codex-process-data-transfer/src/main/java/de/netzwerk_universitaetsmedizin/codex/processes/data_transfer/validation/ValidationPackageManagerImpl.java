@@ -232,16 +232,18 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		}
 		catch (WebApplicationException e)
 		{
-			logger.error("Error while expanding ValueSet {}|{}: {} - {}", v.getUrl(), v.getVersion(),
-					e.getClass().getName(), e.getMessage());
+			logger.warn(
+					"Error while expanding ValueSet {}|{} externally, this may result in incomplete validation: {} - {}",
+					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 			getOutcome(e).ifPresent(m -> logger.debug("Expansion error response: {}", m));
 			logger.debug("ValueSet with error while expanding: {}",
 					fhirContext.newJsonParser().encodeResourceToString(v));
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while expanding ValueSet {}|{}: {} - {}", v.getUrl(), v.getVersion(),
-					e.getClass().getName(), e.getMessage());
+			logger.warn(
+					"Error while expanding ValueSet {}|{} externally, this may result in incomplete validation: {} - {}",
+					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 			logger.debug("ValueSet with error while expanding: {}",
 					fhirContext.newJsonParser().encodeResourceToString(v));
 		}
@@ -254,7 +256,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			ValueSetExpansionOutcome expansion = expander.expand(v);
 
 			if (expansion.getError() != null)
-				logger.warn("Error while expanding ValueSet {}|{}: {}", v.getUrl(), v.getVersion(),
+				logger.warn("Error while expanding ValueSet {}|{} internally: {}", v.getUrl(), v.getVersion(),
 						expansion.getError());
 			else
 				expandedValueSets.add(expansion.getValueset());
@@ -262,7 +264,7 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		catch (Exception e)
 		{
 			logger.info(
-					"Error while expanding ValueSet {}|{}: {} - {}, trying to expand via external terminology server next",
+					"Error while expanding ValueSet {}|{} internally: {} - {}, trying to expand via external terminology server next",
 					v.getUrl(), v.getVersion(), e.getClass().getName(), e.getMessage());
 
 			expandExternal(expandedValueSets, v);

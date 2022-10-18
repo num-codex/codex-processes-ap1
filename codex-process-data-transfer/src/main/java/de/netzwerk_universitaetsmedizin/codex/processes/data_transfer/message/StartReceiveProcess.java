@@ -44,14 +44,15 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
-			String profile, Stream<ParameterComponent> additionalInputParameters)
+	protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
+			String businessKey, String profile, Stream<ParameterComponent> additionalInputParameters)
 	{
-		String crrBusinessKey = createAndSaveAlternativeBusinessKey();
+		String crrBusinessKey = createAndSaveAlternativeBusinessKey(execution);
 
 		logger.debug("DIC businessKey {}, CRR businessKey {}", businessKey, crrBusinessKey);
 
-		super.sendTask(target, instantiatesUri, messageName, crrBusinessKey, profile, additionalInputParameters);
+		super.sendTask(execution, target, instantiatesUri, messageName, crrBusinessKey, profile,
+				additionalInputParameters);
 	}
 
 	private ParameterComponent pseudonymParameter(DelegateExecution execution)
@@ -82,7 +83,7 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected void handleSendTaskError(Exception exception, String errorMessage)
+	protected void handleSendTaskError(DelegateExecution execution, Exception exception, String errorMessage)
 	{
 		throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_CRR_NOT_REACHABLE,
 				"Error while sending Task to CRR: " + exception.getMessage());

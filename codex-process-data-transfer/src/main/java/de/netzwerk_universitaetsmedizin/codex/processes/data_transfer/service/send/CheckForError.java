@@ -50,23 +50,24 @@ public class CheckForError extends AbstractServiceDelegate
 		ContinueStatus continueStatus;
 
 		// continue OK
-		if (currentTaskHasProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND + "|" + VERSION))
+		if (currentTaskHasProfile(execution, PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND + "|" + VERSION))
 		{
 			continueStatus = ContinueStatus.SUCCESS;
-			updateContinueTask();
+			updateContinueTask(execution);
 		}
 
 		// continue Validation ERROR
-		else if (currentTaskHasProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_VALIDATION_ERROR + "|" + VERSION))
+		else if (currentTaskHasProfile(execution,
+				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_VALIDATION_ERROR + "|" + VERSION))
 		{
 			continueStatus = ContinueStatus.VALIDATION_ERROR;
-			updateContinueTask();
+			updateContinueTask(execution);
 		}
 
 		// continue ERROR
-		else if (currentTaskHasProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR + "|" + VERSION))
+		else if (currentTaskHasProfile(execution, PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR + "|" + VERSION))
 		{
-			Task continueWithErrorTask = getCurrentTaskFromExecutionVariables();
+			Task continueWithErrorTask = getCurrentTaskFromExecutionVariables(execution);
 
 			String errorCode = getErrorCode(continueWithErrorTask)
 					.orElse(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNKNOWN);
@@ -79,7 +80,7 @@ public class CheckForError extends AbstractServiceDelegate
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_ERROR_SOURCE, errorSource);
 
 			continueStatus = ContinueStatus.ERROR;
-			updateContinueTask();
+			updateContinueTask(execution);
 		}
 
 		// Timeout
@@ -89,11 +90,11 @@ public class CheckForError extends AbstractServiceDelegate
 		execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, continueStatus);
 	}
 
-	private void updateContinueTask()
+	private void updateContinueTask(DelegateExecution execution)
 	{
 		try
 		{
-			Task continueTask = getCurrentTaskFromExecutionVariables();
+			Task continueTask = getCurrentTaskFromExecutionVariables(execution);
 			continueTask.setStatus(TaskStatus.COMPLETED);
 			getFhirWebserviceClientProvider().getLocalWebserviceClient().update(continueTask);
 		}
@@ -103,9 +104,9 @@ public class CheckForError extends AbstractServiceDelegate
 		}
 	}
 
-	private boolean currentTaskHasProfile(String profile)
+	private boolean currentTaskHasProfile(DelegateExecution execution, String profile)
 	{
-		Task currentTask = getCurrentTaskFromExecutionVariables();
+		Task currentTask = getCurrentTaskFromExecutionVariables(execution);
 		return currentTask.getMeta().getProfile().stream().anyMatch(p -> profile.equals(p.getValue()));
 	}
 

@@ -64,9 +64,17 @@ services:
         target: /docker-entrypoint-initdb.d/init-db.sh
         read_only: true
 
+  mailhog:
+    image: mailhog/mailhog
+    restart: "no"
+    ports:
+      - 127.0.0.1:8025:8025 # web ui
+    networks:
+      internet:
+
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5000:5000
@@ -113,7 +121,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5003:5003
@@ -139,9 +147,6 @@ services:
         source: ./dic/bpe/log
         target: /opt/bpe/log
       - type: bind
-        source: ./dic/bpe/last_event
-        target: /opt/bpe/last_event
-      - type: bind
         source: ./dic/bpe/cache
         target: /opt/bpe/cache
     environment:
@@ -161,6 +166,10 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@dic
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@dic
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
         wwwnetzwerk-universitaetsmedizinde_dataTranslate/${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataReceive/${PROCESS_VERSION}
@@ -171,6 +180,7 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -178,6 +188,7 @@ services:
     depends_on:
       - db
       - dic-fhir
+      - mailhog
       # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
     build: ./dic/hapi
@@ -203,7 +214,7 @@ services:
 
 
   gth-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5001:5001
@@ -250,7 +261,7 @@ services:
       - db
       - proxy
   gth-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5004:5004
@@ -274,9 +285,6 @@ services:
       - type: bind
         source: ./gth/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./gth/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
@@ -294,6 +302,10 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: gth_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://gth/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@gth
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@gth
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
         wwwnetzwerk-universitaetsmedizinde_dataTrigger/${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataSend/${PROCESS_VERSION}
@@ -307,10 +319,11 @@ services:
     depends_on:
       - db
       - gth-fhir
+      - mailhog
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.7.0
+    image: ghcr.io/highmed/fhir:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5002:5002
@@ -357,7 +370,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.7.0
+    image: ghcr.io/highmed/bpe:0.9.0
     restart: "no"
     ports:
       - 127.0.0.1:5005:5005
@@ -382,9 +395,6 @@ services:
       - type: bind
         source: ./crr/bpe/log
         target: /opt/bpe/log
-      - type: bind
-        source: ./crr/bpe/last_event
-        target: /opt/bpe/last_event
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
@@ -402,6 +412,10 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: crr_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://crr/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@crr
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@crr
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
         wwwnetzwerk-universitaetsmedizinde_dataTrigger/${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataSend/${PROCESS_VERSION}
@@ -417,6 +431,7 @@ services:
     depends_on:
       - db
       - crr-fhir
+      - mailhog
       # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
     image: ehrbase/ehrbase-postgres

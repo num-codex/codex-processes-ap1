@@ -203,7 +203,7 @@
       <bpmn:incoming>Flow_1haez7h</bpmn:incoming>
       <bpmn:outgoing>Flow_0164ju7</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1r0n9ev">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT12M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_0jfknjf" sourceRef="Gateway_0wq4j86" targetRef="CheckForError" />
@@ -256,12 +256,19 @@ DIZ PSN</bpmn:text>
   <bpmn:message id="Message_03uhlns" name="continueDataSendWithValidationError" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="wwwnetzwerk-universitaetsmedizinde_dataTranslate">
-      <bpmndi:BPMNShape id="TextAnnotation_16fbtrv_di" bpmnElement="TextAnnotation_16fbtrv">
-        <dc:Bounds x="2176" y="350" width="298" height="60" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_01veptg_di" bpmnElement="TextAnnotation_01veptg">
-        <dc:Bounds x="2176" y="440" width="220" height="30" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0r6da1o_di" bpmnElement="Flow_0r6da1o">
+        <di:waypoint x="850" y="195" />
+        <di:waypoint x="850" y="536" />
+        <di:waypoint x="1985" y="536" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0at3gov_di" bpmnElement="Flow_0at3gov">
+        <di:waypoint x="850" y="137" />
+        <di:waypoint x="905" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mzjsey_di" bpmnElement="Flow_0mzjsey">
+        <di:waypoint x="690" y="137" />
+        <di:waypoint x="750" y="137" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10keuoy_di" bpmnElement="Flow_10keuoy">
         <di:waypoint x="1370" y="137" />
         <di:waypoint x="1454" y="137" />
@@ -419,19 +426,6 @@ DIZ PSN</bpmn:text>
         <di:waypoint x="215" y="137" />
         <di:waypoint x="270" y="137" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0mzjsey_di" bpmnElement="Flow_0mzjsey">
-        <di:waypoint x="690" y="137" />
-        <di:waypoint x="750" y="137" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0at3gov_di" bpmnElement="Flow_0at3gov">
-        <di:waypoint x="850" y="137" />
-        <di:waypoint x="905" y="137" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0r6da1o_di" bpmnElement="Flow_0r6da1o">
-        <di:waypoint x="850" y="195" />
-        <di:waypoint x="850" y="536" />
-        <di:waypoint x="1985" y="536" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_1rtmd0i_di" bpmnElement="DataTranslateMessageStartEvent">
         <dc:Bounds x="179" y="119" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -446,9 +440,6 @@ DIZ PSN</bpmn:text>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0tntlm8_di" bpmnElement="StoreDataForCrr">
         <dc:Bounds x="590" y="97" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0r3d84x_di" bpmnElement="StartReceiveProcess">
-        <dc:Bounds x="750" y="97" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_16xbvhw_di" bpmnElement="LogSuccess">
         <dc:Bounds x="1910" y="97" width="100" height="80" />
@@ -540,14 +531,24 @@ DIZ PSN</bpmn:text>
       <bpmndi:BPMNShape id="Event_1pfux3x_di" bpmnElement="Event_1pfux3x">
         <dc:Bounds x="1032" y="452" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_07l3482_di" bpmnElement="Association_07l3482">
-        <di:waypoint x="2149" y="282" />
-        <di:waypoint x="2225" y="350" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_00i1em9_di" bpmnElement="Association_00i1em9">
-        <di:waypoint x="2246" y="470" />
-        <di:waypoint x="2152" y="527" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0r3d84x_di" bpmnElement="StartReceiveProcess">
+        <dc:Bounds x="750" y="97" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_16fbtrv_di" bpmnElement="TextAnnotation_16fbtrv">
+        <dc:Bounds x="2176" y="350" width="298" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_01veptg_di" bpmnElement="TextAnnotation_01veptg">
+        <dc:Bounds x="2176" y="440" width="220" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_15ji9gc_di" bpmnElement="Event_0w1n24t">
+        <dc:Bounds x="832" y="159" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09zdqf1_di" bpmnElement="Event_0ii8ir3">
+        <dc:Bounds x="1992" y="292" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1stg1ue_di" bpmnElement="Event_1eze3pv">
+        <dc:Bounds x="1812" y="292" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0wwrtyg_di" bpmnElement="Event_1g62jmk">
         <dc:Bounds x="672" y="159" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -557,15 +558,14 @@ DIZ PSN</bpmn:text>
       <bpmndi:BPMNShape id="Event_12sk9nk_di" bpmnElement="Event_1v57p58">
         <dc:Bounds x="352" y="159" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_09zdqf1_di" bpmnElement="Event_0ii8ir3">
-        <dc:Bounds x="1992" y="292" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1stg1ue_di" bpmnElement="Event_1eze3pv">
-        <dc:Bounds x="1812" y="292" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_15ji9gc_di" bpmnElement="Event_0w1n24t">
-        <dc:Bounds x="832" y="159" width="36" height="36" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_07l3482_di" bpmnElement="Association_07l3482">
+        <di:waypoint x="2149" y="282" />
+        <di:waypoint x="2225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_00i1em9_di" bpmnElement="Association_00i1em9">
+        <di:waypoint x="2246" y="470" />
+        <di:waypoint x="2152" y="527" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.listener.AfterDryRunEndListener;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.StartTranslateProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckConsent;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.send.CheckDryRun;
@@ -104,6 +105,15 @@ public class SendConfig
 	{
 		return new LogDryRunSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
 				transferDataConfig.readAccessHelper());
+	}
+
+	@Bean
+	public AfterDryRunEndListener afterDryRunEndListener()
+	{
+		return new AfterDryRunEndListener(transferDataConfig.taskHelper(), transferDataConfig.fhirClientProvider(),
+				transferDataConfig.fhirContext(), transferDataConfig.mailService(),
+				transferDataConfig.organizationProvider().getLocalIdentifierValue(),
+				transferDataConfig.getSendDryRunSuccessMail());
 	}
 
 	@Bean

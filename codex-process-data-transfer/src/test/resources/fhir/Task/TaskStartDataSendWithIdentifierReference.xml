@@ -1,11 +1,11 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.6.0"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|0.7.0"/>
    </meta>
-   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.6.0"/>
+   <instantiatesUri value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/0.7.0"/>
    <status value="requested"/>
    <intent value="order"/>
-   <authoredOn value="2022-06-25T12:00:00+01:00"/>
+   <authoredOn value="2022-10-18T02:00:00+02:00"/>
    <requester>
       <type value="Organization"/>
       <identifier>
@@ -59,7 +59,7 @@
             <code value="export-to"/>
          </coding>
       </type>
-      <valueInstant value="2022-06-25T12:00:00+01:00"/>
+      <valueInstant value="2022-10-18T12:00:00+02:00"/>
    </input>
    <!-- optional parameter specifying GECCO resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
@@ -71,7 +71,7 @@
             <code value="export-from"/>
          </coding>
       </type>
-      <valueDateTime value="2020-06-25T00:00:00+01:00"/>
+      <valueDateTime value="2020-06-25T00:00:00+02:00"/>
    </input> -->
    <!-- optional parameter enabling a dry run of the data-send process. Specifying the
 		'dry-run' parameter with value 'true' will result in the data-send process
