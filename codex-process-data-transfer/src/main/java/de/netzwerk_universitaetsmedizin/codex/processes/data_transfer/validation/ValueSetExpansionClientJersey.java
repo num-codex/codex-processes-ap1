@@ -6,11 +6,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
@@ -21,14 +16,6 @@ import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonP
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
-import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ParametersJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ParametersXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -39,6 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import dev.dsf.fhir.adapter.FhirAdapter;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
 
 public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 {
@@ -102,13 +95,7 @@ public class ValueSetExpansionClientJersey implements ValueSetExpansionClient
 			builder = builder.register(p);
 		}
 
-		builder = builder.register(new CapabilityStatementJsonFhirAdapter(fhirContext))
-				.register(new CapabilityStatementXmlFhirAdapter(fhirContext))
-				.register(new OperationOutcomeJsonFhirAdapter(fhirContext))
-				.register(new OperationOutcomeXmlFhirAdapter(fhirContext))
-				.register(new ParametersJsonFhirAdapter(fhirContext))
-				.register(new ParametersXmlFhirAdapter(fhirContext)).register(new ValueSetJsonFhirAdapter(fhirContext))
-				.register(new ValueSetXmlFhirAdapter(fhirContext));
+		builder = builder.register(new FhirAdapter(fhirContext));
 
 		if (logRequests)
 		{

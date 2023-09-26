@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
@@ -45,7 +45,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public FhirBridgeClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public FhirBridgeClient(DataStoreClient geccoClient, DataLogger dataLogger)
 	{
 		super(geccoClient, dataLogger);
 	}

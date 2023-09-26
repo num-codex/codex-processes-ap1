@@ -2,10 +2,10 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 
 import java.io.IOException;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.ValueSet;
+
+import jakarta.ws.rs.WebApplicationException;
 
 public interface ValueSetExpansionClient
 {

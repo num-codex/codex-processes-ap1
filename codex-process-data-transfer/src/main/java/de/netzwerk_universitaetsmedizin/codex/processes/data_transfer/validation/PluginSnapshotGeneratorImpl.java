@@ -1,11 +1,11 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
-import org.highmed.dsf.fhir.validation.SnapshotGeneratorImpl;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import dev.dsf.fhir.validation.SnapshotGeneratorImpl;
 
 public class PluginSnapshotGeneratorImpl extends SnapshotGeneratorImpl
 {

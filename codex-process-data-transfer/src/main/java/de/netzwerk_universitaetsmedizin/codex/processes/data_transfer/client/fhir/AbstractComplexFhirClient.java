@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
@@ -46,7 +46,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public AbstractComplexFhirClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public AbstractComplexFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
 	{
 		super(geccoClient, dataLogger);
 	}

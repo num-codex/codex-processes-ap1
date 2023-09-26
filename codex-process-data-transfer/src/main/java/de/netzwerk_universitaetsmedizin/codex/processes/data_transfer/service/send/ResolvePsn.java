@@ -13,36 +13,34 @@ import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceValues.PatientReferenceValue;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class ResolvePsn extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResolvePsn.class);
 
-	private final GeccoClientFactory geccoClientFactory;
+	private final DataStoreClientFactory dataStoreClientFactory;
 	private final FttpClientFactory fttpClientFactory;
 
-	public ResolvePsn(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory,
+	public ResolvePsn(ProcessPluginApi api, DataStoreClientFactory dataStoreClientFactory,
 			FttpClientFactory fttpClientFactory)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
-		this.geccoClientFactory = geccoClientFactory;
+		this.dataStoreClientFactory = dataStoreClientFactory;
 		this.fttpClientFactory = fttpClientFactory;
 	}
 
@@ -51,12 +49,12 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataStoreClientFactory, "dataStoreClientFactory");
 		Objects.requireNonNull(fttpClientFactory, "fttpClientFactory");
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		String reference = ((PatientReference) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE))
 				.getAbsoluteReference();
@@ -68,12 +66,12 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 			getPseudonym(patient).ifPresentOrElse(pseudonym ->
 			{
 				logger.debug("Patient {} has DIC pseudonym {}", reference, pseudonym);
-				execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
+				variables.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
 			}, () ->
 			{
 				logger.debug("Patient {} has no DIC pseudonym", reference);
 				String pseudonym = resolvePseudonymAndUpdatePatient(patient);
-				execution.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
+				variables.setVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE, getPatientReference(pseudonym));
 			});
 		}, () ->
 		{
@@ -85,7 +83,7 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 
 	private Optional<Patient> getPatient(String reference)
 	{
-		return geccoClientFactory.getGeccoClient().getFhirClient().getPatient(reference);
+		return dataStoreClientFactory.getDataStoreClient().getFhirClient().getPatient(reference);
 	}
 
 	private Optional<String> getPseudonym(Patient patient)
@@ -127,7 +125,7 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 
 	private void updatePatient(Patient patient)
 	{
-		geccoClientFactory.getGeccoClient().getFhirClient().updatePatient(patient);
+		dataStoreClientFactory.getDataStoreClient().getFhirClient().updatePatient(patient);
 	}
 
 	private PatientReferenceValue getPatientReference(String pseudonym)

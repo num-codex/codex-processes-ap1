@@ -1,8 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
-import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+
+import dev.dsf.fhir.validation.ResourceValidator;
 
 public interface BundleValidator extends ResourceValidator
 {

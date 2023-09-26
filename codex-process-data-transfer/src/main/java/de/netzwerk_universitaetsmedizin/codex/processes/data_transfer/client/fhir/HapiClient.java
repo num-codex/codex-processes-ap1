@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
 public class HapiClient extends AbstractComplexFhirClient
@@ -25,7 +25,7 @@ public class HapiClient extends AbstractComplexFhirClient
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public HapiClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public HapiClient(DataStoreClient geccoClient, DataLogger dataLogger)
 	{
 		super(geccoClient, dataLogger);
 	}

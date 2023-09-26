@@ -9,10 +9,6 @@ import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -27,6 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class LogValidationError extends AbstractServiceDelegate
 {
@@ -35,11 +34,10 @@ public class LogValidationError extends AbstractServiceDelegate
 	private final ErrorOutputParameterGenerator errorOutputParameterGenerator;
 	private final ErrorLogger errorLogger;
 
-	public LogValidationError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, ErrorOutputParameterGenerator errorOutputParameterGenerator,
+	public LogValidationError(ProcessPluginApi api, ErrorOutputParameterGenerator errorOutputParameterGenerator,
 			ErrorLogger errorLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
 		this.errorOutputParameterGenerator = errorOutputParameterGenerator;
 		this.errorLogger = errorLogger;
@@ -55,27 +53,32 @@ public class LogValidationError extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
+		Task task = variables.getStartTask();
+
 		logger.warn("Validation error while adding resources to CRR FHIR repository");
 
-		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+		Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> sourceIdsByBundleUuid = (Map<String, String>) execution
 				.getVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID);
 
-		errorLogger.logValidationFailedRemote(getLeadingTaskFromExecutionVariables(execution).getIdElement()
-				.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
+		errorLogger.logValidationFailedRemote(task.getIdElement().withServerBase(
+				api.getFhirWebserviceClientProvider().getLocalWebserviceClient().getBaseUrl(),
+				ResourceType.Task.name()));
 		logValidationDetails(bundle, sourceIdsByBundleUuid);
-		addErrorsToTask(execution, bundle, sourceIdsByBundleUuid);
+
+		addErrorsToTaskAndSetStatusFailed(task, bundle, sourceIdsByBundleUuid);
+		api.getFhirWebserviceClientProvider().getLocalWebserviceClient().update(task);
+		variables.updateTask(task);
 	}
 
-	private void addErrorsToTask(DelegateExecution execution, Bundle bundle, Map<String, String> sourceIdsByBundleUuid)
+	private void addErrorsToTaskAndSetStatusFailed(Task task, Bundle bundle, Map<String, String> sourceIdsByBundleUuid)
 	{
 		logger.debug("Setting Task.status failed, adding validation errors");
 
-		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.setStatus(TaskStatus.FAILED);
 
 		bundle.getEntry().stream()
@@ -92,8 +95,6 @@ public class LogValidationError extends AbstractServiceDelegate
 
 					errorOutputParameterGenerator.createCrrValidationError(sourceId, outcome).forEach(task::addOutput);
 				});
-
-		updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
 	private void logValidationDetails(Bundle bundle, Map<String, String> sourceIdsByBundleUuid)

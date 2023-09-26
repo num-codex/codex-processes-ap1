@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
 
 import ca.uhn.fhir.rest.api.Constants;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
@@ -20,7 +20,7 @@ public class SimpleFhirClient extends AbstractFhirClient
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public SimpleFhirClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public SimpleFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
 	{
 		super(geccoClient, dataLogger);
 	}

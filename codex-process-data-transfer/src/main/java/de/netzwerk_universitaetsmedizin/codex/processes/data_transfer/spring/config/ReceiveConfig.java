@@ -1,119 +1,118 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithValidationError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DecryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DeleteValidationErrorForGth;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromGth;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DeleteValidationErrorForDts;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromDts;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.EncryptValidationError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogSuccess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogValidationError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForGth;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForDts;
+import dev.dsf.bpe.v1.ProcessPluginApi;
 
 @Configuration
 public class ReceiveConfig
 {
 	@Autowired
+	private ProcessPluginApi api;
+
+	@Autowired
 	private TransferDataConfig transferDataConfig;
 
 	@Bean
-	public DownloadDataFromGth downloadDataFromGth()
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public DownloadDataFromDts downloadDataFromDts()
 	{
-		return new DownloadDataFromGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider(),
-				transferDataConfig.gthIdentifierValue());
+		return new DownloadDataFromDts(api);
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public DecryptData decryptData()
 	{
-		return new DecryptData(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext(),
-				transferDataConfig.crrKeyProvider());
+		return new DecryptData(api, transferDataConfig.crrKeyProvider());
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
-		return new InsertDataIntoCodex(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.geccoClientFactory(),
+		return new InsertDataIntoCodex(api, transferDataConfig.dataStoreClientFactory(),
 				transferDataConfig.dataLogger());
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public ContinueTranslateProcess continueTranslateProcess()
 	{
-		return new ContinueTranslateProcess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.organizationProvider(),
-				transferDataConfig.fhirContext());
+		return new ContinueTranslateProcess(api, transferDataConfig.dtsIdentifierValue());
 	}
 
 	@Bean(name = "Receive-logSuccess") // prefix to force distinct bean names
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public LogSuccess logSuccess()
 	{
-		return new LogSuccess(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+		return new LogSuccess(api);
 	}
 
 	@Bean(name = "Receive-logValidation") // prefix to force distinct bean names
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public LogValidationError logValidationError()
 	{
-		return new LogValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator(),
+		return new LogValidationError(api, transferDataConfig.errorOutputParameterGenerator(),
 				transferDataConfig.errorLogger());
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public EncryptValidationError encryptValidationError()
 	{
-		return new EncryptValidationError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.fhirContext());
+		return new EncryptValidationError(api);
 	}
 
 	@Bean
-	public StoreValidationErrorForGth storeValidationErrorForGth()
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public StoreValidationErrorForDts storeValidationErrorForDts()
 	{
-		return new StoreValidationErrorForGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.endpointProvider(),
-				transferDataConfig.gthIdentifierValue());
+		return new StoreValidationErrorForDts(api, transferDataConfig.dtsIdentifierValue());
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public ContinueTranslateProcessWithValidationError continueTranslateProcessWithValidationError()
 	{
-		return new ContinueTranslateProcessWithValidationError(transferDataConfig.fhirClientProvider(),
-				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
-				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext());
+		return new ContinueTranslateProcessWithValidationError(api, transferDataConfig.dtsIdentifierValue());
 	}
 
 	@Bean
-	public DeleteValidationErrorForGth deleteValidationErrorForGth()
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public DeleteValidationErrorForDts deleteValidationErrorForDts()
 	{
-		return new DeleteValidationErrorForGth(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper());
+		return new DeleteValidationErrorForDts(api);
 	}
 
 	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public ContinueTranslateProcessWithError continueTranslateProcessWithError()
 	{
-		return new ContinueTranslateProcessWithError(transferDataConfig.fhirClientProvider(),
-				transferDataConfig.taskHelper(), transferDataConfig.readAccessHelper(),
-				transferDataConfig.organizationProvider(), transferDataConfig.fhirContext(),
+		return new ContinueTranslateProcessWithError(api, transferDataConfig.dtsIdentifierValue(),
 				transferDataConfig.errorInputParameterGenerator());
 	}
 
 	@Bean(name = "Receive-logError") // prefix to force distinct bean names
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public LogError logError()
 	{
-		return new LogError(transferDataConfig.fhirClientProvider(), transferDataConfig.taskHelper(),
-				transferDataConfig.readAccessHelper(), transferDataConfig.errorOutputParameterGenerator(),
-				transferDataConfig.errorLogger());
+		return new LogError(api, transferDataConfig.errorOutputParameterGenerator(), transferDataConfig.errorLogger());
 	}
 }

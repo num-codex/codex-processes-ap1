@@ -49,14 +49,14 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
-public abstract class AbstractFhirClient implements GeccoFhirClient
+public abstract class AbstractFhirClient implements DataStoreFhirClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
@@ -207,7 +207,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		}
 	}
 
-	protected final GeccoClient geccoClient;
+	protected final DataStoreClient geccoClient;
 	protected final DataLogger dataLogger;
 
 	/**
@@ -216,7 +216,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public AbstractFhirClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public AbstractFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
 	{
 		this.geccoClient = geccoClient;
 		this.dataLogger = dataLogger;

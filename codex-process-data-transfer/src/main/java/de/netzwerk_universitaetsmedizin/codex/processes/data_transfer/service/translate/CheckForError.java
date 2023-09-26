@@ -4,7 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_CODE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_SOURCE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNKNOWN;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA_SOURCE;
@@ -12,18 +12,12 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -33,71 +27,85 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.constants.CodeSystems;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class CheckForError extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckForError.class);
 
-	public CheckForError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper)
+	private final String resourceVersion;
+
+	public CheckForError(ProcessPluginApi api, String resourceVersion)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
+
+		this.resourceVersion = resourceVersion;
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	public void afterPropertiesSet() throws Exception
 	{
-		ContinueStatus continueStatus;
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(resourceVersion, "resourceVersion");
+	}
+
+	@Override
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
+	{
+		Task task = variables.getLatestTask();
 
 		// continue OK
-		if (currentTaskHasProfile(execution, PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE + "|" + VERSION))
+		if (taskHasProfile(task, PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE + "|" + resourceVersion))
 		{
-			continueStatus = ContinueStatus.SUCCESS;
-			updateContinueTask(execution);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
+			updateContinueTask(task);
+			variables.updateTask(task);
 		}
 
 		// continue Validation ERROR
-		else if (currentTaskHasProfile(execution,
-				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR + "|" + VERSION))
+		else if (taskHasProfile(task,
+				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR + "|" + resourceVersion))
 		{
-			continueStatus = ContinueStatus.VALIDATION_ERROR;
-			updateContinueTask(execution);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.VALIDATION_ERROR);
+			updateContinueTask(task);
+			variables.updateTask(task);
 		}
 
 		// continue ERROR
-		else if (currentTaskHasProfile(execution,
-				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR + "|" + VERSION))
+		else if (taskHasProfile(task,
+				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR + "|" + resourceVersion))
 		{
-			Task continueWithErrorTask = getCurrentTaskFromExecutionVariables(execution);
-
-			String errorCode = getErrorCode(continueWithErrorTask)
+			Optional<ParameterComponent> errorInputParameter = getErrorInputParameter(task);
+			String errorCode = getErrorCode(errorInputParameter)
 					.orElse(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNKNOWN);
-			String errorMessage = getErrorMessage(continueWithErrorTask).orElse("Unknown Error");
-			String errorSource = getErrorSource(continueWithErrorTask)
-					.orElse(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH);
+			String errorMessage = getErrorMessage(errorInputParameter).orElse("Unknown Error");
+			String errorSource = getErrorSource(errorInputParameter)
+					.orElse(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS);
 
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_ERROR_CODE, errorCode);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE, errorMessage);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_ERROR_SOURCE, errorSource);
 
-			continueStatus = ContinueStatus.ERROR;
-			updateContinueTask(execution);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.ERROR);
+			updateContinueTask(task);
+			variables.updateTask(task);
 		}
 
 		// Timeout
 		else
-			continueStatus = ContinueStatus.TIMEOUT;
-
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, continueStatus);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.TIMEOUT);
 	}
 
-	private void updateContinueTask(DelegateExecution execution)
+	private void updateContinueTask(Task task)
 	{
 		try
 		{
-			Task continueTask = getCurrentTaskFromExecutionVariables(execution);
-			continueTask.setStatus(TaskStatus.COMPLETED);
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().update(continueTask);
+			task.setStatus(TaskStatus.COMPLETED);
+			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().update(task);
 		}
 		catch (Exception e)
 		{
@@ -105,41 +113,34 @@ public class CheckForError extends AbstractServiceDelegate
 		}
 	}
 
-	private boolean currentTaskHasProfile(DelegateExecution execution, String profile)
+	private boolean taskHasProfile(Task task, String profile)
 	{
-		Task currentTask = getCurrentTaskFromExecutionVariables(execution);
-		return currentTask.getMeta().getProfile().stream().anyMatch(p -> profile.equals(p.getValue()));
+		return task.getMeta().getProfile().stream().anyMatch(p -> profile.equals(p.getValue()));
 	}
 
-	private Optional<String> getErrorCode(Task task)
+	private Optional<String> getErrorCode(Optional<ParameterComponent> errorInputParameter)
 	{
-		return getErrorInputParameter(task).map(i -> i.getExtensionByUrl(EXTENSION_ERROR_METADATA))
+		return errorInputParameter.map(i -> i.getExtensionByUrl(EXTENSION_ERROR_METADATA))
 				.map(e -> e.getExtensionByUrl(EXTENSION_ERROR_METADATA_TYPE)).map(e -> e.getValue())
 				.map(v -> (Coding) v).map(Coding::getCode);
 	}
 
-	private Optional<String> getErrorSource(Task task)
+	private Optional<String> getErrorSource(Optional<ParameterComponent> errorInputParameter)
 	{
-		return getErrorInputParameter(task).map(i -> i.getExtensionByUrl(EXTENSION_ERROR_METADATA))
+		return errorInputParameter.map(i -> i.getExtensionByUrl(EXTENSION_ERROR_METADATA))
 				.map(e -> e.getExtensionByUrl(EXTENSION_ERROR_METADATA_SOURCE)).map(e -> e.getValue())
 				.map(v -> (Coding) v).map(Coding::getCode);
 	}
 
-	private Optional<String> getErrorMessage(Task task)
+	private Optional<String> getErrorMessage(Optional<ParameterComponent> errorInputParameter)
 	{
-		return getErrorInputParameter(task).filter(ParameterComponent::hasValue)
-				.filter(i -> i.getValue() instanceof StringType).map(i -> (StringType) i.getValue())
-				.map(StringType::getValue);
+		return errorInputParameter.filter(ParameterComponent::hasValue).filter(i -> i.getValue() instanceof StringType)
+				.map(i -> (StringType) i.getValue()).map(StringType::getValue);
 	}
 
 	private Optional<ParameterComponent> getErrorInputParameter(Task task)
 	{
-		if (task != null && task.hasInput())
-		{
-			return getTaskHelper().getInputParameterWithExtension(task, CODESYSTEM_HIGHMED_BPMN,
-					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, EXTENSION_ERROR_METADATA).findFirst();
-		}
-		else
-			return Optional.empty();
+		return api.getTaskHelper().getFirstInputParameterWithExtension(task, CodeSystems.BpmnMessage.error(),
+				StringType.class, EXTENSION_ERROR_METADATA);
 	}
 }

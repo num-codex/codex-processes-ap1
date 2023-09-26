@@ -7,14 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.InitializingBean;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.MissingEntriesIncluder;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.ValueSetModifier;
+import jakarta.ws.rs.WebApplicationException;
 
 public class ValueSetExpansionClientWithModifiers implements ValueSetExpansionClient, InitializingBean
 {

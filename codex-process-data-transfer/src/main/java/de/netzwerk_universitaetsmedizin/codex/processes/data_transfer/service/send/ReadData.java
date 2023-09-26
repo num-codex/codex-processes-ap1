@@ -25,11 +25,6 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -68,15 +63,17 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class ReadData extends AbstractServiceDelegate
 {
@@ -87,15 +84,14 @@ public class ReadData extends AbstractServiceDelegate
 
 	private static final Logger logger = LoggerFactory.getLogger(ReadData.class);
 
-	private final GeccoClientFactory geccoClientFactory;
+	private final DataStoreClientFactory dataStoreClientFactory;
 	private final DataLogger dataLogger;
 
-	public ReadData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory, DataLogger dataLogger)
+	public ReadData(ProcessPluginApi api, DataStoreClientFactory dataStoreClientFactory, DataLogger dataLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
-		this.geccoClientFactory = geccoClientFactory;
+		this.dataStoreClientFactory = dataStoreClientFactory;
 		this.dataLogger = dataLogger;
 	}
 
@@ -104,31 +100,31 @@ public class ReadData extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataStoreClientFactory, "dataStoreClientFactory");
 		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		String pseudonym = getPseudonym(execution)
 				.orElseThrow(() -> new IllegalStateException("Patient reference does not contain identifier"));
 
-		Task task = getCurrentTaskFromExecutionVariables(execution);
+		Task task = variables.getStartTask();
 		DateTimeType exportFrom = getExportFrom(task).orElse(null);
 		InstantType exportTo = getExportTo(task).orElseThrow(() -> new IllegalStateException("No export-to in Task"));
 
 		Bundle bundle = readDataAndCreateBundle(pseudonym, exportFrom, exportTo);
-
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
+		variables.setResource(BPMN_EXECUTION_VARIABLE_BUNDLE, bundle);
 	}
 
 	protected Bundle readDataAndCreateBundle(String pseudonym, DateTimeType from, InstantType to)
 	{
 		logger.info("Reading data for DIC pseudonym {}", pseudonym);
 
-		Stream<DomainResource> resources = geccoClientFactory.getGeccoClient().getFhirClient().getNewData(pseudonym,
-				from == null ? null : new DateWithPrecision(from.getValue(), from.getPrecision()), to.getValue());
+		Stream<DomainResource> resources = dataStoreClientFactory.getDataStoreClient().getFhirClient().getNewData(
+				pseudonym, from == null ? null : new DateWithPrecision(from.getValue(), from.getPrecision()),
+				to.getValue());
 
 		Bundle bundle = toBundle(pseudonym, resources);
 
@@ -150,22 +146,14 @@ public class ReadData extends AbstractServiceDelegate
 
 	private Optional<DateTimeType> getExportFrom(Task task)
 	{
-		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM, DateTimeType.class).findFirst();
+		return api.getTaskHelper().getFirstInputParameterValue(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_FROM, DateTimeType.class);
 	}
 
 	private Optional<InstantType> getExportTo(Task task)
 	{
-		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO, InstantType.class).findFirst();
-	}
-
-	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
-	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
-				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> type.cast(c.getValue()));
+		return api.getTaskHelper().getFirstInputParameterValue(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO, InstantType.class);
 	}
 
 	protected Bundle toBundle(String pseudonym, Stream<DomainResource> resourcesStream)
@@ -245,7 +233,7 @@ public class ReadData extends AbstractServiceDelegate
 			return null;
 
 		return r.getIdElement().isAbsolute() ? r.getIdElement()
-				: r.getIdElement().withServerBase(geccoClientFactory.getServerBase(), r.getResourceType().name());
+				: r.getIdElement().withServerBase(dataStoreClientFactory.getServerBase(), r.getResourceType().name());
 	}
 
 	private DomainResource clean(DomainResource r)

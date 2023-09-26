@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_18azqkl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_18azqkl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.11.0">
   <bpmn:process id="wwwnetzwerk-universitaetsmedizinde_dataReceive" isExecutable="true" camunda:versionTag="#{version}">
     <bpmn:startEvent id="DataReceiveMessageStartEvent" name="start data receive process">
       <bpmn:outgoing>Flow_1gyqorb</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1qwi1k6" messageRef="Message_157qpi8" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1gyqorb" sourceRef="DataReceiveMessageStartEvent" targetRef="DownloadDataFromGth" />
-    <bpmn:serviceTask id="DownloadDataFromGth" name="download data from GTH" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromGth">
+    <bpmn:sequenceFlow id="Flow_1gyqorb" sourceRef="DataReceiveMessageStartEvent" targetRef="DownloadDataFromDts" />
+    <bpmn:serviceTask id="DownloadDataFromDts" name="download data from DTS" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromDts">
       <bpmn:incoming>Flow_1gyqorb</bpmn:incoming>
       <bpmn:outgoing>Flow_064nbas</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_064nbas" sourceRef="DownloadDataFromGth" targetRef="DecryptData" />
+    <bpmn:sequenceFlow id="Flow_064nbas" sourceRef="DownloadDataFromDts" targetRef="DecryptData" />
     <bpmn:serviceTask id="DecryptData" name="decrypt data" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DecryptData">
       <bpmn:incoming>Flow_064nbas</bpmn:incoming>
       <bpmn:outgoing>Flow_0si3bwl</bpmn:outgoing>
@@ -20,7 +20,7 @@
       <bpmn:incoming>Flow_0si3bwl</bpmn:incoming>
       <bpmn:outgoing>Flow_09lbnic</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:boundaryEvent id="Event_1tjhiyz" attachedToRef="DownloadDataFromGth">
+    <bpmn:boundaryEvent id="Event_1tjhiyz" attachedToRef="DownloadDataFromDts">
       <bpmn:outgoing>Flow_0cysiak</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1kf3ess" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
@@ -48,23 +48,23 @@
     <bpmn:sequenceFlow id="Flow_0cysiak" sourceRef="Event_1tjhiyz" targetRef="Gateway_0wzgymf" />
     <bpmn:sequenceFlow id="Flow_03ztcka" sourceRef="Event_05s0i22" targetRef="Gateway_0wzgymf" />
     <bpmn:sequenceFlow id="Flow_0gjzmhl" sourceRef="Gateway_0wzgymf" targetRef="ContinueTranslateProcessWithError" />
-    <bpmn:sequenceFlow id="Flow_1g2ia7m" sourceRef="EncryptValidationError" targetRef="StoreValidationErrorForGth" />
+    <bpmn:sequenceFlow id="Flow_1g2ia7m" sourceRef="EncryptValidationError" targetRef="StoreValidationErrorForDts" />
     <bpmn:serviceTask id="EncryptValidationError" name="encrypt validation error" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.EncryptValidationError">
       <bpmn:incoming>Flow_11fvfcn</bpmn:incoming>
       <bpmn:outgoing>Flow_1g2ia7m</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="StoreValidationErrorForGth" name="store validation error for GTH" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForGth">
+    <bpmn:serviceTask id="StoreValidationErrorForDts" name="store validation error for DTS" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForDts">
       <bpmn:incoming>Flow_1g2ia7m</bpmn:incoming>
       <bpmn:outgoing>Flow_0qzurps</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1pjawha" name="success" sourceRef="Gateway_078c0ws" targetRef="ContinueTranslateProcess">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'SUCCESS'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0ok68b5" sourceRef="Event_1ngq9gx" targetRef="DeleteValidationErrorForGth" />
-    <bpmn:endEvent id="Event_0l90akm">
+    <bpmn:sequenceFlow id="Flow_0ok68b5" sourceRef="Event_1ngq9gx" targetRef="DeleteValidationErrorForDts" />
+    <bpmn:endEvent id="ValidationErrorEndEvent">
       <bpmn:incoming>Flow_18ceeqv</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_18ceeqv" sourceRef="DeleteValidationErrorForGth" targetRef="Event_0l90akm" />
+    <bpmn:sequenceFlow id="Flow_18ceeqv" sourceRef="DeleteValidationErrorForDts" targetRef="ValidationErrorEndEvent" />
     <bpmn:intermediateCatchEvent id="Event_1ngq9gx">
       <bpmn:incoming>Flow_1kkiaj0</bpmn:incoming>
       <bpmn:outgoing>Flow_0ok68b5</bpmn:outgoing>
@@ -72,7 +72,7 @@
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:serviceTask id="DeleteValidationErrorForGth" name="delete validation error for GTH" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DeleteValidationErrorForGth">
+    <bpmn:serviceTask id="DeleteValidationErrorForDts" name="delete validation error for DTS" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DeleteValidationErrorForDts">
       <bpmn:incoming>Flow_0ok68b5</bpmn:incoming>
       <bpmn:outgoing>Flow_18ceeqv</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -84,7 +84,7 @@
       <bpmn:outgoing>Flow_0lzdm4b</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1wcnc8n" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="Event_0zizxzm" attachedToRef="StoreValidationErrorForGth">
+    <bpmn:boundaryEvent id="Event_0zizxzm" attachedToRef="StoreValidationErrorForDts">
       <bpmn:outgoing>Flow_0wsem2y</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1rzefde" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
@@ -99,18 +99,24 @@
     <bpmn:sequenceFlow id="Flow_02q1fg2" name="validation error" sourceRef="Gateway_078c0ws" targetRef="LogValidationError">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${continueStatus == 'VALIDATION_ERROR'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0qzurps" sourceRef="StoreValidationErrorForGth" targetRef="ContinueTranslateProcessWithValidationError" />
+    <bpmn:sequenceFlow id="Flow_0qzurps" sourceRef="StoreValidationErrorForDts" targetRef="ContinueTranslateProcessWithValidationError" />
     <bpmn:intermediateThrowEvent id="ContinueTranslateProcessWithValidationError" name="continue translate process with validation error">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/#{version}</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">continueDataTranslateWithValidationError</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-validation-error|#{version}</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_0qzurps</bpmn:incoming>
       <bpmn:outgoing>Flow_1kkiaj0</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_13q8vqu" messageRef="Message_09jqglx" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithValidationError" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_13q8vqu" messageRef="Message_09jqglx" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithValidationError">
+        <bpmn:extensionElements>
+          <camunda:field name="profile">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-validation-error|#{version}</camunda:string>
+          </camunda:field>
+          <camunda:field name="messageName">
+            <camunda:string>continueDataTranslateWithValidationError</camunda:string>
+          </camunda:field>
+          <camunda:field name="instantiatesCanonical">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate|#{version}</camunda:string>
+          </camunda:field>
+        </bpmn:extensionElements>
+      </bpmn:messageEventDefinition>
     </bpmn:intermediateThrowEvent>
     <bpmn:sequenceFlow id="Flow_1kkiaj0" sourceRef="ContinueTranslateProcessWithValidationError" targetRef="Event_1ngq9gx" />
     <bpmn:sequenceFlow id="Flow_11fvfcn" sourceRef="LogValidationError" targetRef="EncryptValidationError" />
@@ -119,39 +125,51 @@
       <bpmn:outgoing>Flow_11fvfcn</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:intermediateThrowEvent id="ContinueTranslateProcess" name="continue translate process">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/#{version}</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">continueDataTranslate</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate|#{version}</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_1pjawha</bpmn:incoming>
       <bpmn:outgoing>Flow_0qgdm67</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0dj590w" messageRef="Message_03q34kp" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcess" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0dj590w" messageRef="Message_03q34kp" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcess">
+        <bpmn:extensionElements>
+          <camunda:field name="profile">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate|#{version}</camunda:string>
+          </camunda:field>
+          <camunda:field name="messageName">
+            <camunda:string>continueDataTranslate</camunda:string>
+          </camunda:field>
+          <camunda:field name="instantiatesCanonical">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate|#{version}</camunda:string>
+          </camunda:field>
+        </bpmn:extensionElements>
+      </bpmn:messageEventDefinition>
     </bpmn:intermediateThrowEvent>
     <bpmn:sequenceFlow id="Flow_0qgdm67" sourceRef="ContinueTranslateProcess" targetRef="LogSuccess" />
-    <bpmn:endEvent id="Event_1777fin">
+    <bpmn:endEvent id="EndEvent">
       <bpmn:incoming>Flow_0k9x0eh</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0k9x0eh" sourceRef="LogSuccess" targetRef="Event_1777fin" />
+    <bpmn:sequenceFlow id="Flow_0k9x0eh" sourceRef="LogSuccess" targetRef="EndEvent" />
     <bpmn:intermediateThrowEvent id="ContinueTranslateProcessWithError" name="continue translate process with error">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="instantiatesUri">http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/#{version}</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">continueDataTranslateWithError</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-error|#{version}</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_0gjzmhl</bpmn:incoming>
       <bpmn:outgoing>Flow_1jsw4ms</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_1j7eh6e" messageRef="Message_07a8kee" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithError" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1j7eh6e" messageRef="Message_07a8kee" camunda:class="de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithError">
+        <bpmn:extensionElements>
+          <camunda:field name="profile">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-error|#{version}</camunda:string>
+          </camunda:field>
+          <camunda:field name="messageName">
+            <camunda:string>continueDataTranslateWithError</camunda:string>
+          </camunda:field>
+          <camunda:field name="instantiatesCanonical">
+            <camunda:string>http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate|#{version}</camunda:string>
+          </camunda:field>
+        </bpmn:extensionElements>
+      </bpmn:messageEventDefinition>
     </bpmn:intermediateThrowEvent>
     <bpmn:sequenceFlow id="Flow_1jsw4ms" sourceRef="ContinueTranslateProcessWithError" targetRef="LogError" />
-    <bpmn:endEvent id="Event_0eyl72m">
+    <bpmn:endEvent id="ErrorEndEvent">
       <bpmn:incoming>Flow_0jhj8th</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0jhj8th" sourceRef="LogError" targetRef="Event_0eyl72m" />
+    <bpmn:sequenceFlow id="Flow_0jhj8th" sourceRef="LogError" targetRef="ErrorEndEvent" />
     <bpmn:textAnnotation id="TextAnnotation_0bi1mvw">
       <bpmn:text>Error message &amp; error metadata</bpmn:text>
     </bpmn:textAnnotation>
@@ -169,119 +187,15 @@ Codex PSN</bpmn:text>
   <bpmn:message id="Message_03q34kp" name="continueDataTranslate" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="wwwnetzwerk-universitaetsmedizinde_dataReceive">
-      <bpmndi:BPMNShape id="TextAnnotation_0bi1mvw_di" bpmnElement="TextAnnotation_0bi1mvw">
-        <dc:Bounds x="1550" y="470" width="190" height="30" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1i70xep_di" bpmnElement="TextAnnotation_1i70xep">
-        <dc:Bounds x="1550" y="280" width="270" height="60" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_11fvfcn_di" bpmnElement="Flow_11fvfcn">
-        <di:waypoint x="1000" y="230" />
-        <di:waypoint x="1060" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1kkiaj0_di" bpmnElement="Flow_1kkiaj0">
-        <di:waypoint x="1498" y="230" />
-        <di:waypoint x="1612" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qzurps_di" bpmnElement="Flow_0qzurps">
-        <di:waypoint x="1320" y="230" />
-        <di:waypoint x="1462" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_02q1fg2_di" bpmnElement="Flow_02q1fg2">
-        <di:waypoint x="800" y="122" />
-        <di:waypoint x="800" y="230" />
-        <di:waypoint x="900" y="230" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="803" y="243" width="74" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0wsem2y_di" bpmnElement="Flow_0wsem2y">
-        <di:waypoint x="1320" y="288" />
-        <di:waypoint x="1320" y="378" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0lzdm4b_di" bpmnElement="Flow_0lzdm4b">
-        <di:waypoint x="1160" y="288" />
-        <di:waypoint x="1160" y="403" />
-        <di:waypoint x="1295" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_193yd93_di" bpmnElement="Flow_193yd93">
-        <di:waypoint x="690" y="155" />
-        <di:waypoint x="690" y="403" />
-        <di:waypoint x="1295" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_18ceeqv_di" bpmnElement="Flow_18ceeqv">
-        <di:waypoint x="1830" y="230" />
-        <di:waypoint x="1912" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ok68b5_di" bpmnElement="Flow_0ok68b5">
-        <di:waypoint x="1648" y="230" />
-        <di:waypoint x="1730" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1pjawha_di" bpmnElement="Flow_1pjawha">
-        <di:waypoint x="825" y="97" />
-        <di:waypoint x="932" y="97" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="842" y="79" width="40" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1g2ia7m_di" bpmnElement="Flow_1g2ia7m">
-        <di:waypoint x="1160" y="230" />
-        <di:waypoint x="1220" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0gjzmhl_di" bpmnElement="Flow_0gjzmhl">
-        <di:waypoint x="1345" y="403" />
-        <di:waypoint x="1462" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_03ztcka_di" bpmnElement="Flow_03ztcka">
-        <di:waypoint x="530" y="155" />
-        <di:waypoint x="530" y="403" />
-        <di:waypoint x="1295" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0cysiak_di" bpmnElement="Flow_0cysiak">
-        <di:waypoint x="370" y="155" />
-        <di:waypoint x="370" y="403" />
-        <di:waypoint x="1295" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_09lbnic_di" bpmnElement="Flow_09lbnic">
-        <di:waypoint x="690" y="97" />
-        <di:waypoint x="775" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0si3bwl_di" bpmnElement="Flow_0si3bwl">
-        <di:waypoint x="530" y="97" />
-        <di:waypoint x="590" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_064nbas_di" bpmnElement="Flow_064nbas">
-        <di:waypoint x="370" y="97" />
-        <di:waypoint x="430" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1gyqorb_di" bpmnElement="Flow_1gyqorb">
-        <di:waypoint x="215" y="97" />
-        <di:waypoint x="270" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qgdm67_di" bpmnElement="Flow_0qgdm67">
-        <di:waypoint x="968" y="97" />
-        <di:waypoint x="1060" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0k9x0eh_di" bpmnElement="Flow_0k9x0eh">
-        <di:waypoint x="1160" y="97" />
-        <di:waypoint x="1252" y="97" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1jsw4ms_di" bpmnElement="Flow_1jsw4ms">
-        <di:waypoint x="1498" y="403" />
-        <di:waypoint x="1580" y="403" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jhj8th_di" bpmnElement="Flow_0jhj8th">
-        <di:waypoint x="1680" y="403" />
-        <di:waypoint x="1762" y="403" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0kx3ho7_di" bpmnElement="DataReceiveMessageStartEvent">
         <dc:Bounds x="179" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="156" y="122" width="85" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1l9pati_di" bpmnElement="DownloadDataFromGth">
+      <bpmndi:BPMNShape id="Activity_1l9pati_di" bpmnElement="DownloadDataFromDts">
         <dc:Bounds x="270" y="57" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_09bdctd_di" bpmnElement="DecryptData">
         <dc:Bounds x="430" y="57" width="100" height="80" />
@@ -289,11 +203,31 @@ Codex PSN</bpmn:text>
       <bpmndi:BPMNShape id="Activity_0pau3xo_di" bpmnElement="InsertDataIntoCodex">
         <dc:Bounds x="590" y="57" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mmlkch_di" bpmnElement="LogError">
+        <dc:Bounds x="1580" y="363" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0cti0a5_di" bpmnElement="LogSuccess">
+        <dc:Bounds x="1060" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0wzgymf_di" bpmnElement="Gateway_0wzgymf" isMarkerVisible="true">
+        <dc:Bounds x="1295" y="378" width="50" height="50" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0s7itnq_di" bpmnElement="EncryptValidationError">
         <dc:Bounds x="1060" y="190" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1703afw_di" bpmnElement="StoreValidationErrorForGth">
+      <bpmndi:BPMNShape id="Activity_1703afw_di" bpmnElement="StoreValidationErrorForDts">
         <dc:Bounds x="1220" y="190" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0l90akm_di" bpmnElement="ValidationErrorEndEvent">
+        <dc:Bounds x="1912" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ny2ivo_di" bpmnElement="Event_1ngq9gx">
+        <dc:Bounds x="1612" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0khxgr8_di" bpmnElement="DeleteValidationErrorForDts">
+        <dc:Bounds x="1730" y="190" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_078c0ws_di" bpmnElement="Gateway_078c0ws" isMarkerVisible="true">
         <dc:Bounds x="775" y="72" width="50" height="50" />
@@ -313,14 +247,8 @@ Codex PSN</bpmn:text>
           <dc:Bounds x="906" y="125" width="88" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0cti0a5_di" bpmnElement="LogSuccess">
-        <dc:Bounds x="1060" y="57" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1777fin_di" bpmnElement="Event_1777fin">
+      <bpmndi:BPMNShape id="Event_1777fin_di" bpmnElement="EndEvent">
         <dc:Bounds x="1252" y="79" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0wzgymf_di" bpmnElement="Gateway_0wzgymf" isMarkerVisible="true">
-        <dc:Bounds x="1295" y="378" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0nbu4jv_di" bpmnElement="ContinueTranslateProcessWithError">
         <dc:Bounds x="1462" y="385" width="36" height="36" />
@@ -328,29 +256,15 @@ Codex PSN</bpmn:text>
           <dc:Bounds x="1436" y="428" width="89" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0mmlkch_di" bpmnElement="LogError">
-        <dc:Bounds x="1580" y="363" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0eyl72m_di" bpmnElement="Event_0eyl72m">
+      <bpmndi:BPMNShape id="Event_0eyl72m_di" bpmnElement="ErrorEndEvent">
         <dc:Bounds x="1762" y="385" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1ny2ivo_di" bpmnElement="Event_1ngq9gx">
-        <dc:Bounds x="1612" y="212" width="36" height="36" />
+      <bpmndi:BPMNShape id="TextAnnotation_0bi1mvw_di" bpmnElement="TextAnnotation_0bi1mvw">
+        <dc:Bounds x="1550" y="470" width="190" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0khxgr8_di" bpmnElement="DeleteValidationErrorForGth">
-        <dc:Bounds x="1730" y="190" width="100" height="80" />
+      <bpmndi:BPMNShape id="TextAnnotation_1i70xep_di" bpmnElement="TextAnnotation_1i70xep">
+        <dc:Bounds x="1550" y="280" width="270" height="60" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0l90akm_di" bpmnElement="Event_0l90akm">
-        <dc:Bounds x="1912" y="212" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1rsvlt8_di" bpmnElement="Association_1rsvlt8">
-        <di:waypoint x="1495" y="413" />
-        <di:waypoint x="1584" y="470" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0yv2t9r_di" bpmnElement="Association_0yv2t9r">
-        <di:waypoint x="1496" y="238" />
-        <di:waypoint x="1578" y="280" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0kdfj1d_di" bpmnElement="Event_0zizxzm">
         <dc:Bounds x="1302" y="252" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -366,6 +280,113 @@ Codex PSN</bpmn:text>
       <bpmndi:BPMNShape id="Event_1vgnz7p_di" bpmnElement="Event_1tjhiyz">
         <dc:Bounds x="352" y="119" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1gyqorb_di" bpmnElement="Flow_1gyqorb">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="270" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_064nbas_di" bpmnElement="Flow_064nbas">
+        <di:waypoint x="370" y="97" />
+        <di:waypoint x="430" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0si3bwl_di" bpmnElement="Flow_0si3bwl">
+        <di:waypoint x="530" y="97" />
+        <di:waypoint x="590" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09lbnic_di" bpmnElement="Flow_09lbnic">
+        <di:waypoint x="690" y="97" />
+        <di:waypoint x="775" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cysiak_di" bpmnElement="Flow_0cysiak">
+        <di:waypoint x="370" y="155" />
+        <di:waypoint x="370" y="403" />
+        <di:waypoint x="1295" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03ztcka_di" bpmnElement="Flow_03ztcka">
+        <di:waypoint x="530" y="155" />
+        <di:waypoint x="530" y="403" />
+        <di:waypoint x="1295" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gjzmhl_di" bpmnElement="Flow_0gjzmhl">
+        <di:waypoint x="1345" y="403" />
+        <di:waypoint x="1462" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g2ia7m_di" bpmnElement="Flow_1g2ia7m">
+        <di:waypoint x="1160" y="230" />
+        <di:waypoint x="1220" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pjawha_di" bpmnElement="Flow_1pjawha">
+        <di:waypoint x="825" y="97" />
+        <di:waypoint x="932" y="97" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="842" y="79" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ok68b5_di" bpmnElement="Flow_0ok68b5">
+        <di:waypoint x="1648" y="230" />
+        <di:waypoint x="1730" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18ceeqv_di" bpmnElement="Flow_18ceeqv">
+        <di:waypoint x="1830" y="230" />
+        <di:waypoint x="1912" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_193yd93_di" bpmnElement="Flow_193yd93">
+        <di:waypoint x="690" y="155" />
+        <di:waypoint x="690" y="403" />
+        <di:waypoint x="1295" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lzdm4b_di" bpmnElement="Flow_0lzdm4b">
+        <di:waypoint x="1160" y="288" />
+        <di:waypoint x="1160" y="403" />
+        <di:waypoint x="1295" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wsem2y_di" bpmnElement="Flow_0wsem2y">
+        <di:waypoint x="1320" y="288" />
+        <di:waypoint x="1320" y="378" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02q1fg2_di" bpmnElement="Flow_02q1fg2">
+        <di:waypoint x="800" y="122" />
+        <di:waypoint x="800" y="230" />
+        <di:waypoint x="900" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="803" y="243" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qzurps_di" bpmnElement="Flow_0qzurps">
+        <di:waypoint x="1320" y="230" />
+        <di:waypoint x="1462" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kkiaj0_di" bpmnElement="Flow_1kkiaj0">
+        <di:waypoint x="1498" y="230" />
+        <di:waypoint x="1612" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11fvfcn_di" bpmnElement="Flow_11fvfcn">
+        <di:waypoint x="1000" y="230" />
+        <di:waypoint x="1060" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qgdm67_di" bpmnElement="Flow_0qgdm67">
+        <di:waypoint x="968" y="97" />
+        <di:waypoint x="1060" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k9x0eh_di" bpmnElement="Flow_0k9x0eh">
+        <di:waypoint x="1160" y="97" />
+        <di:waypoint x="1252" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jsw4ms_di" bpmnElement="Flow_1jsw4ms">
+        <di:waypoint x="1498" y="403" />
+        <di:waypoint x="1580" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jhj8th_di" bpmnElement="Flow_0jhj8th">
+        <di:waypoint x="1680" y="403" />
+        <di:waypoint x="1762" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1rsvlt8_di" bpmnElement="Association_1rsvlt8">
+        <di:waypoint x="1495" y="413" />
+        <di:waypoint x="1584" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0yv2t9r_di" bpmnElement="Association_0yv2t9r">
+        <di:waypoint x="1496" y="238" />
+        <di:waypoint x="1578" y="280" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

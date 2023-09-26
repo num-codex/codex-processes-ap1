@@ -2,25 +2,24 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.s
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class SetNoConsentUsageAndTransferError extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(SetNoConsentUsageAndTransferError.class);
 
-	public SetNoConsentUsageAndTransferError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper)
+	public SetNoConsentUsageAndTransferError(ProcessPluginApi api)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		// TODO set Variable errorCode, errorMessage
 		logger.debug("TODO set Variable errorCode, errorMessage");

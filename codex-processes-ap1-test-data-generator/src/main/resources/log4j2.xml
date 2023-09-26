@@ -9,7 +9,7 @@
 
 	<Loggers>
 		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG"/>
-		<Logger name="org.highmed" level="DEBUG"/>
+		<Logger name="dev.dsf" level="DEBUG"/>
 		<logger name="de.rwh" level="INFO"/>
 
 		<Root level="WARN">

@@ -6,11 +6,11 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.ws.rs.WebApplicationException;
 
 public class ValidationPackageClientWithFileSystemCache extends AbstractFileSystemCache<ValidationPackage>
 		implements ValidationPackageClient, InitializingBean

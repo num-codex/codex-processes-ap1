@@ -19,14 +19,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.bouncycastle.pkcs.PKCSException;
-import org.highmed.dsf.fhir.json.ObjectMapperFactory;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.ValueSetExpander;
-import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
-import org.highmed.dsf.tools.generator.ProcessDocumentation;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.slf4j.Logger;
@@ -35,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -61,6 +52,12 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.ValueSetExpander;
+import dev.dsf.fhir.validation.ValueSetExpanderImpl;
+import jakarta.ws.rs.WebApplicationException;
 
 @Configuration
 public class ValidationConfig
@@ -222,7 +219,7 @@ public class ValidationConfig
 	private String systemTempFolder;
 
 	@Autowired
-	private FhirContext fhirContext;
+	private ProcessPluginApi api;
 
 	@Bean
 	public ValidationPackageIdentifier validationPackageIdentifier()
@@ -242,7 +239,7 @@ public class ValidationConfig
 				valueSetExpansionBindingStrengths.stream().map(BindingStrength::fromCode).collect(Collectors.toList()));
 
 		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(),
-				validationObjectMapper(), fhirContext, internalSnapshotGeneratorFactory(),
+				api.getObjectMapper(), api.getFhirContext(), internalSnapshotGeneratorFactory(),
 				internalValueSetExpanderFactory(), noDownload, bindingStrengths);
 	}
 
@@ -379,7 +376,7 @@ public class ValidationConfig
 	@Bean
 	public ValidationPackageClient validationPackageClient()
 	{
-		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), validationObjectMapper(),
+		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), api.getObjectMapper(),
 				validationPackageClientJersey());
 	}
 
@@ -421,7 +418,7 @@ public class ValidationConfig
 		List<ValueSetModifier> modifiers = valueSetModifierClasses.stream().map(this::createValueSetModifier)
 				.collect(Collectors.toList());
 
-		return new ValueSetExpansionClientWithFileSystemCache(valueSetCacheFolder(), fhirContext,
+		return new ValueSetExpansionClientWithFileSystemCache(valueSetCacheFolder(), api.getFhirContext(),
 				new ValueSetExpansionClientWithModifiers(valueSetExpansionClientJersey(), modifiers));
 	}
 
@@ -475,14 +472,8 @@ public class ValidationConfig
 				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
 				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
-				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, validationObjectMapper(),
-				fhirContext);
-	}
-
-	@Bean
-	public ObjectMapper validationObjectMapper()
-	{
-		return ObjectMapperFactory.createObjectMapper(fhirContext);
+				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, api.getObjectMapper(),
+				api.getFhirContext());
 	}
 
 	public TerminologyServerConnectionTestStatus testConnectionToTerminologyServer()

@@ -5,57 +5,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.highmed.dsf.bpe.service.MailService;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.organization.EndpointProvider;
-import org.highmed.dsf.fhir.organization.OrganizationProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.tools.generator.ProcessDocumentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.FttpClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProviderImpl;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorInputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 @Configuration
 public class TransferDataConfig
 {
 	@Autowired
-	private FhirWebserviceClientProvider fhirClientProvider;
-
-	@Autowired
-	private TaskHelper taskHelper;
-
-	@Autowired
-	private ReadAccessHelper readAccessHelper;
-
-	@Autowired
-	private OrganizationProvider organizationProvider;
-
-	@Autowired
-	private EndpointProvider endpointProvider;
-
-	@Autowired
-	private FhirContext fhirContext;
-
-	@Autowired
-	private BundleValidatorFactory bundleValidatorFactory;
-
-	@Autowired
-	private MailService mailService;
+	private ProcessPluginApi api;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the GECCO FHIR server", processNames = {
 			"wwwnetzwerk-universitaetsmedizinde_dataSend",
@@ -167,9 +139,9 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.private.key:#{null}}")
 	private String crrPrivateKeyFile;
 
-	@ProcessDocumentation(description = "DSF organization identifier of the GECCO Transfer Hub", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gth.identifier.value:hs-heilbronn.de}")
-	private String gthIdentifierValue;
+	@ProcessDocumentation(description = "DSF organization identifier of the Data Transfer Site", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("${de.netzwerk.universitaetsmedizin.codex.dts.identifier.value:hs-heilbronn.de}")
+	private String dtsIdentifierValue;
 
 	@ProcessDocumentation(description = "DSF organization identifier of the central research repository", processNames = "wwwnetzwerk-universitaetsmedizinde_dataTranslate")
 	@Value("${de.netzwerk.universitaetsmedizin.codex.crr.identifier.value:num-codex.de}")
@@ -298,9 +270,6 @@ public class TransferDataConfig
 	@Value("${de.netzwerk.universitaetsmedizin.codex.mail.sendDryRunSuccessMail:false}")
 	private boolean sendDryRunSuccessMail;
 
-	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
-	private String localIdentifierValue;
-
 	public List<String> idatMergeGrantedOids()
 	{
 		return idatMergeGrantedOids;
@@ -311,54 +280,14 @@ public class TransferDataConfig
 		return mdatTransferGrantedOids;
 	}
 
-	public String gthIdentifierValue()
+	public String dtsIdentifierValue()
 	{
-		return gthIdentifierValue;
+		return dtsIdentifierValue;
 	}
 
 	public String crrIdentifierValue()
 	{
 		return crrIdentifierValue;
-	}
-
-	public FhirWebserviceClientProvider fhirClientProvider()
-	{
-		return fhirClientProvider;
-	}
-
-	public TaskHelper taskHelper()
-	{
-		return taskHelper;
-	}
-
-	public ReadAccessHelper readAccessHelper()
-	{
-		return readAccessHelper;
-	}
-
-	public FhirContext fhirContext()
-	{
-		return fhirContext;
-	}
-
-	public BundleValidatorFactory bundleValidatorFactory()
-	{
-		return bundleValidatorFactory;
-	}
-
-	public EndpointProvider endpointProvider()
-	{
-		return endpointProvider;
-	}
-
-	public OrganizationProvider organizationProvider()
-	{
-		return organizationProvider;
-	}
-
-	public MailService mailService()
-	{
-		return mailService;
 	}
 
 	public boolean getSendDryRunSuccessMail()
@@ -388,12 +317,12 @@ public class TransferDataConfig
 	@Bean
 	public DataLogger dataLogger()
 	{
-		return new DataLogger(dataLoggingEnabled, fhirContext());
+		return new DataLogger(dataLoggingEnabled, api.getFhirContext());
 	}
 
 	@Bean
 	@SuppressWarnings("unchecked")
-	public GeccoClientFactory geccoClientFactory()
+	public DataStoreClientFactory dataStoreClientFactory()
 	{
 		Path trustStorePath = checkExists(fhirStoreTrustStore);
 		Path certificatePath = checkExists(fhirStoreCertificate);
@@ -402,12 +331,12 @@ public class TransferDataConfig
 
 		try
 		{
-			return new GeccoClientFactory(trustStorePath, certificatePath, privateKeyPath, fhirStorePrivateKeyPassword,
-					fhirStoreConnectTimeout, fhirStoreSocketTimeout, fhirStoreConnectionRequestTimeout,
-					fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword, fhirStoreBearerToken, fhirStoreProxyUrl,
-					fhirStoreProxyUsername, fhirStoreProxyPassword, fhirStoreHapiClientVerbose, fhirContext,
-					searchBundleOverride, localIdentifierValue,
-					(Class<GeccoFhirClient>) Class.forName(fhirStoreClientClass),
+			return new DataStoreClientFactory(trustStorePath, certificatePath, privateKeyPath,
+					fhirStorePrivateKeyPassword, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
+					fhirStoreConnectionRequestTimeout, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
+					fhirStoreBearerToken, fhirStoreProxyUrl, fhirStoreProxyUsername, fhirStoreProxyPassword,
+					fhirStoreHapiClientVerbose, api.getFhirContext(), searchBundleOverride,
+					(Class<DataStoreFhirClient>) Class.forName(fhirStoreClientClass),
 					fhirStoreUseChainedParameterNotLogicalReference, dataLogger());
 		}
 		catch (ClassNotFoundException e)
@@ -452,6 +381,6 @@ public class TransferDataConfig
 	@Bean
 	public ErrorLogger errorLogger()
 	{
-		return new ErrorLogger(mailService, sendValidationFailedMail, sendProcessFailedMail);
+		return new ErrorLogger(api.getMailService(), sendValidationFailedMail, sendProcessFailedMail);
 	}
 }

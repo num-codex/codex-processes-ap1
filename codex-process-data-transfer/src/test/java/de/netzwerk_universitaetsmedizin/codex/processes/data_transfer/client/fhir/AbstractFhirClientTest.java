@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
@@ -33,7 +33,7 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
@@ -66,7 +66,7 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
@@ -101,7 +101,7 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPatientIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
@@ -137,7 +137,7 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPseudonymIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(geccoClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));

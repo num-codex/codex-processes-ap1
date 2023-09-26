@@ -3,14 +3,12 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DIC;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA_SOURCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.EXTENSION_ERROR_METADATA_TYPE;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
 import java.util.stream.Stream;
 
@@ -24,6 +22,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 
+import dev.dsf.bpe.v1.constants.CodeSystems;
+
 public class ErrorOutputParameterGenerator
 {
 	public Stream<TaskOutputComponent> createMeDicValidationError(IdType reference, OperationOutcome outcome)
@@ -31,7 +31,7 @@ public class ErrorOutputParameterGenerator
 		return outcome.getIssue().stream()
 				.filter(i -> IssueSeverity.FATAL.equals(i.getSeverity()) || IssueSeverity.ERROR.equals(i.getSeverity()))
 				.map(i -> createValidationError(reference, i,
-						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC));
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DIC));
 	}
 
 	public Stream<TaskOutputComponent> createCrrValidationError(IdType reference, OperationOutcome outcome)
@@ -52,8 +52,7 @@ public class ErrorOutputParameterGenerator
 	private TaskOutputComponent createValidationError(IdType reference, OperationOutcomeIssueComponent i, String source)
 	{
 		TaskOutputComponent output = new TaskOutputComponent();
-		output.getType().getCodingFirstRep().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR);
+		output.getType().addCoding(CodeSystems.BpmnMessage.error());
 
 		Extension metaData = output.addExtension();
 		metaData.setUrl(EXTENSION_ERROR_METADATA);
@@ -76,8 +75,7 @@ public class ErrorOutputParameterGenerator
 	public TaskOutputComponent createError(String source, String code, String message)
 	{
 		TaskOutputComponent output = new TaskOutputComponent();
-		output.getType().getCodingFirstRep().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR);
+		output.getType().addCoding(CodeSystems.BpmnMessage.error());
 
 		Extension metaData = output.addExtension();
 		metaData.setUrl(EXTENSION_ERROR_METADATA);
