@@ -258,7 +258,7 @@ public class TaskProfileTest
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.addIssue().setSeverity(IssueSeverity.ERROR).addLocation("Patient.identifier[0].system");
 		new ErrorOutputParameterGenerator()
-				.createMeDicValidationError(new IdType("http://gecco.fhir.server/fhir", "Patient", "42", null), outcome)
+				.createMeDicValidationError(new IdType("http://data.fhir.server/fhir", "Patient", "42", null), outcome)
 				.forEach(task::addOutput);
 
 		logTask(task);

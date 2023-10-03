@@ -98,12 +98,12 @@ public class ValidateDataLearningTest
 		}
 
 		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate")));
 		char[] keyStorePassword = properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key.password")
 				.toCharArray();
 		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key")),
 				keyStorePassword);
 		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
 				UUID.randomUUID().toString(), keyStorePassword);

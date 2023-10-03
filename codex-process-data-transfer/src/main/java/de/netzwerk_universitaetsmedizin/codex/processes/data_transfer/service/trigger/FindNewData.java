@@ -36,13 +36,13 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 {
 	private static final Logger logger = LoggerFactory.getLogger(FindNewData.class);
 
-	private final DataStoreClientFactory geccoClientFactory;
+	private final DataStoreClientFactory dataClientFactory;
 
-	public FindNewData(ProcessPluginApi api, DataStoreClientFactory geccoClientFactory)
+	public FindNewData(ProcessPluginApi api, DataStoreClientFactory dataClientFactory)
 	{
 		super(api);
 
-		this.geccoClientFactory = geccoClientFactory;
+		this.dataClientFactory = dataClientFactory;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataClientFactory, "dataClientFactory");
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 		logger.debug("Searching for new data to transfer from {} with precision {} to {}", exportFrom,
 				exportFrom == null ? null : exportFrom.getPrecision(), exportTo);
 
-		DataStoreFhirClient fhirClient = geccoClientFactory.getDataStoreClient().getFhirClient();
+		DataStoreFhirClient fhirClient = dataClientFactory.getDataStoreClient().getFhirClient();
 
 		PatientReferenceList references = fhirClient.getPatientReferencesWithNewData(exportFrom, exportTo);
 

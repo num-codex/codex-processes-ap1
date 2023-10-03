@@ -33,13 +33,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		Date exportTo = new Date();
 
@@ -66,13 +66,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
 		Date exportTo = new Date();
@@ -101,13 +101,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPatientIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String patientId = "some-patient-id";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
@@ -137,13 +137,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPseudonymIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String pseudonym = "some-pseudonym";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);

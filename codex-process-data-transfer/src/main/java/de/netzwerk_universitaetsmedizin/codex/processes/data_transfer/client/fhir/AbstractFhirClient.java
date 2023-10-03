@@ -207,18 +207,18 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		}
 	}
 
-	protected final DataStoreClient geccoClient;
+	protected final DataStoreClient dataClient;
 	protected final DataLogger dataLogger;
 
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public AbstractFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
+	public AbstractFhirClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		this.geccoClient = geccoClient;
+		this.dataClient = dataClient;
 		this.dataLogger = dataLogger;
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 
 		dataLogger.logData("Executing Search-Bundle", searchBundle);
 
-		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = dataClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);
@@ -281,7 +281,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 	{
 		IdType idElement = patient.getIdElement();
 		return PatientReference
-				.from(new IdType(geccoClient.getServerBase(), idElement.getResourceType(), idElement.getIdPart(), null)
+				.from(new IdType(dataClient.getServerBase(), idElement.getResourceType(), idElement.getIdPart(), null)
 						.getValue());
 	}
 
@@ -319,7 +319,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Executing search: {}", url);
 
-		Bundle resultBundle = (Bundle) geccoClient.getGenericFhirClient().search().byUrl(url)
+		Bundle resultBundle = (Bundle) dataClient.getGenericFhirClient().search().byUrl(url)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);
@@ -397,7 +397,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 	{
 		try
 		{
-			Path searchBundleOverride = geccoClient.getSearchBundleOverride();
+			Path searchBundleOverride = dataClient.getSearchBundleOverride();
 
 			if (searchBundleOverride != null)
 			{
@@ -412,7 +412,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 					try (InputStream in = Files.newInputStream(searchBundleOverride))
 					{
 						logger.warn("Using Search-Bundle override from {}", searchBundleOverride.toString());
-						return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
+						return dataClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 					}
 				}
 			}
@@ -421,7 +421,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 				try (InputStream in = getClass().getResourceAsStream("/fhir/Bundle/SearchBundle.xml"))
 				{
 					logger.debug("Using internal Search-Bundle");
-					return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
+					return dataClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 				}
 
 			}
@@ -614,7 +614,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		logger.info("Requesting patient {}", reference);
 
 		IdType idType = new IdType(reference);
-		IGenericClient client = geccoClient.getGenericFhirClient();
+		IGenericClient client = dataClient.getGenericFhirClient();
 
 		if (client.getServerBase().equals(idType.getBaseUrl()))
 		{
@@ -631,7 +631,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		}
 		else
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_BAD_PATIENT_REFERENCE,
-					"Patient reference not an absolute reference to a resouce at the local GECCO FHIR server: "
+					"Patient reference not an absolute reference to a resouce at the local data FHIR server: "
 							+ client.getServerBase());
 	}
 
@@ -645,7 +645,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(patient)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().update().resource(patient)
 					.prefer(PreferReturnEnum.OPERATION_OUTCOME).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)

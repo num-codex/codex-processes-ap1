@@ -15,20 +15,20 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.Da
 public class SimpleFhirClient extends AbstractFhirClient
 {
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public SimpleFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
+	public SimpleFhirClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		super(geccoClient, dataLogger);
+		super(dataClient, dataLogger);
 	}
 
 	@Override
 	public void storeBundle(Bundle bundle)
 	{
-		geccoClient.getGenericFhirClient().transaction().withBundle(bundle)
+		dataClient.getGenericFhirClient().transaction().withBundle(bundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 	}
 
@@ -39,7 +39,7 @@ public class SimpleFhirClient extends AbstractFhirClient
 
 		dataLogger.logData("Executing Search-Bundle", searchBundle);
 
-		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = dataClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);

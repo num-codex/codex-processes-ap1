@@ -52,10 +52,10 @@ public class ReadDataTest
 
 		ProcessPluginApi api = Mockito.mock(ProcessPluginApi.class);
 		DataStoreClientFactory dataStoreClientFactory = Mockito.mock(DataStoreClientFactory.class);
-		DataStoreClient geccoClient = Mockito.mock(DataStoreClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataStoreFhirClient fhirClient = Mockito.mock(DataStoreFhirClient.class);
-		Mockito.when(dataStoreClientFactory.getDataStoreClient()).thenReturn(geccoClient);
-		Mockito.when(geccoClient.getFhirClient()).thenReturn(fhirClient);
+		Mockito.when(dataStoreClientFactory.getDataStoreClient()).thenReturn(dataClient);
+		Mockito.when(dataClient.getFhirClient()).thenReturn(fhirClient);
 		Mockito.when(fhirClient.getNewData(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(readBundle(fhirContext));
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);

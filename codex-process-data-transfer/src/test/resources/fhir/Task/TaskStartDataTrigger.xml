@@ -32,7 +32,7 @@
       <valueString value="startDataTrigger"/>
    </input>
    <!-- optional date specifying what data is defined as 'new', if not defined 
-		every GECCO resource is new and triggers the send process -->
+		every resource is new and triggers the send process -->
    <!-- <input>
       <type>
          <coding>

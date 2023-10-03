@@ -41,14 +41,14 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
 
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public AbstractComplexFhirClient(DataStoreClient geccoClient, DataLogger dataLogger)
+	public AbstractComplexFhirClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		super(geccoClient, dataLogger);
+		super(dataClient, dataLogger);
 	}
 
 	protected Resource setSubject(Resource resource, Reference patientRef)
@@ -134,7 +134,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 	{
 		try
 		{
-			Bundle patientBundle = geccoClient
+			Bundle patientBundle = dataClient
 					.getGenericFhirClient().search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly()
 							.systemAndIdentifier(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM, pseudonym))
 					.sort().descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
@@ -219,7 +219,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 
 		dataLogger.logData("Executing Search-Bundle", searchBundle);
 
-		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = dataClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);
@@ -232,7 +232,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 
 	private Optional<Patient> findPatientInLocalFhirStore(String system, String pseudonym)
 	{
-		Bundle patientBundle = (Bundle) geccoClient.getGenericFhirClient().search().forResource(Patient.class)
+		Bundle patientBundle = (Bundle) dataClient.getGenericFhirClient().search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier(system, pseudonym)).execute();
 
 		dataLogger.logData("Patient search-bundle result", patientBundle);

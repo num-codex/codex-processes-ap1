@@ -60,10 +60,10 @@ public class ValidationMain implements InitializingBean
 	@PropertySource(ignoreResourceNotFound = true, value = "file:application.properties")
 	public static class TestConfig
 	{
-		@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.output:JSON}")
+		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.output:JSON}")
 		private Output output;
 
-		@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.output.pretty:true}")
+		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.output.pretty:true}")
 		private boolean outputPretty;
 
 		@Autowired

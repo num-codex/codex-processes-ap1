@@ -70,141 +70,141 @@ public class ValidationConfig
 	}
 
 	@ProcessDocumentation(description = "Enables/disables local FHIR validation, set to `false` to skip validation", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation:true}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation:true}")
 	private boolean validationEnabled;
 
 	@ProcessDocumentation(description = "FHIR implementation guide package used to validated resources, specify as `name|version`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package:de.gecco|1.0.5}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package:de.gecco|1.0.5}")
 	private String validationPackage;
 
 	@ProcessDocumentation(description = "FHIR implementation guide packages that do not need to be downloaded, list with `name|version` values", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.noDownload:hl7.fhir.r4.core|4.0.1}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.package.noDownload:hl7.fhir.r4.core|4.0.1}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> noDownloadPackages;
 
 	@ProcessDocumentation(description = "Folder for storing downloaded FHIR implementation guide packages", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.cacheFolder:${java.io.tmpdir}/codex_gecco_validation_cache/Package}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.cacheFolder:${java.io.tmpdir}/rdp_validation_cache/Package}")
 	private String packageCacheFolder;
 
-	@ProcessDocumentation(description = "Base The base address of the FHIR repository containing GECCO data.URL of the FHIR implementation guide package server to download validation packages from", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.server.baseUrl:https://packages.simplifier.net}")
+	@ProcessDocumentation(description = "URL of the FHIR implementation guide package server to download validation packages from", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.server.baseUrl:https://packages.simplifier.net}")
 	private String packageServerBaseUrl;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the FHIR implementation guide package server, uses the JVMs trust store if not specified", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/validation_package_server_ca.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.trust.certificates:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.trust.certificates:#{null}}")
 	private String packageClientTrustCertificates;
 
 	@ProcessDocumentation(description = "PEM encoded file with client-certificate, if the FHIR implementation guide package server requires mutual TLS authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/validation_package_server_client_certificate.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.certificate:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.certificate:#{null}}")
 	private String packageClientCertificate;
 
-	@ProcessDocumentation(description = "PEM encoded file with private-key for the client-certificate defined via `de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.certificate`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/validation_package_server_client_certificate_private_key.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.certificate.private.key:#{null}}")
+	@ProcessDocumentation(description = "PEM encoded file with private-key for the client-certificate defined via `de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.certificate`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/validation_package_server_client_certificate_private_key.pem")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.certificate.private.key:#{null}}")
 	private String packageClientCertificatePrivateKey;
 
-	@ProcessDocumentation(description = "Password to decrypt the private-key defined via `de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.certificate.private.key`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/validation_package_server_client_certificate_private_key.pem.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.certificate.private.key.password:#{null}}")
+	@ProcessDocumentation(description = "Password to decrypt the private-key defined via `de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.certificate.private.key`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/validation_package_server_client_certificate_private_key.pem.password")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.certificate.private.key.password:#{null}}")
 	private char[] packageClientCertificatePrivateKeyPassword;
 
 	@ProcessDocumentation(description = "Basic authentication username to authenticate against the FHIR implementation guide package server, set if the server requests authentication using basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.basic.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.basic.username:#{null}}")
 	private String packageClientBasicAuthUsername;
 
 	@ProcessDocumentation(description = "Basic authentication password to authenticate against the FHIR implementation guide package server, set if the server requests authentication using basic authentication ", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/validation_package_server_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.authentication.basic.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.basic.password:#{null}}")
 	private char[] packageClientBasicAuthPassword;
 
 	@ProcessDocumentation(description = "Forwarding proxy server url, set if the FHIR implementation guide package server can only be reached via a proxy server", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", example = "http://proxy.foo:8080")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.proxy.schemeHostPort:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.schemeHostPort:#{null}}")
 	private String packageClientProxySchemeHostPort;
 
 	@ProcessDocumentation(description = "Forwarding proxy server basic authentication username, set if the FHIR implementation guide package server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.proxy.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.username:#{null}}")
 	private String packageClientProxyUsername;
 
 	@ProcessDocumentation(description = "Forwarding proxy server basic authentication password, set if the FHIR implementation guide package server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/validation_package_server_proxy_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.proxy.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.password:#{null}}")
 	private char[] packageClientProxyPassword;
 
 	@ProcessDocumentation(description = "Connection timeout in milliseconds used when accessing the FHIR implementation guide package server, time until a connection needs to be established before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.timeout.connect:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.timeout.connect:10000}")
 	private int packageClientConnectTimeout;
 
 	@ProcessDocumentation(description = "Read timeout in milliseconds used when accessing the FHIR implementation guide package server, time until the server needs to send a reply before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.timeout.read:300000}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.timeout.read:300000}")
 	private int packageClientReadTimeout;
 
 	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the FHIR implementation guide package server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.package.client.verbose:false}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.verbose:false}")
 	private boolean packageClientVerbose;
 
 	@ProcessDocumentation(description = "ValueSets found in the StructureDefinitions with the specified binding strength will be expanded", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.bindingStrength:required,extensible,preferred,example}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.bindingStrength:required,extensible,preferred,example}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> valueSetExpansionBindingStrengths;
 
 	@ProcessDocumentation(description = "Folder for storing expanded ValueSets", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.cacheFolder:${java.io.tmpdir}/codex_gecco_validation_cache/ValueSet}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.cacheFolder:${java.io.tmpdir}/rdp_validation_cache/ValueSet}")
 	private String valueSetCacheFolder;
 
 	@ProcessDocumentation(description = "Base URL of the terminology server used to expand FHIR ValueSets", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Specify a local terminology server to improve ValueSet expansion speed")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.server.baseUrl:https://terminology-highmed.medic.medfak.uni-koeln.de/fhir}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.server.baseUrl:https://terminology-highmed.medic.medfak.uni-koeln.de/fhir}")
 	private String valueSetExpansionServerBaseUrl;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the terminology server, uses the JVMs trust store if not specified", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/terminology_server_ca.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.trust.certificates:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.trust.certificates:#{null}}")
 	private String valueSetExpansionClientTrustCertificates;
 
 	@ProcessDocumentation(description = "PEM encoded file with client-certificate, if the terminology server requires mutual TLS authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/terminology_server_client_certificate.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate:#{null}}")
 	private String valueSetExpansionClientCertificate;
 
-	@ProcessDocumentation(description = "PEM encoded file with private-key for the client-certificate defined via `de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/terminology_server_client_certificate_private_key.pem")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key:#{null}}")
+	@ProcessDocumentation(description = "PEM encoded file with private-key for the client-certificate defined via `de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure", example = "/run/secrets/terminology_server_client_certificate_private_key.pem")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key:#{null}}")
 	private String valueSetExpansionClientCertificatePrivateKey;
 
-	@ProcessDocumentation(description = "Password to decrypt the private-key defined via `de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_client_certificate_private_key.pem.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password:#{null}}")
+	@ProcessDocumentation(description = "Password to decrypt the private-key defined via `de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_client_certificate_private_key.pem.password")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key.password:#{null}}")
 	private char[] valueSetExpansionClientCertificatePrivateKeyPassword;
 
 	@ProcessDocumentation(description = "Basic authentication username to authenticate against the terminology server, set if the server requests authentication using basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.basic.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.basic.username:#{null}}")
 	private String valueSetExpansionClientBasicAuthUsername;
 
 	@ProcessDocumentation(description = "Basic authentication password to authenticate against the terminology server, set if the server requests authentication using basic authentication ", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.basic.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.basic.password:#{null}}")
 	private char[] valueSetExpansionClientBasicAuthPassword;
 
 	@ProcessDocumentation(description = "Forwarding proxy server url, set if the terminology server can only be reached via a proxy server", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", example = "http://proxy.foo:8080")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.proxy.schemeHostPort:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.schemeHostPort:#{null}}")
 	private String valueSetExpansionClientProxySchemeHostPort;
 
 	@ProcessDocumentation(description = "Forwarding proxy server basic authentication username, set if the terminology server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.proxy.username:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.username:#{null}}")
 	private String valueSetExpansionClientProxyUsername;
 
 	@ProcessDocumentation(description = "Forwarding proxy server basic authentication password, set if the terminology server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_proxy_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.proxy.password:#{null}}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.password:#{null}}")
 	private char[] valueSetExpansionClientProxyPassword;
 
 	@ProcessDocumentation(description = "Connection timeout in milliseconds used when accessing the terminology server, time until a connection needs to be established before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.timeout.connect:10000}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.timeout.connect:10000}")
 	private int valueSetExpansionClientConnectTimeout;
 
 	@ProcessDocumentation(description = "Read timeout in milliseconds used when accessing the terminology server, time until the server needs to send a reply before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.timeout.read:300000}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.timeout.read:300000}")
 	private int valueSetExpansionClientReadTimeout;
 
 	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the terminology server, set to `true`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.verbose:false}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.verbose:false}")
 	private boolean valueSetExpansionClientVerbose;
 
 	@ProcessDocumentation(description = "List of ValueSet modifier classes, modifiers are executed before atempting to expand a ValueSet and after", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.modifierClasses:"
+	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.modifierClasses:"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.MissingEntriesIncluder"
 			+ "}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> valueSetModifierClasses;
 
 	@ProcessDocumentation(description = "List of StructureDefinition modifier classes, modifiers are executed before atempting to generate a StructureDefinition snapshot", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("#{'${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.modifierClasses:"
+	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.structuredefinition.modifierClasses:"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.ClosedTypeSlicingRemover,"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.IdentifierRemover,"
 			+ "de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer"
@@ -212,7 +212,7 @@ public class ValidationConfig
 	private List<String> structureDefinitionModifierClasses;
 
 	@ProcessDocumentation(description = "Folder for storing generated StructureDefinition snapshots", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.codex.gecco.validation.structuredefinition.cacheFolder:${java.io.tmpdir}/codex_gecco_validation_cache/StructureDefinition}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.structuredefinition.cacheFolder:${java.io.tmpdir}/rdp_validation_cache/StructureDefinition}")
 	private String structureDefinitionCacheFolder;
 
 	@Value("${java.io.tmpdir}")

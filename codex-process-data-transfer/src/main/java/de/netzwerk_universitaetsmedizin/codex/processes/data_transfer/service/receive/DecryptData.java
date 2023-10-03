@@ -62,18 +62,18 @@ public class DecryptData extends AbstractServiceDelegate
 	{
 		try
 		{
-			decryptGeccoData(variables);
+			decryptData(variables);
 		}
 		catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
 				| NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e)
 		{
-			logger.warn("Unable to decrypt GECCO data from DIC: " + e.getMessage(), e);
+			logger.warn("Unable to decrypt data from DIC: " + e.getMessage(), e);
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED,
-					"Error while decrypting GECCO data from DIC");
+					"Error while decrypting data from DIC");
 		}
 	}
 
-	private void decryptGeccoData(Variables variables)
+	private void decryptData(Variables variables)
 			throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException,
 			NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException
 	{
@@ -100,7 +100,7 @@ public class DecryptData extends AbstractServiceDelegate
 	{
 		return getInputParameterValues(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM, Identifier.class).findFirst()
-				.map(Identifier::getValue);
+						.map(Identifier::getValue);
 	}
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)

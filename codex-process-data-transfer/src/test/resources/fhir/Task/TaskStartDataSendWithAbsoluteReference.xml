@@ -44,7 +44,7 @@
          <reference value="http://dic-fhir-store:8080/fhir/Patient/1"/>
       </valueReference>
    </input>
-   <!-- parameter specifying GECCO resources should be send stopping at the 
+   <!-- parameter specifying resources should be send stopping at the 
 		defined date, resources that have been modified after the specified date 
 		will not be transmitted, typically this will be the current date time -->
    <input>
@@ -56,7 +56,7 @@
       </type>
       <valueInstant value="2022-10-18T12:00:00+02:00"/>
    </input>
-   <!-- optional parameter specifying GECCO resources should be send starting 
+   <!-- optional parameter specifying resources should be send starting 
 		at the defined date, resources older than the specified date will not be 
 		transported -->
    <!-- <input>

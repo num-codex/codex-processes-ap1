@@ -88,9 +88,9 @@ public class EncryptData extends AbstractServiceDelegate
 				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
 				| ShortBufferException | IOException e)
 		{
-			logger.warn("Unable to encrypt GECCO data for CRR: " + e.getMessage(), e);
+			logger.warn("Unable to encrypt data for CRR: " + e.getMessage(), e);
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_DATA_FOR_CRR_FAILED,
-					"Unable to encrypt GECCO data for CRR");
+					"Unable to encrypt data for CRR");
 		}
 	}
 

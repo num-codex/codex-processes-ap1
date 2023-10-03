@@ -2,6 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.listener;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +20,12 @@ public class ProcessPluginDeploymentStateListenerImpl implements ProcessPluginDe
 
 	private final DataStoreClientFactory dataStoreClientFactory;
 	private final FttpClientFactory fttpClientFactory;
-	private final TerminologyServerConnectionTestStatus terminologyServerConnectionTestStatus;
+	private final Supplier<TerminologyServerConnectionTestStatus> terminologyServerConnectionTestStatus;
 	private final BundleValidatorFactory bundleValidatorFactory;
 
 	public ProcessPluginDeploymentStateListenerImpl(DataStoreClientFactory dataStoreClientFactory,
 			FttpClientFactory fttpClientFactory,
-			TerminologyServerConnectionTestStatus terminologyServerConnectionTestStatus,
+			Supplier<TerminologyServerConnectionTestStatus> terminologyServerConnectionTestStatus,
 			BundleValidatorFactory bundleValidatorFactory)
 	{
 		this.dataStoreClientFactory = dataStoreClientFactory;
@@ -59,10 +60,11 @@ public class ProcessPluginDeploymentStateListenerImpl implements ProcessPluginDe
 
 		if (processes.contains("wwwnetzwerk-universitaetsmedizinde_dataSend"))
 		{
+			TerminologyServerConnectionTestStatus status = terminologyServerConnectionTestStatus.get();
 
-			if (TerminologyServerConnectionTestStatus.OK.equals(terminologyServerConnectionTestStatus))
+			if (TerminologyServerConnectionTestStatus.OK.equals(status))
 				bundleValidatorFactory.init();
-			else if (TerminologyServerConnectionTestStatus.NOT_OK.equals(terminologyServerConnectionTestStatus))
+			else if (TerminologyServerConnectionTestStatus.NOT_OK.equals(status))
 				logger.warn(
 						"Due to an error while testing the connection to the terminology server {} was not initialized, validation of bundles will be skipped.",
 						BundleValidatorFactory.class.getSimpleName());

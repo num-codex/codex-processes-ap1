@@ -20,7 +20,7 @@ public class ProcessPluginDeploymentConfig
 	public ProcessPluginDeploymentStateListener pluginDeploymentStateListener()
 	{
 		return new ProcessPluginDeploymentStateListenerImpl(transferDataConfig.dataStoreClientFactory(),
-				transferDataConfig.fttpClientFactory(), validationConfig.testConnectionToTerminologyServer(),
+				transferDataConfig.fttpClientFactory(), () -> validationConfig.testConnectionToTerminologyServer(),
 				validationConfig.bundleValidatorFactory());
 	}
 }

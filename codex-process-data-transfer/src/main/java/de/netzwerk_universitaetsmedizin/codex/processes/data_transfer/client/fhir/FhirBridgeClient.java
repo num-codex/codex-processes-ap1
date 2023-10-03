@@ -40,14 +40,14 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 	private static final String NUM_CODEX_BLOOD_GAS_PANEL = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/blood-gas-panel";
 
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public FhirBridgeClient(DataStoreClient geccoClient, DataLogger dataLogger)
+	public FhirBridgeClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		super(geccoClient, dataLogger);
+		super(dataClient, dataLogger);
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(newPatient)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().update().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
@@ -178,7 +178,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().create().resource(newPatient)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().create().resource(newPatient)
 					.prefer(PreferReturnEnum.REPRESENTATION).preferResponseType(Patient.class).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)
@@ -251,7 +251,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 	private Optional<Resource> findResourceInLocalFhirStore(String url, Class<? extends Resource> resourceType)
 	{
-		if (geccoClient.shouldUseChainedParameterNotLogicalReference())
+		if (dataClient.shouldUseChainedParameterNotLogicalReference())
 			url = url.replace("patient:identifier", "patient.identifier");
 
 		UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromUriString(url);
@@ -259,7 +259,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			Bundle resultBundle = geccoClient.getGenericFhirClient().search().byUrl(url).sort()
+			Bundle resultBundle = dataClient.getGenericFhirClient().search().byUrl(url).sort()
 					.descending("_lastUpdated").count(1).returnBundle(Bundle.class).execute();
 
 			dataLogger.logData(resourceType.getAnnotation(ResourceDef.class).name() + " search-bundle result: {}",
@@ -367,7 +367,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(newResource)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().update().resource(newResource)
 					.prefer(PreferReturnEnum.MINIMAL).execute();
 
 			if (outcome.getId() == null)
@@ -438,7 +438,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().create().resource(newResource)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().create().resource(newResource)
 					.prefer(PreferReturnEnum.MINIMAL).execute();
 
 			if (!Boolean.TRUE.equals(outcome.getCreated()) || outcome.getId() == null)

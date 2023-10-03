@@ -27,36 +27,36 @@ public class DataStoreClientImpl implements DataStoreClient
 
 	private final IRestfulClientFactory clientFactory;
 
-	private final String geccoServerBase;
+	private final String dataServerBase;
 
-	private final String geccoServerBasicAuthUsername;
-	private final String geccoServerBasicAuthPassword;
-	private final String geccoServerBearerToken;
+	private final String dataServerBasicAuthUsername;
+	private final String dataServerBasicAuthPassword;
+	private final String dataServerBearerToken;
 
 	private final boolean hapiClientVerbose;
 
 	private final FhirContext fhirContext;
 	private final Path searchBundleOverride;
-	private final Class<DataStoreFhirClient> geccoFhirClientClass;
+	private final Class<DataStoreFhirClient> dataFhirClientClass;
 	private final boolean useChainedParameterNotLogicalReference;
 
 	private final DataLogger dataLogger;
 
 	public DataStoreClientImpl(KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword, int connectTimeout,
-			int socketTimeout, int connectionRequestTimeout, String geccoServerBasicAuthUsername,
-			String geccoServerBasicAuthPassword, String geccoServerBearerToken, String geccoServerBase, String proxyUrl,
+			int socketTimeout, int connectionRequestTimeout, String dataServerBasicAuthUsername,
+			String dataServerBasicAuthPassword, String dataServerBearerToken, String dataServerBase, String proxyUrl,
 			String proxyUsername, String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext,
-			Path searchBundleOverride, Class<DataStoreFhirClient> geccoFhirClientClass,
+			Path searchBundleOverride, Class<DataStoreFhirClient> dataFhirClientClass,
 			boolean useChainedParameterNotLogicalReference, DataLogger dataLogger)
 	{
 		clientFactory = createClientFactory(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
 				connectionRequestTimeout);
 
-		this.geccoServerBase = geccoServerBase;
+		this.dataServerBase = dataServerBase;
 
-		this.geccoServerBasicAuthUsername = geccoServerBasicAuthUsername;
-		this.geccoServerBasicAuthPassword = geccoServerBasicAuthPassword;
-		this.geccoServerBearerToken = geccoServerBearerToken;
+		this.dataServerBasicAuthUsername = dataServerBasicAuthUsername;
+		this.dataServerBasicAuthPassword = dataServerBasicAuthPassword;
+		this.dataServerBearerToken = dataServerBearerToken;
 
 		configureProxy(clientFactory, proxyUrl, proxyUsername, proxyPassword);
 
@@ -64,7 +64,7 @@ public class DataStoreClientImpl implements DataStoreClient
 
 		this.fhirContext = fhirContext;
 		this.searchBundleOverride = searchBundleOverride;
-		this.geccoFhirClientClass = geccoFhirClientClass;
+		this.dataFhirClientClass = dataFhirClientClass;
 		this.useChainedParameterNotLogicalReference = useChainedParameterNotLogicalReference;
 
 		this.dataLogger = dataLogger;
@@ -81,7 +81,7 @@ public class DataStoreClientImpl implements DataStoreClient
 				clientFactory.setProxy(url.getHost(), url.getPort());
 				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
 
-				logger.info("Using proxy for GECCO FHIR server connection with {host: {}, port: {}, username: {}}",
+				logger.info("Using proxy for data FHIR server connection with {host: {}, port: {}, username: {}}",
 						url.getHost(), url.getPort(), proxyUsername);
 			}
 			catch (MalformedURLException e)
@@ -109,15 +109,15 @@ public class DataStoreClientImpl implements DataStoreClient
 
 	private void configuredWithBasicAuth(IGenericClient client)
 	{
-		if (geccoServerBasicAuthUsername != null && geccoServerBasicAuthPassword != null)
+		if (dataServerBasicAuthUsername != null && dataServerBasicAuthPassword != null)
 			client.registerInterceptor(
-					new BasicAuthInterceptor(geccoServerBasicAuthUsername, geccoServerBasicAuthPassword));
+					new BasicAuthInterceptor(dataServerBasicAuthUsername, dataServerBasicAuthPassword));
 	}
 
 	private void configureBearerTokenAuthInterceptor(IGenericClient client)
 	{
-		if (geccoServerBearerToken != null)
-			client.registerInterceptor(new BearerTokenAuthInterceptor(geccoServerBearerToken));
+		if (dataServerBearerToken != null)
+			client.registerInterceptor(new BearerTokenAuthInterceptor(dataServerBearerToken));
 	}
 
 	private void configureLoggingInterceptor(IGenericClient client)
@@ -133,7 +133,7 @@ public class DataStoreClientImpl implements DataStoreClient
 	@Override
 	public String getServerBase()
 	{
-		return geccoServerBase;
+		return dataServerBase;
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class DataStoreClientImpl implements DataStoreClient
 	{
 		try
 		{
-			Constructor<DataStoreFhirClient> constructor = geccoFhirClientClass.getConstructor(DataStoreClient.class,
+			Constructor<DataStoreFhirClient> constructor = dataFhirClientClass.getConstructor(DataStoreClient.class,
 					DataLogger.class);
 
 			return constructor.newInstance(this, dataLogger);
@@ -165,7 +165,7 @@ public class DataStoreClientImpl implements DataStoreClient
 		catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e)
 		{
-			logger.warn("Error while creating GECCO FHIR client: {}", e.getMessage());
+			logger.warn("Error while creating data FHIR client: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -179,7 +179,7 @@ public class DataStoreClientImpl implements DataStoreClient
 	@Override
 	public IGenericClient getGenericFhirClient()
 	{
-		IGenericClient client = clientFactory.newGenericClient(geccoServerBase);
+		IGenericClient client = clientFactory.newGenericClient(dataServerBase);
 
 		configuredWithBasicAuth(client);
 		configureBearerTokenAuthInterceptor(client);

@@ -20,14 +20,14 @@ public class HapiClient extends AbstractComplexFhirClient
 	private static final Logger logger = LoggerFactory.getLogger(HapiClient.class);
 
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public HapiClient(DataStoreClient geccoClient, DataLogger dataLogger)
+	public HapiClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		super(geccoClient, dataLogger);
+		super(dataClient, dataLogger);
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class HapiClient extends AbstractComplexFhirClient
 	{
 		modifyBundle(bundle);
 
-		geccoClient.getGenericFhirClient().transaction().withBundle(bundle)
+		dataClient.getGenericFhirClient().transaction().withBundle(bundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 	}
 

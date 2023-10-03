@@ -24,14 +24,14 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final DataStoreClientFactory geccoClientFactory;
+	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
 
-	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory geccoClientFactory, DataLogger dataLogger)
+	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger)
 	{
 		super(api);
 
-		this.geccoClientFactory = geccoClientFactory;
+		this.dataClientFactory = dataClientFactory;
 		this.dataLogger = dataLogger;
 	}
 
@@ -40,7 +40,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataClientFactory, "dataClientFactory");
 		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
@@ -56,7 +56,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 				logger.info("Executing bundle against FHIR store ...");
 				dataLogger.logData("Received bundle", bundle);
 
-				geccoClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
+				dataClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
 
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 			}

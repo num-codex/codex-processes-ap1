@@ -135,7 +135,7 @@ services:
       - app_dic_client_certificate.pem
       - app_dic_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
-      - codex_crr_public_key.pem
+      - crr_public_key.pem
     volumes:
       - type: bind
         source: ./dic/bpe/plugin
@@ -175,14 +175,14 @@ services:
         wwwnetzwerk-universitaetsmedizinde_dataTranslate|${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataReceive|${PROCESS_VERSION}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_DTS_IDENTIFIER_VALUE: Test_DTS
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PUBLIC_KEY: /run/secrets/crr_public_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -193,7 +193,7 @@ services:
       - mailhog
       # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
-    build: ./dic/hapi
+    image: hapiproject/hapi:v6.8.0
     restart: "no"
     ports:
       - 127.0.0.1:8080:8080
@@ -314,8 +314,8 @@ services:
         wwwnetzwerk-universitaetsmedizinde_dataSend|${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataReceive|${PROCESS_VERSION}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_DTS_IDENTIFIER_VALUE: Test_DTS
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
     networks:
       dts-bpe-frontend:
       dts-bpe-backend:
@@ -388,7 +388,7 @@ services:
       - app_crr_client_certificate.pem
       - app_crr_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
-      - codex_crr_private_key.pem
+      - crr_private_key.pem
     volumes:
       - type: bind
         source: ./crr/bpe/plugin
@@ -426,10 +426,10 @@ services:
         wwwnetzwerk-universitaetsmedizinde_dataSend|${PROCESS_VERSION}
         wwwnetzwerk-universitaetsmedizinde_dataTranslate|${PROCESS_VERSION}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_DTS_IDENTIFIER_VALUE: Test_DTS
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PRIVATE_KEY: /run/secrets/codex_crr_private_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://crr-fhir-bridge:8888/fhir-bridge/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
@@ -484,6 +484,15 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase
+  crr-fhir-store-hapi:
+    image: hapiproject/hapi:v6.8.0
+    restart: "no"
+    ports:
+      - 127.0.0.1:8888:8080
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      - crr-bpe-backend
 
 
 secrets:
@@ -547,10 +556,10 @@ secrets:
   app_crr_client_certificate_private_key.pem:
     file: ./secrets/app_crr_client_certificate_private_key.pem
 
-  codex_crr_public_key.pem:
-    file: ./secrets/codex_crr_public_key.pem
-  codex_crr_private_key.pem:
-    file: ./secrets/codex_crr_private_key.pem
+  crr_public_key.pem:
+    file: ./secrets/crr_public_key.pem
+  crr_private_key.pem:
+    file: ./secrets/crr_private_key.pem
 
 networks:
   internet:
