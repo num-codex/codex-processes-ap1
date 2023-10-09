@@ -193,7 +193,7 @@ services:
       - mailhog
       # - dic-fhir-store not defining a dependency here, dic-fhir-store* needs to be started manually
   dic-fhir-store-hapi:
-    image: hapiproject/hapi:v6.8.0
+    build: ./dic/hapi
     restart: "no"
     ports:
       - 127.0.0.1:8080:8080
@@ -485,7 +485,7 @@ services:
     depends_on:
       - crr-ehrbase
   crr-fhir-store-hapi:
-    image: hapiproject/hapi:v6.8.0
+    build: ./crr/hapi
     restart: "no"
     ports:
       - 127.0.0.1:8888:8080
