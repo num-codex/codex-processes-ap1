@@ -250,12 +250,12 @@ public class ValidationPackageWithDepedencies extends ValidationPackage
 		IValidationSupport validationSupport = fhirContext.getValidationSupport();
 		String missingValueSets = neededValueSets.stream()
 				.filter(e -> !foundValueSetUrls.contains(e) && validationSupport.fetchValueSet(e) == null).distinct()
-				.sorted().collect(Collectors.joining(", ", "[", "]"));
+				.sorted().collect(Collectors.joining(", "));
 
 		if (!missingValueSets.isEmpty())
 		{
 			logger.warn(
-					"The following ValueSet are required for validation but could not be found in validation package {}|{} or its dependencies, this may result in incomplete valdidation: {}",
+					"The following ValueSet are required for validation but could not be found in validation package {}|{} or its dependencies, this may result in incomplete valdidation: [{}]",
 					getName(), getVersion(), missingValueSets);
 		}
 	}

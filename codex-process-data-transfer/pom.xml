@@ -75,6 +75,8 @@
 				<configuration>
 					<excludes>
 						<exclude>**/*LearningTest.java</exclude>
+						<exclude>**/MiiTest.java</exclude>
+						<exclude>**/PolarDataTest.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

@@ -1,6 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,18 +34,22 @@ public class BundleValidatorImpl implements BundleValidator
 	private final Set<String> expectedStructureDefinitionUrls;
 	private final Set<String> expectedStructureDefinitionUrlsWithVersion;
 
-	public BundleValidatorImpl(FhirContext fhirContext, ValidationPackageWithDepedencies packageWithDependencies,
-			ResourceValidator delegate)
+	public BundleValidatorImpl(ResourceValidator delegate, FhirContext fhirContext,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
 	{
 		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 
-		Set<StructureDefinition> sds = Objects.requireNonNull(packageWithDependencies, "packageWithDependencies")
-				.getValidationSupportResources().getStructureDefinitions().stream()
-				.flatMap(sd -> Stream.concat(Stream.of(sd),
-						packageWithDependencies.getStructureDefinitionDependencies(sd).stream()))
-				.filter(sd -> StructureDefinitionKind.RESOURCE.equals(sd.getKind()))
-				.filter(sd -> !sd.hasAbstract() || !sd.getAbstract()).filter(StructureDefinition::hasUrl)
-				.collect(Collectors.toSet());
+		Set<StructureDefinition> sds = new HashSet<>();
+
+		packagesWithDependencies.forEach(packageWithDependencies ->
+		{
+			sds.addAll(packageWithDependencies.getValidationSupportResources().getStructureDefinitions().stream()
+					.flatMap(sd -> Stream.concat(Stream.of(sd),
+							packageWithDependencies.getStructureDefinitionDependencies(sd).stream()))
+					.filter(sd -> StructureDefinitionKind.RESOURCE.equals(sd.getKind()))
+					.filter(sd -> !sd.hasAbstract() || !sd.getAbstract()).filter(StructureDefinition::hasUrl)
+					.collect(Collectors.toSet()));
+		});
 
 		expectedStructureDefinitionUrls = sds.stream().map(StructureDefinition::getUrl).collect(Collectors.toSet());
 		expectedStructureDefinitionUrlsWithVersion = sds.stream().filter(StructureDefinition::hasVersion)
