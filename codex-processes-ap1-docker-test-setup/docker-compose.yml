@@ -111,8 +111,22 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://dic/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINT: ${DIC_USER_THUMBPRINT}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
     networks:
       dic-fhir-frontend:
         ipv4_address: 172.20.0.67
@@ -183,6 +197,8 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION: 'false'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -253,8 +269,21 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dts_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://dts/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DTS
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINT: ${DTS_USER_THUMBPRINT}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
     networks:
       dts-fhir-frontend:
         ipv4_address: 172.20.0.83
@@ -364,8 +393,21 @@ services:
       DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: crr_fhir_server_permanent_delete_user
       DEV_DSF_FHIR_SERVER_BASE_URL: https://crr/fhir
       DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
-      DEV_DSF_FHIR_SERVER_USER_THUMBPRINT: ${CRR_USER_THUMBPRINT}
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
     networks:
       crr-fhir-frontend:
         ipv4_address: 172.20.0.99
@@ -430,6 +472,7 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:

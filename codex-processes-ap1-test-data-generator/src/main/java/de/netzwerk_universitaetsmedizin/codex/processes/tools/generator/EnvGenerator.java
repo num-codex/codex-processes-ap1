@@ -21,8 +21,8 @@ public class EnvGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(EnvGenerator.class);
 
-	private static final String USER_THUMBPRINT = "USER_THUMBPRINT";
 	private static final String PROCESS_VERSION = "PROCESS_VERSION";
+	private static final String WEBBROSER_TEST_USER_THUMBPRINT = "WEBBROSER_TEST_USER_THUMBPRINT";
 
 	private static final class EnvEntry
 	{
@@ -38,16 +38,10 @@ public class EnvGenerator
 
 	public void generateAndWriteDockerTestFhirEnvFiles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		String dicUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dic-client")
-				.findFirst().get();
-		String crrUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "crr-client")
-				.findFirst().get();
-		String dtsUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dts-client")
-				.findFirst().get();
+		String webbroserTestUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"Webbrowser Test User").findFirst().get();
 
-		List<EnvEntry> entries = List.of(new EnvEntry("DIC_" + USER_THUMBPRINT, dicUserThumbprint),
-				new EnvEntry("CRR_" + USER_THUMBPRINT, crrUserThumbprint),
-				new EnvEntry("DTS_" + USER_THUMBPRINT, dtsUserThumbprint));
+		List<EnvEntry> entries = List.of(new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint));
 
 		Map<String, String> additionalEntries = Map.of(PROCESS_VERSION,
 				new DataTransferProcessPluginDefinition().getResourceVersion());
