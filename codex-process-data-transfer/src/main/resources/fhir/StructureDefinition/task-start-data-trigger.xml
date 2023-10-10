@@ -80,6 +80,7 @@
     <element id="Task.output:export-to">
       <path value="Task.output" />
       <sliceName value="export-to" />
+      <min value="0" />
       <max value="1" />
     </element>
     <element id="Task.output:export-to.type">
