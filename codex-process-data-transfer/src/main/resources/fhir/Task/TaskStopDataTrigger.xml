@@ -1,0 +1,38 @@
+<Task xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger|#{version}" />
+	</meta>
+	<identifier>
+		<system value="http://dsf.dev/sid/task-identifier" />
+		<value value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/#{version}/task-stop-data-trigger" />
+	</identifier>
+	<instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger|#{version}" />
+	<status value="draft" />
+	<intent value="order" />
+	<authoredOn value="#{date}" />
+	<requester>
+		<type value="Organization" />
+		<identifier>
+			<system value="http://dsf.dev/sid/organization-identifier" />
+			<value value="#{organization}" />
+		</identifier>
+	</requester>
+	<restriction>
+		<recipient>
+			<type value="Organization" />
+			<identifier>
+				<system value="http://dsf.dev/sid/organization-identifier" />
+				<value value="#{organization}" />
+			</identifier>
+		</recipient>
+	</restriction>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
+				<code value="message-name" />
+			</coding>
+		</type>
+		<valueString value="stopDataTrigger" />
+	</input>
+</Task>

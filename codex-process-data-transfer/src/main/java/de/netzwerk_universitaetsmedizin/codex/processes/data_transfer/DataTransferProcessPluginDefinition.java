@@ -81,14 +81,20 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 		var sTconDtraWe = "fhir/StructureDefinition/task-continue-data-translate-with-error.xml";
 		var sTstaDrec = "fhir/StructureDefinition/task-start-data-receive.xml";
 
+		var tStartSendAbsoluteReference = "fhir/Task/TaskStartDataSendWithAbsoluteReference.xml";
+		var tStartSendIdentifierReference = "fhir/Task/TaskStartDataSendWithIdentifierReference.xml";
+		var tStartTrigger = "fhir/Task/TaskStartDataTrigger.xml";
+		var tStopTrigger = "fhir/Task/TaskStopDataTrigger.xml";
+
 		var vD = "fhir/ValueSet/data-transfer.xml";
 		var vDeS = "fhir/ValueSet/data-transfer-error-source.xml";
 		var vDe = "fhir/ValueSet/data-transfer-error.xml";
 
-		return Map.of(
-				"wwwnetzwerk-universitaetsmedizinde_dataTrigger", Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, vD),
-				"wwwnetzwerk-universitaetsmedizinde_dataSend", Arrays.asList(aSen, cD, cDeS, cDe, nB, nD, sTexErMe,
-						sTstaDsen, sTconDsen, sTconDsenWvE, sTconDsenWe, vD, vDeS, vDe),
+		return Map.of("wwwnetzwerk-universitaetsmedizinde_dataTrigger",
+				Arrays.asList(aTri, cD, nD, sTstaDtri, sTstoDtri, tStartTrigger, tStopTrigger, vD),
+				"wwwnetzwerk-universitaetsmedizinde_dataSend",
+				Arrays.asList(aSen, cD, cDeS, cDe, nB, nD, sTexErMe, sTstaDsen, sTconDsen, sTconDsenWvE, sTconDsenWe,
+						tStartSendAbsoluteReference, tStartSendIdentifierReference, vD, vDeS, vDe),
 				"wwwnetzwerk-universitaetsmedizinde_dataTranslate",
 				Arrays.asList(aTra, cD, cDeS, cDe, nD, nC, sTexErMe, sTstaDtra, sTconDtra, sTconDtraWvE, sTconDtraWe,
 						vD),
