@@ -244,7 +244,6 @@ public class PolarDataTest
 		}
 	}
 
-
 	private static Bundle fixBundle(String trace, Bundle bundle, Set<String> resourcesAndProfiles)
 	{
 		Map<String, String> idTranslation = new HashMap<>();
@@ -340,6 +339,7 @@ public class PolarDataTest
 			for (int i = 0; i < identifiers.size(); i++)
 			{
 				Identifier identifier = identifiers.get(i);
+
 				// Removing (not replacing) extension, due to HAPI bug.
 				if (identifier.getSystem() == null && identifier.getSystemElement().hasExtension())
 				{
@@ -347,6 +347,7 @@ public class PolarDataTest
 							identifier.getExtension().size() > 1 ? "s" : "");
 					identifier.getSystemElement().setExtension(null);
 				}
+
 				// if (identifier.getSystem() == null && identifier.getSystemElement()
 				// .hasExtension("http://terminology.hl7.org/CodeSystem/data-absent-reason"))
 				// {
