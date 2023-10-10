@@ -432,7 +432,7 @@ public class TaskProfileTest
 		task.getRequester().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE_MESSAGE_NAME)).getType()
 				.addCoding(CodeSystems.BpmnMessage.messageName());
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
@@ -488,7 +488,7 @@ public class TaskProfileTest
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE_MESSAGE_NAME)).getType()
@@ -499,7 +499,7 @@ public class TaskProfileTest
 				.setValue(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM).setValue("target/original"))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM);
-		task.addInput().setValue(new Reference(new IdType("https://gth", "Binary", UUID.randomUUID().toString(), "1")))
+		task.addInput().setValue(new Reference(new IdType("https://dts", "Binary", UUID.randomUUID().toString(), "1")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
 
@@ -528,7 +528,7 @@ public class TaskProfileTest
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_MESSAGE_NAME)).getType()
@@ -562,7 +562,7 @@ public class TaskProfileTest
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput()
@@ -570,7 +570,7 @@ public class TaskProfileTest
 				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
 				.addCoding(CodeSystems.BpmnMessage.businessKey());
-		task.addInput().setValue(new Reference(new IdType("https://gth", "Binary", UUID.randomUUID().toString(), "1")))
+		task.addInput().setValue(new Reference(new IdType("https://dts", "Binary", UUID.randomUUID().toString(), "1")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
 
@@ -600,7 +600,7 @@ public class TaskProfileTest
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR_MESSAGE_NAME))
@@ -608,7 +608,7 @@ public class TaskProfileTest
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
 				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
-		ParameterComponent error = new ErrorInputParameterGenerator().createGthError(
+		ParameterComponent error = new ErrorInputParameterGenerator().createDtsError(
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DIC_FAILED,
 				"Test Error Message");
 		task.addInput(error);
@@ -641,7 +641,7 @@ public class TaskProfileTest
 		task.getRequester().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_MESSAGE_NAME)).getType()
 				.addCoding(CodeSystems.BpmnMessage.messageName());
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
@@ -676,7 +676,7 @@ public class TaskProfileTest
 		task.getRequester().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput()
 				.setValue(new StringType(
 						PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR_MESSAGE_NAME))
@@ -716,7 +716,7 @@ public class TaskProfileTest
 		task.getRequester().setType(ResourceType.Organization.name())
 				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
-				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_GTH"));
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR_MESSAGE_NAME))
 				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()

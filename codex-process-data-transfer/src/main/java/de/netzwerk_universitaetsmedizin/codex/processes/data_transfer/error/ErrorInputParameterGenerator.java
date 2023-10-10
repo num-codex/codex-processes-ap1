@@ -23,7 +23,7 @@ public class ErrorInputParameterGenerator
 		return createError(errorCode, errorMessage, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DIC);
 	}
 
-	public ParameterComponent createGthError(String errorCode, String errorMessage)
+	public ParameterComponent createDtsError(String errorCode, String errorMessage)
 	{
 		return createError(errorCode, errorMessage, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS);
 	}

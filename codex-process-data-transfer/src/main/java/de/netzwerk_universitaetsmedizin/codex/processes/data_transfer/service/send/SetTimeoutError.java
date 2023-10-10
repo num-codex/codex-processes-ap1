@@ -23,6 +23,6 @@ public class SetTimeoutError extends AbstractServiceDelegate
 	{
 		variables.setString(BPMN_EXECUTION_VARIABLE_ERROR_CODE,
 				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_DTS);
-		variables.setString(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE, "Timeout while waiting for continue task from GTH");
+		variables.setString(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE, "Timeout while waiting for continue task from DTS");
 	}
 }

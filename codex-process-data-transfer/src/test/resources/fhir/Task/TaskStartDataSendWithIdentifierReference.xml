@@ -76,7 +76,7 @@
    <!-- optional parameter enabling a dry run of the data-send process. Specifying the
 		'dry-run' parameter with value 'true' will result in the data-send process
 		aborting before storing the encrypted transfer bundle in the local DSF FHIR server
-		and sending a Task to start the data-translate process to the GTH -->
+		and sending a Task to start the data-translate process to the DTS -->
    <!-- <input>
       <type>
          <coding>

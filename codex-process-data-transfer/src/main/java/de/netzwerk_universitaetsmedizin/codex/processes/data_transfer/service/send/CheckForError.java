@@ -108,7 +108,7 @@ public class CheckForError extends AbstractServiceDelegate
 		}
 		catch (Exception e)
 		{
-			logger.warn("Unable to update continue Task from GTH", e);
+			logger.warn("Unable to update continue Task from DTS", e);
 		}
 	}
 

@@ -102,6 +102,6 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 			String errorMessage)
 	{
 		throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DTS_NOT_REACHABLE,
-				"Error while sending Task to GTH: " + exception.getMessage());
+				"Error while sending Task to DTS: " + exception.getMessage());
 	}
 }
