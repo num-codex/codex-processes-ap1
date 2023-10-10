@@ -142,8 +142,8 @@ public class PolarDataTest
 
 		for (BundleWithTrace bundleWithTrace : bundles)
 		{
-			logger.debug("Posting bundle with {} entries from {} to ", bundleWithTrace.bundle.getEntry().size(),
-					bundleWithTrace.trace);
+			logger.debug("Posting bundle with {} entries from {} to {}", bundleWithTrace.bundle.getEntry().size(),
+					bundleWithTrace.trace, serverBase);
 			fhirContext.newRestfulGenericClient(serverBase).transaction().withBundle(bundleWithTrace.bundle).execute();
 		}
 	}
