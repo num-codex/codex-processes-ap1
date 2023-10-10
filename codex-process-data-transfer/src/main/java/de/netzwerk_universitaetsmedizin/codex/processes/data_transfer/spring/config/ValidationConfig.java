@@ -74,7 +74,7 @@ public class ValidationConfig
 	private boolean validationEnabled;
 
 	@ProcessDocumentation(description = "FHIR implementation guide package used to validated resources, specify as `name|version`", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.package:de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4,de.medizininformatikinitiative.kerndatensatz.fall|1.0.1,de.medizininformatikinitiative.kerndatensatz.laborbefund|1.0.6,de.medizininformatikinitiative.kerndatensatz.medikation|1.0.11,de.medizininformatikinitiative.kerndatensatz.person|1.0.16,de.medizininformatikinitiative.kerndatensatz.prozedur|1.0.7}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.package:de.basisprofil.r4|1.4.0,de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4,de.medizininformatikinitiative.kerndatensatz.fall|1.0.1,de.medizininformatikinitiative.kerndatensatz.laborbefund|1.0.6,de.medizininformatikinitiative.kerndatensatz.medikation|1.0.11,de.medizininformatikinitiative.kerndatensatz.person|1.0.16,de.medizininformatikinitiative.kerndatensatz.prozedur|1.0.7}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> validationPackages;
 
 	@ProcessDocumentation(description = "FHIR implementation guide packages that do not need to be downloaded, list with `name|version` values", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")

@@ -47,14 +47,14 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
 		SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases&_include=Condition%3Apatient"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose&_include=Condition%3Apatient"
 				+ "&_lastUpdated=lt" + exportToString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -81,7 +81,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -89,7 +89,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases&_include=Condition%3Apatient"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose&_include=Condition%3Apatient"
 				+ "&_lastUpdated=lt" + exportToString + "&_lastUpdated=ge" + exportFromString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -117,7 +117,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(63, bundle.getEntry().size());
+		assertEquals(6, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -125,7 +125,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
 				+ "&patient=" + patientId + "&_lastUpdated=lt" + exportToString + "&_lastUpdated=ge" + exportFromString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -153,7 +153,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -162,7 +162,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
 				+ "&patient:identifier=" + namingSystemString + "%7C" + pseudonym + "&_lastUpdated=lt" + exportToString
 				+ "&_lastUpdated=ge" + exportFromString;
 

@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
@@ -152,7 +153,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 
 	private static final class QueryParameters implements UriTemplateVariables
 	{
-		final List<QuerParameter> parameters = new ArrayList<>();
+		final List<QueryParameter> parameters = new ArrayList<>();
 
 		@Override
 		public Object getValue(String name)
@@ -161,7 +162,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 					.orElseThrow(() -> new IllegalArgumentException("No value for '" + name + "'"));
 		}
 
-		boolean add(QuerParameter param)
+		boolean add(QueryParameter param)
 		{
 			if (param != null)
 				return parameters.add(param);
@@ -175,12 +176,12 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		}
 	}
 
-	private static final class QuerParameter
+	private static final class QueryParameter
 	{
 		final String name;
 		final Map<String, String> valuesByTemplateParameter = new HashMap<>();
 
-		QuerParameter(String templateParameter, String name, String... values)
+		QueryParameter(String templateParameter, String name, String... values)
 		{
 			Objects.requireNonNull(templateParameter, "templateParameter");
 			Objects.requireNonNull(name, "name");
@@ -463,8 +464,16 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 				else
 					queryParameters.add(createPatPrefixPseudonymSearchUrlPart(pseudonym));
 
+				List<String> values = new ArrayList<>();
+
 				if (includePatient)
-					queryParameters.add(createIncludeSearchUrlPart(resource));
+					values.add(":patient");
+				if (ResourceType.MedicationAdministration.name().equals(resource)
+						|| ResourceType.MedicationStatement.name().equals(resource))
+					values.add(":medication");
+
+				if (!values.isEmpty())
+					queryParameters.add(createIncludeSearchUrlPart(resource, values));
 			}
 			else if ("Patient".equals(resource))
 			{
@@ -483,7 +492,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 						+ resource + " not supported");
 			}
 
-			queryParameters.add(new QuerParameter("from_to", "_lastUpdated", createExportFromSearchUrlPart(exportFrom),
+			queryParameters.add(new QueryParameter("from_to", "_lastUpdated", createExportFromSearchUrlPart(exportFrom),
 					createExportToSearchUrlPart(exportTo)));
 
 			queryParameters.replace(urlBuilder);
@@ -494,29 +503,29 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		};
 	}
 
-	private QuerParameter createPseudonymSearchUrlPart(String pseudonym)
+	private QueryParameter createPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym == null || pseudonym.isBlank())
 			return null;
 		else
-			return new QuerParameter("pseudonym", "identifier",
+			return new QueryParameter("pseudonym", "identifier",
 					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
-	private QuerParameter createPatIdSearchUrlPart(String patientId)
+	private QueryParameter createPatIdSearchUrlPart(String patientId)
 	{
 		if (patientId == null || patientId.isBlank())
 			return null;
 		else
-			return new QuerParameter("patientId", "patient", patientId);
+			return new QueryParameter("patientId", "patient", patientId);
 	}
 
-	private QuerParameter createPatPrefixPseudonymSearchUrlPart(String pseudonym)
+	private QueryParameter createPatPrefixPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym == null || pseudonym.isBlank())
 			return null;
 		else
-			return new QuerParameter("pseudonym", "patient:identifier",
+			return new QueryParameter("pseudonym", "patient:identifier",
 					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
@@ -561,21 +570,21 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 			return "lt" + TIME_FORMAT.format(exportTo);
 	}
 
-	private QuerParameter createIncludeSearchUrlPart(String resource)
+	private QueryParameter createIncludeSearchUrlPart(String resource, List<String> values)
 	{
 		if (resource == null)
 			return null;
 		else
-			return new QuerParameter("include_resource", "_include", resource + ":patient");
+			return new QueryParameter("include_resource", "_include",
+					values.stream().map(v -> resource + v).toArray(String[]::new));
 	}
 
 	protected Stream<DomainResource> getDomainResources(Bundle bundle)
 	{
 		Stream<DomainResource> domainResources = getDomainResourcesFromBundle(bundle);
 
-		if (bundle.getTotal() > bundle.getEntry().size())
-			return Stream.concat(domainResources,
-					doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl(), bundle.getEntry().size()));
+		if (bundle.getLink(Bundle.LINK_NEXT) != null)
+			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl()));
 		else
 			return domainResources;
 	}
@@ -594,14 +603,13 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 						.map(r -> (DomainResource) r));
 	}
 
-	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
+	private Stream<DomainResource> doGetDomainResources(String nextUrl)
 	{
 		Bundle bundle = continueSearch(nextUrl);
 		Stream<DomainResource> domainResources = getDomainResourcesFromBundle(bundle);
 
-		if (bundle.getTotal() > bundle.getEntry().size() + subTotal)
-			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl(),
-					bundle.getEntry().size() + subTotal));
+		if (bundle.getLink(Bundle.LINK_NEXT) != null)
+			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl()));
 		else
 			return domainResources;
 	}

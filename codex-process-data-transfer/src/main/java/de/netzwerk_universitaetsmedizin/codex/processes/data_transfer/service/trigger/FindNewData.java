@@ -17,6 +17,7 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,7 @@ public class FindNewData extends AbstractServiceDelegate implements Initializing
 
 	private <T extends Type> Stream<T> getInputParameterValues(Task task, String system, String code, Class<T> type)
 	{
-		return task.getInput().stream().filter(c -> type.isInstance(c.getValue()))
+		return task.getInput().stream().filter(ParameterComponent::hasValue).filter(c -> type.isInstance(c.getValue()))
 				.filter(c -> c.getType().getCoding().stream()
 						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
 				.map(c -> type.cast(c.getValue()));

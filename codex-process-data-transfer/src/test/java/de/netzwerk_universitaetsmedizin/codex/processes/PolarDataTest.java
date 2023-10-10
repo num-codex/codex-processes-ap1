@@ -21,11 +21,15 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -93,6 +97,8 @@ public class PolarDataTest
 			.serializationInclusion(Include.NON_EMPTY).disable(MapperFeature.AUTO_DETECT_CREATORS)
 			.disable(MapperFeature.AUTO_DETECT_FIELDS).disable(MapperFeature.AUTO_DETECT_SETTERS).build();
 
+	private static final Random random = new Random();
+
 	private static final record BundleWithTrace(Bundle bundle, String trace, String file)
 	{
 	}
@@ -100,7 +106,31 @@ public class PolarDataTest
 	@Test
 	public void readPolar() throws Exception
 	{
-		readBundles();
+		List<BundleWithTrace> bundles = readBundles();
+
+		for (BundleWithTrace b : bundles)
+		{
+			Map<String, Integer> resourcesCount = new HashMap<>();
+
+			b.bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+					.map(BundleEntryComponent::getResource).forEach(r ->
+					{
+						String resourceType = r.getResourceType().name();
+						String profiles = r.getMeta().getProfile().stream().map(CanonicalType::getValue)
+								.collect(Collectors.joining(", ", "[", "]"));
+
+						resourcesCount.merge(resourceType + profiles, 1, (i, j) -> i + j);
+					});
+
+			List<String> results = resourcesCount.entrySet().stream().sorted(Comparator.comparing(Entry::getKey))
+					.map(e -> String.format("%4d %s", e.getValue(), e.getKey())).toList();
+
+			logger.info("{}: {} entr{}", b.trace, String.format("%4d", b.bundle.getEntry().size()),
+					(b.bundle.getEntry().size() == 1 ? "y" : "ies"));
+			// using list / for-each for output formatting
+			for (String r : results)
+				logger.info("{}: {}", b.trace, r);
+		}
 	}
 
 	@Test
@@ -108,12 +138,29 @@ public class PolarDataTest
 	{
 		List<BundleWithTrace> bundles = readBundles();
 
+		addBloomFilters(bundles);
+
 		for (BundleWithTrace bundleWithTrace : bundles)
 		{
 			logger.debug("Posting bundle with {} entries from {} to ", bundleWithTrace.bundle.getEntry().size(),
 					bundleWithTrace.trace);
 			fhirContext.newRestfulGenericClient(serverBase).transaction().withBundle(bundleWithTrace.bundle).execute();
 		}
+	}
+
+	private void addBloomFilters(List<BundleWithTrace> bundles)
+	{
+		bundles.stream().map(BundleWithTrace::bundle).map(Bundle::getEntry).flatMap(List::stream)
+				.filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Patient).map(r -> (Patient) r).forEach(p ->
+				{
+					byte[] value = new byte[64];
+					random.nextBytes(value);
+
+					p.addIdentifier().setSystem("http://www.netzwerk-universitaetsmedizin.de/sid/bloom-filter")
+							.setValue(Base64.getEncoder().encodeToString(value)).getType().addCoding()
+							.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203").setCode("ANON");
+				});
 	}
 
 	@Test
@@ -155,7 +202,7 @@ public class PolarDataTest
 
 			for (Path bundleFile : bundleFiles)
 			{
-				String trace = bundleZip.getFileName().toString() + ":" + bundleFile.getFileName().toString();
+				String trace = bundleZip.getFileName().toString() + "/" + bundleFile.getFileName().toString();
 				Bundle bundle = readBundle(trace, bundleFile, fhirContext);
 				bundle = fixBundle(trace, bundle, resourcesAndProfiles);
 
@@ -293,6 +340,7 @@ public class PolarDataTest
 			for (int i = 0; i < identifiers.size(); i++)
 			{
 				Identifier identifier = identifiers.get(i);
+				// Removing (not replacing) extension, due to HAPI bug.
 				if (identifier.getSystem() == null && identifier.getSystemElement().hasExtension())
 				{
 					logger.warn("{} removing system.extension{}", eTrace + "/identifier[" + i + "]",
@@ -329,6 +377,16 @@ public class PolarDataTest
 			else
 				logger.warn("{}: No id for {}", trace, oldReference);
 		}
+		else if (oldReference == null && reference.hasReference() && reference.getReferenceElement_()
+				.hasExtension("http://terminology.hl7.org/CodeSystem/data-absent-reason"))
+		{
+			logger.info(
+					"{}: Reference extension.url ...CodeSystem/data-absent-reason -> StructureDefinition/data-absent-reason",
+					trace);
+			reference.getReferenceElement_()
+					.getExtensionsByUrl("http://terminology.hl7.org/CodeSystem/data-absent-reason")
+					.forEach(e -> e.setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason"));
+		}
 		else
 			logger.info("{}: Reference null", trace);
 	}
@@ -339,7 +397,8 @@ public class PolarDataTest
 		{
 			ValidationPackageManager validationPackageManager = createValidationPackageManager();
 
-			String[] packages = { "de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4",
+			String[] packages = { "de.basisprofil.r4|1.4.0",
+					"de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4",
 					"de.medizininformatikinitiative.kerndatensatz.fall|1.0.1",
 					"de.medizininformatikinitiative.kerndatensatz.laborbefund|1.0.6",
 					"de.medizininformatikinitiative.kerndatensatz.medikation|1.0.11",

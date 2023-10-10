@@ -52,7 +52,7 @@ public class MiiTest
 	{
 		ValidationPackageManager validationPackageManager = createValidationPackageManager();
 
-		String[] packages = { "de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4",
+		String[] packages = { "de.basisprofil.r4|1.4.0", "de.medizininformatikinitiative.kerndatensatz.diagnose|1.0.4",
 				"de.medizininformatikinitiative.kerndatensatz.fall|1.0.1",
 				"de.medizininformatikinitiative.kerndatensatz.laborbefund|1.0.6",
 				"de.medizininformatikinitiative.kerndatensatz.medikation|1.0.11",

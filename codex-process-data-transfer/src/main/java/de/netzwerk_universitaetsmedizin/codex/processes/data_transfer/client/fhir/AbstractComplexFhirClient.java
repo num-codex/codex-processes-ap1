@@ -15,8 +15,11 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -53,72 +56,71 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 
 	protected Resource setSubject(Resource resource, Reference patientRef)
 	{
-		if (resource instanceof Condition)
-		{
-			((Condition) resource).setSubject(patientRef);
-			return resource;
-		}
-		else if (resource instanceof Consent)
-		{
-			((Consent) resource).setPatient(patientRef);
-			return resource;
-		}
-		else if (resource instanceof DiagnosticReport)
-		{
-			((DiagnosticReport) resource).setSubject(patientRef);
-			return resource;
-		}
-		else if (resource instanceof Immunization)
-		{
-			((Immunization) resource).setPatient(patientRef);
-			return resource;
-		}
-		else if (resource instanceof MedicationStatement)
-		{
-			((MedicationStatement) resource).setSubject(patientRef);
-			return resource;
-		}
-		else if (resource instanceof Observation)
-		{
-			((Observation) resource).setSubject(patientRef);
-			return resource;
-		}
-		else if (resource instanceof Procedure)
-		{
-			((Procedure) resource).setSubject(patientRef);
-			return resource;
-		}
+		if (resource instanceof Condition c)
+			c.setSubject(patientRef);
+		else if (resource instanceof Consent c)
+			c.setPatient(patientRef);
+		else if (resource instanceof DiagnosticReport dr)
+			dr.setSubject(patientRef);
+		else if (resource instanceof Encounter e)
+			e.setSubject(patientRef);
+		else if (resource instanceof Immunization i)
+			i.setPatient(patientRef);
+		else if (resource instanceof Medication m)
+			; // nothing to do
+		else if (resource instanceof MedicationAdministration ma)
+			ma.setSubject(patientRef);
+		else if (resource instanceof MedicationStatement ms)
+			ms.setSubject(patientRef);
+		else if (resource instanceof Observation o)
+			o.setSubject(patientRef);
+		else if (resource instanceof Procedure p)
+			p.setSubject(patientRef);
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
+
+		return resource;
 	}
 
-	protected Reference getSubject(Resource resource)
+	protected Optional<Reference> getSubject(Resource resource)
 	{
-		if (resource instanceof Condition)
-			return ((Condition) resource).getSubject();
-		else if (resource instanceof Consent)
-			return ((Consent) resource).getPatient();
-		else if (resource instanceof DiagnosticReport)
-			return ((DiagnosticReport) resource).getSubject();
-		else if (resource instanceof Immunization)
-			return ((Immunization) resource).getPatient();
-		else if (resource instanceof MedicationStatement)
-			return ((MedicationStatement) resource).getSubject();
-		else if (resource instanceof Observation)
-			return ((Observation) resource).getSubject();
-		else if (resource instanceof Procedure)
-			return ((Procedure) resource).getSubject();
+		if (resource instanceof Condition c)
+			return Optional.of(c.getSubject());
+		else if (resource instanceof Consent c)
+			return Optional.of(c.getPatient());
+		else if (resource instanceof DiagnosticReport dr)
+			return Optional.of(dr.getSubject());
+		else if (resource instanceof Encounter e)
+			return Optional.of(e.getSubject());
+		else if (resource instanceof Immunization i)
+			return Optional.of(i.getPatient());
+		else if (resource instanceof Medication m)
+			return Optional.empty();
+		else if (resource instanceof MedicationAdministration ma)
+			return Optional.of(ma.getSubject());
+		else if (resource instanceof MedicationStatement ms)
+			return Optional.of(ms.getSubject());
+		else if (resource instanceof Observation o)
+			return Optional.of(o.getSubject());
+		else if (resource instanceof Procedure p)
+			return Optional.of(p.getSubject());
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
 	}
 
 	protected String findPseudonym(Bundle bundle)
 	{
-		return bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
-				.map(BundleEntryComponent::getResource).map(this::getSubject).filter(Reference::hasIdentifier)
-				.map(Reference::getIdentifier).filter(i -> NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem()))
-				.map(Identifier::getValue).findFirst()
-				.orElseThrow(() -> new RuntimeException("No resource in Bundle has subject with pseudonym"));
+		Optional<String> opt = bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).map(this::getSubject).flatMap(Optional::stream)
+				.filter(Reference::hasIdentifier).map(Reference::getIdentifier)
+				.filter(i -> NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM.equals(i.getSystem())).map(Identifier::getValue)
+				.findFirst();
+
+		if (opt.isEmpty() && bundle.getEntry().stream().filter(BundleEntryComponent::hasResource)
+				.map(BundleEntryComponent::getResource).anyMatch(r -> !(r instanceof Medication)))
+			throw new RuntimeException("No resource in Bundle has subject with pseudonym");
+		else
+			return opt.get();
 	}
 
 	protected String getPseudonym(Patient patient)
@@ -242,5 +244,4 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		else
 			return Optional.of((Patient) patientBundle.getEntryFirstRep().getResource());
 	}
-
 }
