@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
@@ -52,7 +54,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
-import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValueSetExpander;
@@ -218,8 +219,13 @@ public class ValidationConfig
 	@Value("${java.io.tmpdir}")
 	private String systemTempFolder;
 
+	// not using process plugin api to enable reuse of this config class in stand-alone validator
 	@Autowired
-	private ProcessPluginApi api;
+	private FhirContext fhirContext;
+
+	// not using process plugin api to enable reuse of this config class in stand-alone validator
+	@Autowired
+	private ObjectMapper objectMapper;
 
 
 	@Bean
@@ -230,9 +236,9 @@ public class ValidationConfig
 		EnumSet<BindingStrength> bindingStrengths = EnumSet.copyOf(
 				valueSetExpansionBindingStrengths.stream().map(BindingStrength::fromCode).collect(Collectors.toList()));
 
-		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(),
-				api.getObjectMapper(), api.getFhirContext(), internalSnapshotGeneratorFactory(),
-				internalValueSetExpanderFactory(), noDownload, bindingStrengths);
+		return new ValidationPackageManagerImpl(validationPackageClient(), valueSetExpansionClient(), objectMapper,
+				fhirContext, internalSnapshotGeneratorFactory(), internalValueSetExpanderFactory(), noDownload,
+				bindingStrengths);
 	}
 
 	private StructureDefinitionModifier createStructureDefinitionModifier(String className)
@@ -368,7 +374,7 @@ public class ValidationConfig
 	@Bean
 	public ValidationPackageClient validationPackageClient()
 	{
-		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), api.getObjectMapper(),
+		return new ValidationPackageClientWithFileSystemCache(packageCacheFolder(), objectMapper,
 				validationPackageClientJersey());
 	}
 
@@ -410,7 +416,7 @@ public class ValidationConfig
 		List<ValueSetModifier> modifiers = valueSetModifierClasses.stream().map(this::createValueSetModifier)
 				.collect(Collectors.toList());
 
-		return new ValueSetExpansionClientWithFileSystemCache(valueSetCacheFolder(), api.getFhirContext(),
+		return new ValueSetExpansionClientWithFileSystemCache(valueSetCacheFolder(), fhirContext,
 				new ValueSetExpansionClientWithModifiers(valueSetExpansionClientJersey(), modifiers));
 	}
 
@@ -464,8 +470,7 @@ public class ValidationConfig
 				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
 				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
 				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
-				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, api.getObjectMapper(),
-				api.getFhirContext());
+				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, objectMapper, fhirContext);
 	}
 
 	public TerminologyServerConnectionTestStatus testConnectionToTerminologyServer()
@@ -524,7 +529,8 @@ public class ValidationConfig
 				validationPackageIdentifiers());
 	}
 
-	private List<ValidationPackageIdentifier> validationPackageIdentifiers()
+	@Bean
+	public List<ValidationPackageIdentifier> validationPackageIdentifiers()
 	{
 		if (validationPackages == null || validationPackages.isEmpty())
 			throw new IllegalArgumentException("Validation packages not specified");

@@ -3,7 +3,9 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -22,6 +24,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
@@ -70,7 +77,7 @@ public class ValidationMain implements InitializingBean
 		private ValidationPackageManager packageManager;
 
 		@Autowired
-		private ValidationPackageIdentifier validationPackage;
+		private List<ValidationPackageIdentifier> validationPackageIdentifiers;
 
 		@Autowired
 		private ValueSetExpansionClient valueSetExpansionClient;
@@ -79,7 +86,15 @@ public class ValidationMain implements InitializingBean
 		private ConfigurableEnvironment environment;
 
 		@Bean
-		public FhirContext fhirContext()
+		public ObjectMapper getObjectMapper()
+		{
+			return JsonMapper.builder().serializationInclusion(Include.NON_NULL)
+					.serializationInclusion(Include.NON_EMPTY).disable(MapperFeature.AUTO_DETECT_CREATORS)
+					.disable(MapperFeature.AUTO_DETECT_FIELDS).disable(MapperFeature.AUTO_DETECT_SETTERS).build();
+		}
+
+		@Bean
+		public FhirContext getFhirContext()
 		{
 			FhirContext context = FhirContext.forR4();
 			HapiLocalizer localizer = new HapiLocalizer()
@@ -97,14 +112,15 @@ public class ValidationMain implements InitializingBean
 		@Bean
 		public ValidationMain validatorMain()
 		{
-			return new ValidationMain(environment, fhirContext(), packageManager, validationPackage, output,
-					outputPretty, valueSetExpansionClient);
+			return new ValidationMain(environment, getFhirContext(), packageManager, validationPackageIdentifiers,
+					output, outputPretty, valueSetExpansionClient);
 		}
 	}
 
 	public static enum Output
 	{
 		JSON, XML
+
 	}
 
 	public static void main(String[] args)
@@ -137,19 +153,20 @@ public class ValidationMain implements InitializingBean
 	private final ConfigurableEnvironment environment;
 	private final FhirContext fhirContext;
 	private final ValidationPackageManager packageManager;
-	private final ValidationPackageIdentifier validationPackage;
+	private final List<ValidationPackageIdentifier> validationPackageIdentifiers = new ArrayList<>();
 	private final Output output;
 	private final boolean outputPretty;
 	private final ValueSetExpansionClient valueSetExpansionClient;
 
 	public ValidationMain(ConfigurableEnvironment environment, FhirContext fhirContext,
-			ValidationPackageManager packageManager, ValidationPackageIdentifier validationPackage, Output output,
-			boolean outputPretty, ValueSetExpansionClient valueSetExpansionClient)
+			ValidationPackageManager packageManager, List<ValidationPackageIdentifier> validationPackageIdentifiers,
+			Output output, boolean outputPretty, ValueSetExpansionClient valueSetExpansionClient)
 	{
 		this.environment = environment;
 		this.fhirContext = fhirContext;
 		this.packageManager = packageManager;
-		this.validationPackage = validationPackage;
+		if (validationPackageIdentifiers != null)
+			this.validationPackageIdentifiers.addAll(validationPackageIdentifiers);
 		this.output = output;
 		this.outputPretty = outputPretty;
 		this.valueSetExpansionClient = valueSetExpansionClient;
@@ -161,18 +178,16 @@ public class ValidationMain implements InitializingBean
 		Objects.requireNonNull(environment, "environment");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(packageManager, "packageManager");
-		Objects.requireNonNull(validationPackage, "validationPackage");
 		Objects.requireNonNull(output, "output");
 		Objects.requireNonNull(valueSetExpansionClient, "valueSetExpansionClient");
 	}
 
 	public void validate(String[] files)
 	{
-		logger.info("Using validation package {}", validationPackage);
+		logger.info("Using validation packages {}", validationPackageIdentifiers);
 		getAllNumProperties().forEach(c -> logger.debug("Config: {}", c));
 
-		BundleValidator validator = packageManager.createBundleValidator(validationPackage.getName(),
-				validationPackage.getVersion());
+		BundleValidator validator = packageManager.createBundleValidator(validationPackageIdentifiers);
 
 		Arrays.stream(files).map(this::read).filter(r -> r != null).forEach(r ->
 		{

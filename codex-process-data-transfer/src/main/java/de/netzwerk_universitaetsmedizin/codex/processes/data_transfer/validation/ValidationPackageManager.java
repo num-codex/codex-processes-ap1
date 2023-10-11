@@ -148,4 +148,16 @@ public interface ValidationPackageManager
 	 * @return {@link BundleValidator} for the specified FHIR package
 	 */
 	BundleValidator createBundleValidator(ValidationPackageIdentifier identifier);
+
+	/**
+	 * Downloads the given FHIR packages and all its dependencies. Will try to generate snapshots for all
+	 * {@link StructureDefinition}s of the specified (root) package and its dependencies, will try to expand all
+	 * {@link ValueSet}s with binding strength {@link BindingStrength#EXTENSIBLE}, {@link BindingStrength#PREFERRED} or
+	 * {@link BindingStrength#REQUIRED} used by the {@link StructureDefinition} of the specified (root) package or their
+	 * dependencies, before returning a {@link IValidationSupport}.
+	 *
+	 * @param identifiers
+	 * @return {@link BundleValidator} for the specified FHIR packages
+	 */
+	BundleValidator createBundleValidator(List<ValidationPackageIdentifier> identifiers);
 }

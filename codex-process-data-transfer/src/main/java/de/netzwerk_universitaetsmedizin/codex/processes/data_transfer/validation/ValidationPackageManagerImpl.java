@@ -171,6 +171,17 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	@Override
+	public BundleValidator createBundleValidator(List<ValidationPackageIdentifier> identifiers)
+	{
+		Objects.requireNonNull(identifiers, "identifiers");
+
+		List<ValidationPackageWithDepedencies> packageWithDependencies = downloadPackagesWithDependencies(identifiers);
+		IValidationSupport validationSupport = expandValueSetsAndGenerateStructureDefinitionSnapshots(
+				packageWithDependencies);
+		return createBundleValidator(validationSupport, packageWithDependencies);
+	}
+
+	@Override
 	public BundleValidator createBundleValidator(ValidationPackageIdentifier identifier)
 	{
 		Objects.requireNonNull(identifier, "identifier");
@@ -409,7 +420,11 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 						getAll(ValidationPackageWithDepedencies::getAllStructureDefinitions, packagesWithDependencies),
 						getAll(ValidationPackageWithDepedencies::getAllCodeSystems, packagesWithDependencies),
 						getAll(ValidationPackageWithDepedencies::getAllValueSets, packagesWithDependencies)),
-				new DefaultProfileValidationSupport(context), new QuietCommonCodeSystemsTerminologyService(context));
+				new DefaultProfileValidationSupport(context), new QuietCommonCodeSystemsTerminologyService(context),
+				// TODO remove NonValidatingValidationSupport
+				new NonValidatingValidationSupport(context, "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+						"http://fhir.de/CodeSystem/dimdi/icd-10-gm", "http://fhir.de/CodeSystem/bfarm/ops",
+						"http://fhir.de/CodeSystem/dimdi/ops", "http://fhir.de/CodeSystem/ifa/pzn"));
 	}
 
 	private <V> List<V> getAll(Function<ValidationPackageWithDepedencies, List<V>> mapper,
