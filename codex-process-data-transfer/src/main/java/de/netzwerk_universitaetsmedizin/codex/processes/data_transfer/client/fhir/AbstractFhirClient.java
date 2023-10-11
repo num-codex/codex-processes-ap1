@@ -633,7 +633,11 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 			}
 			catch (Exception e)
 			{
-				logger.warn("Patient " + reference + " not found", e);
+				logger.warn("Patient {} not found: {} - {}", reference, e.getClass().getName(), e.getMessage());
+
+				if (logger.isDebugEnabled())
+					logger.debug("Error while reading patient " + reference, e);
+
 				return Optional.empty();
 			}
 		}
