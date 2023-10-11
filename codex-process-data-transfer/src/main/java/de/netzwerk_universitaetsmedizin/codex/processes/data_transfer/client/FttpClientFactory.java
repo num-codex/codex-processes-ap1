@@ -144,8 +144,9 @@ public class FttpClientFactory
 					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
-					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase, fttpApiKey,
-					fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword != null ? "***" : "null");
+					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase,
+					fttpApiKey != null ? "***" : "null", fttpStudy, fttpTarget, proxyUrl, proxyUsername,
+					proxyPassword != null ? "***" : "null");
 
 			getFttpClient().testConnection();
 		}
