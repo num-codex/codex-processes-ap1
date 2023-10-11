@@ -1,5 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -15,24 +18,25 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 
 	private final boolean validationEnabled;
 	private final ValidationPackageManager validationPackageManager;
-	private final ValidationPackageIdentifier validationPackageIdentifier;
+	private final List<ValidationPackageIdentifier> validationPackageIdentifiers = new ArrayList<>();
 
 	private IValidationSupport validationSupport;
-	private ValidationPackageWithDepedencies packageWithDependencies;
+	private List<ValidationPackageWithDepedencies> packageWithDependencies;
 
 	public BundleValidatorFactoryImpl(boolean validationEnabled, ValidationPackageManager validationPackageManager,
-			ValidationPackageIdentifier validationPackageIdentifier)
+			Collection<? extends ValidationPackageIdentifier> validationPackageIdentifiers)
 	{
 		this.validationEnabled = validationEnabled;
 		this.validationPackageManager = validationPackageManager;
-		this.validationPackageIdentifier = validationPackageIdentifier;
+
+		if (validationPackageIdentifiers != null)
+			this.validationPackageIdentifiers.addAll(validationPackageIdentifiers);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(validationPackageManager, "validationPackageManager");
-		Objects.requireNonNull(validationPackageIdentifier, "validationPackageIdentifier");
 	}
 
 	@Override
@@ -47,8 +51,10 @@ public class BundleValidatorFactoryImpl implements BundleValidatorFactory, Initi
 		if (validationSupport != null)
 			return;
 
-		logger.info("Downloading FHIR validation package {} and dependencies", validationPackageIdentifier.toString());
-		packageWithDependencies = validationPackageManager.downloadPackageWithDependencies(validationPackageIdentifier);
+		logger.info("Downloading FHIR validation packages {} and dependencies",
+				validationPackageIdentifiers.toString());
+		packageWithDependencies = validationPackageManager.downloadPackagesWithDependencies(
+				validationPackageIdentifiers.toArray(ValidationPackageIdentifier[]::new));
 
 		logger.info("Expanding ValueSets and generating StructureDefinition snapshots");
 		validationSupport = validationPackageManager

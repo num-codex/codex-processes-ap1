@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.validation.ValueSetExpander;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.validation.ValueSetExpander;
 
 public class ValueSetExpanderWithFileSystemCache
 		extends AbstractFhirResourceFileSystemCache<ValueSetExpansionOutcome, ValueSet>

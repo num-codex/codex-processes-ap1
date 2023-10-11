@@ -1,0 +1,134 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<url value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error" />
+	<!-- version managed by bpe -->
+	<version value="#{version}" />
+	<name value="NumRdpDataTransferError" />
+	<title value="NUM-RDP data-transfer error" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
+	<publisher value="NUM-RDP" />
+	<description value="CodeSystem with error codes for the NUM-RDP data-transfer processes" />
+	<caseSensitive value="true" />
+	<hierarchyMeaning value="grouped-by" />
+	<versionNeeded value="false" />
+	<content value="complete" />
+	<concept>
+		<code value="unknown" />
+		<display value="Unknown" />
+		<definition value="An unknown error occured" />
+	</concept>
+	<concept>
+		<code value="patient-not-found" />
+		<display value="Patient Not Found" />
+		<definition value="The referenced Patient could not be found in the local FHIR repository" />
+	</concept>
+	<concept>
+		<code value="bad-patient-reference" />
+		<display value="Bad Patient Reference" />
+		<definition value="The given Patient reference does not point to a resource at the local FHIR repository" />
+	</concept>
+	<concept>
+		<code value="validation-failed" />
+		<display value="Validation Failed" />
+		<definition value="Error or fatal error during validaton of FHIR resources" />
+	</concept>
+	<concept>
+		<code value="ecryption-of-data-for-crr-failed" />
+		<display value="Ecryption of Data For CRR Failed" />
+		<definition value="Error while ecrypting data for CRR" />
+	</concept>
+	<concept>
+		<code value="unable-to-store-ecrypted-data" />
+		<display value="Unable to Store Ecrypted Data" />
+		<definition value="Error while creating Binary ressource with encrypted data in local DSF FHIR server" />
+	</concept>
+	<concept>
+		<code value="dts-not-reachable" />
+		<display value="DTS Not Reachable" />
+		<definition value="The DTS was not reachable while sending Task to start the translate process" />
+	</concept>
+	<concept>
+		<code value="download-of-encrypted-validation-error-from-dts-failed" />
+		<display value="Download of Encrypted Validation Error From DTS Failed" />
+		<definition value="Error while downloading encrypted validation error from DTS" />
+	</concept>
+	<concept>
+		<code value="decryption-of-validation-error-from-crr-failed" />
+		<display value="Decryption of Validation Error From CRR Failed" />
+		<definition value="Error while decrypting validation error from CRR" />
+	</concept>
+	<concept>
+		<code value="download-of-encrypted-data-from-dic-failed" />
+		<display value="Download of Encrypted Data From DIC Failed" />
+		<definition value="Error while downloading encrypted data from DIC" />
+	</concept>
+	<concept>
+		<code value="fttp-not-reachable" />
+		<display value="Unable to Connect to The fTTP" />
+		<definition value="No connection could be established with the fTTP" />
+	</concept>
+	<concept>
+		<code value="no-dic-pseudonym-for-bloomfilter" />
+		<display value="No DIC Pseudonym For Bloomfilter" />
+		<definition value="The fTTP did not return a DIC pseudonym for the given Bloomfilter" />
+	</concept>
+	<concept>
+		<code value="no-crr-pseudonym-for-dic-pseudonym" />
+		<display value="No CRR Pseudonym For DIC pseudonym" />
+		<definition value="The fTTP did not return a CRR pseudonym for the given DIC pseudonym" />
+	</concept>
+	<concept>
+		<code value="crr-not-reachable" />
+		<display value="CRR Not Reachable" />
+		<definition value="The CRR was not reachable while sending Task to start the receive process" />
+	</concept>
+	<concept>
+		<code value="download-of-encrypted-data-from-dts-failed" />
+		<display value="Download of Encrypted Data From DTS Failed" />
+		<definition value="Error while downloading encrypted data from DTS" />
+	</concept>
+	<concept>
+		<code value="decryption-of-data-from-dic-failed" />
+		<display value="Decryption of Data From DIC Failed" />
+		<definition value="Error while decrypting data from DIC" />
+	</concept>
+	<concept>
+		<code value="insert-into-crr-fhir-respository-failed" />
+		<display value="Insert Into CRR FHIR Repository Failed" />
+		<definition value="Error while inserting data into CRR FHIR repository, not a validation error" />
+	</concept>
+	<concept>
+		<code value="ecryption-of-validation-error-for-dic-failed" />
+		<display value="Ecryption of Validation Error for DIC Failed" />
+		<definition value="Error while ecrypting validation error for DIC" />
+	</concept>
+	<concept>
+		<code value="download-of-encrytped-validation-error-from-crr-failed" />
+		<display value="Download of Encrypted Validation Error From CRR Failed" />
+		<definition value="Error while downloading encrypted validation error from CRR" />
+	</concept>
+	<concept>
+		<code value="unable-to-store-ecrypted-validation-error" />
+		<display value="Unable to Store Ecrypted Validation Error" />
+		<definition value="Error while creating Binary ressource with encrypted validation error in local DSF FHIR server" />
+	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-crr" />
+		<display value="Timeout Waiting For Response From CRR" />
+		<definition value="Timeout while waiting for a response (process continue) task from CRR" />
+	</concept>
+	<concept>
+		<code value="timeout-waiting-for-response-from-dts" />
+		<display value="Timeout Waiting For Response From DTS" />
+		<definition value="Timeout while waiting for a response (process continue) task from DTS" />
+	</concept>
+</CodeSystem> 

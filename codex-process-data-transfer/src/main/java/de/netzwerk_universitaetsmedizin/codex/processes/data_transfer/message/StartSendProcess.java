@@ -15,12 +15,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.organization.OrganizationProvider;
-import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Target;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -31,31 +25,34 @@ import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractTaskMessageSend;
+import dev.dsf.bpe.v1.variables.Target;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class StartSendProcess extends AbstractTaskMessageSend
 {
 	private static final Logger logger = LoggerFactory.getLogger(StartSendProcess.class);
 
-	public StartSendProcess(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, OrganizationProvider organizationProvider, FhirContext fhirContext)
+	public StartSendProcess(ProcessPluginApi api)
 	{
-		super(clientProvider, taskHelper, readAccessHelper, organizationProvider, fhirContext);
+		super(api);
 	}
 
 	@Override
-	protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
-			String businessKey, String profile, Stream<ParameterComponent> additionalInputParameters)
+	protected void sendTask(DelegateExecution execution, Variables variables, Target target,
+			String instantiatesCanonical, String messageName, String businessKey, String profile,
+			Stream<ParameterComponent> additionalInputParameters)
 	{
 		// can't use same business key as trigger process
-		super.sendTask(execution, target, instantiatesUri, messageName, UUID.randomUUID().toString(), profile,
-				additionalInputParameters);
+		super.sendTask(execution, variables, target, instantiatesCanonical, messageName, UUID.randomUUID().toString(),
+				profile, additionalInputParameters);
 	}
 
 	@Override
-	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
+	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution, Variables variables)
 	{
 		return Stream.of(referenceParameter(execution), exportFromParameter(execution), exportToParameter(execution))
 				.filter(Objects::nonNull);

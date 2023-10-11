@@ -10,10 +10,6 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
@@ -23,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class LogError extends AbstractServiceDelegate
 {
@@ -31,11 +30,10 @@ public class LogError extends AbstractServiceDelegate
 	private final ErrorOutputParameterGenerator errorOutputParameterGenerator;
 	private final ErrorLogger errorLogger;
 
-	public LogError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, ErrorOutputParameterGenerator errorOutputParameterGenerator,
+	public LogError(ProcessPluginApi api, ErrorOutputParameterGenerator errorOutputParameterGenerator,
 			ErrorLogger errorLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
 		this.errorOutputParameterGenerator = errorOutputParameterGenerator;
 		this.errorLogger = errorLogger;
@@ -51,11 +49,11 @@ public class LogError extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		logger.debug("Setting Task.status failed, adding error");
 
-		Task task = getLeadingTaskFromExecutionVariables(execution);
+		Task task = variables.getStartTask();
 		task.setStatus(TaskStatus.FAILED);
 
 		String errorCode = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_CODE);
@@ -76,10 +74,11 @@ public class LogError extends AbstractServiceDelegate
 				logger.error("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
-			errorLogger.logDataReceiveFailed(getLeadingTaskFromExecutionVariables(execution).getIdElement()
-					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
+			errorLogger.logDataReceiveFailed(task.getIdElement().withServerBase(
+					api.getFhirWebserviceClientProvider().getLocalWebserviceClient().getBaseUrl(),
+					ResourceType.Task.name()));
 		}
 
-		updateLeadingTaskInExecutionVariables(execution, task);
+		variables.updateTask(task);
 	}
 }

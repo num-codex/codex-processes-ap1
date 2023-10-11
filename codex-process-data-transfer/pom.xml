@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>codex-process-data-transfer</artifactId>
@@ -14,29 +16,60 @@
 	</properties>
 
 	<dependencies>
-		<!-- provided by DSF -->
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-base</artifactId>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-bpe-process-api-v1</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-tools-documentation-generator</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>6.0.11</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<!-- must be added as regular DSF plugin -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-validation</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>dev.dsf</groupId>
+					<artifactId>dsf-tools-bundle-generator</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>dev.dsf</groupId>
+			<artifactId>dsf-fhir-rest-adapter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>dev.dsf</groupId>
+					<artifactId>dsf-common-auth</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
 		</dependency>
 
 		<dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -47,7 +80,31 @@
 				<configuration>
 					<excludes>
 						<exclude>**/*LearningTest.java</exclude>
+						<exclude>**/MiiTest.java</exclude>
+						<exclude>**/PolarDataTest.java</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					<artifactSet>
+						<excludes>
+							
+						</excludes>
+					</artifactSet>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -68,24 +125,8 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/process</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-hapi-fhir-client/crr</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-client</artifactId>
-									<version>${hapi.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/crr/bpe/plugin</outputDirectory>
+							<outputDirectory>
+								../codex-processes-ap1-docker-test-setup/crr/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -102,28 +143,12 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/process</outputDirectory>
+							<outputDirectory>
+								../codex-processes-ap1-docker-test-setup/dic/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
-						<id>copy-hapi-fhir-client/dic</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-client</artifactId>
-									<version>${hapi.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/dic/bpe/plugin</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-process-plugin-to-docker-test-setup/gth</id>
+						<id>copy-process-plugin-to-docker-test-setup/dts</id>
 						<phase>package</phase>
 						<goals>
 							<goal>copy</goal>
@@ -136,24 +161,8 @@
 									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/process</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-hapi-fhir-client/gth</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
-									<artifactId>hapi-fhir-client</artifactId>
-									<version>${hapi.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>../codex-processes-ap1-docker-test-setup/gth/bpe/plugin</outputDirectory>
+							<outputDirectory>
+								../codex-processes-ap1-docker-test-setup/dts/bpe/process</outputDirectory>
 						</configuration>
 					</execution>
 
@@ -165,14 +174,15 @@
 						</goals>
 						<configuration>
 							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-							<includeArtifactIds>hapi-fhir-base,hapi-fhir-client,hapi-fhir-converter,hapi-fhir-structures-r4,hapi-fhir-structures-r5,hapi-fhir-validation,hapi-fhir-validation-resources-r4,
-							hapi-fhir-validation-resources-r5,org.hl7.fhir.convertors,org.hl7.fhir.dstu2,org.hl7.fhir.dstu2016may,org.hl7.fhir.dstu3,org.hl7.fhir.r4,org.hl7.fhir.r5,org.hl7.fhir.utilities,
-							org.hl7.fhir.validation,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,caffeine,guava,
-							commons-codec,commons-io,crypto-utils,log4j2-utils,jakarta.activation,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
-							httpclient,httpcore,log4j-api,log4j-core,log4j-slf4j-impl,bcpkix-jdk15on,bcprov-jdk15on,bcutil-jdk15on,ucum,hk2-api,hk2-locator,hk2-utils,osgi-resource-locator,
-							aopalliance-repackaged,jakarta.inject,jersey-apache-connector,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
-							dsf-bpe-process-base,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
-							slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
+							<includeArtifactIds>
+								hapi-fhir-base,hapi-fhir-client,hapi-fhir-converter,hapi-fhir-structures-r4,hapi-fhir-structures-r5,hapi-fhir-validation,hapi-fhir-validation-resources-r4,
+								hapi-fhir-validation-resources-r5,org.hl7.fhir.convertors,org.hl7.fhir.dstu2,org.hl7.fhir.dstu2016may,org.hl7.fhir.dstu3,org.hl7.fhir.r4,org.hl7.fhir.r5,org.hl7.fhir.utilities,
+								org.hl7.fhir.validation,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,caffeine,guava,
+								commons-codec,commons-io,crypto-utils,jakarta.activation,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
+								httpclient,httpcore,log4j-api,log4j-core,log4j-slf4j2-impl,bcpkix-jdk18on,bcprov-jdk18on,bcutil-jdk18on,ucum,hk2-api,hk2-locator,hk2-utils,osgi-resource-locator,
+								aopalliance-repackaged,jakarta.inject-api,jersey-apache-connector,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
+								dsf-bpe-process-api-v1,dsf-fhir-auth,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
+								slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
 							</includeArtifactIds>
 						</configuration>
 					</execution>
@@ -184,44 +194,29 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/process</directory>
+							<directory>
+								../codex-processes-ap1-docker-test-setup/crr/bpe/process</directory>
 							<includes>
-								<include>${project.artifactId}-${project.version}.jar</include>
+								<include>
+									${project.artifactId}-${project.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/crr/bpe/plugin</directory>
+							<directory>
+								../codex-processes-ap1-docker-test-setup/dic/bpe/process</directory>
 							<includes>
-								<include>hapi-fhir-client-${hapi.version}.jar</include>
+								<include>
+									${project.artifactId}-${project.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/process</directory>
+							<directory>
+								../codex-processes-ap1-docker-test-setup/dts/bpe/process</directory>
 							<includes>
-								<include>${project.artifactId}-${project.version}.jar</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/dic/bpe/plugin</directory>
-							<includes>
-								<include>hapi-fhir-client-${hapi.version}.jar</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/gth/bpe/process</directory>
-							<includes>
-								<include>${project.artifactId}-${project.version}.jar</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-						<fileset>
-							<directory>../codex-processes-ap1-docker-test-setup/gth/bpe/plugin</directory>
-							<includes>
-								<include>hapi-fhir-client-${hapi.version}.jar</include>
+								<include>
+									${project.artifactId}-${project.version}.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
@@ -230,13 +225,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<appendAssemblyId>false</appendAssemblyId>
-					<descriptors>
-						<descriptor>src/assembly/zip.xml</descriptor>
-					</descriptors>
-					<finalName>codex-process-data-transfer-validator-${project.version}</finalName>
-				</configuration>
 				<executions>
 					<execution>
 						<id>zip-assembly</id>
@@ -244,36 +232,33 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>src/assembly/zip.xml</descriptor>
+							</descriptors>
+							<finalName>
+								codex-process-data-transfer-validator-${project.version}</finalName>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>dev.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<version>${dsf.version}</version>
 				<executions>
 					<execution>
 						<goals>
-							<goal>exec</goal>
+							<goal>generate</goal>
 						</goals>
-						<phase>prepare-package</phase>
 					</execution>
 				</executions>
 				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
-						</argument>
-						<argument>
-							de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config
-						</argument>
-					</arguments>
-					<includeProjectDependencies>true</includeProjectDependencies>
-					<addResourcesToClasspath>true</addResourcesToClasspath>
-					<classpathScope>compile</classpathScope>
-					<workingDirectory>${project.basedir}</workingDirectory>
+					<workingPackages>
+						<workingPackage>
+							de.netzwerk_universitaetsmedizin.codex.processes.data_transfer</workingPackage>
+					</workingPackages>
 				</configuration>
 			</plugin>
 		</plugins>

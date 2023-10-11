@@ -1,0 +1,197 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate" />
+  <!-- version managed by bpe -->
+  <version value="#{version}" />
+  <name value="TaskStartDataTranslate" />
+  <!-- status managed by bpe -->
+  <status value="unknown" />
+  <experimental value="false" />
+  <!-- date managed by bpe -->
+  <date value="#{date}" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesCanonical">
+      <path value="Task.instantiatesCanonical" />
+      <fixedCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate|#{version}" />
+    </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <min value="4" />
+      <max value="4" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="startDataTranslate" />
+    </element>
+    <element id="Task.input:business-key">
+      <path value="Task.input" />
+      <sliceName value="business-key" />
+      <min value="1" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:pseudonym">
+      <path value="Task.input" />
+      <sliceName value="pseudonym" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:pseudonym.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
+      </binding>
+    </element>
+    <element id="Task.input:pseudonym.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:pseudonym.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.input:pseudonym.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="pseudonym" />
+    </element>
+    <element id="Task.input:pseudonym.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="Identifier" />
+      </type>
+    </element>
+    <element id="Task.input:pseudonym.value[x].system">
+      <path value="Task.input.value[x].system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/sid/dic-pseudonym" />
+    </element>
+    <element id="Task.input:pseudonym.value[x].value">
+      <path value="Task.input.value[x].value" />
+      <min value="1" />
+    </element>
+    <element id="Task.input:data">
+      <path value="Task.input" />
+      <sliceName value="data" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:data.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
+      </binding>
+    </element>
+    <element id="Task.input:data.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:data.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.input:data.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="data-reference" />
+    </element>
+    <element id="Task.input:data.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://hl7.org/fhir/StructureDefinition/Binary" />
+      </type>
+    </element>
+    <element id="Task.input:data.value[x].reference">
+      <path value="Task.input.value[x].reference" />
+      <min value="1" />
+    </element>
+    <element id="Task.input:data.value[x].identifier">
+      <path value="Task.input.value[x].identifier" />
+      <max value="0" />
+    </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="0" />
+    </element>
+    <element id="Task.output:error.extension:error-metadata">
+      <path value="Task.output.extension" />
+      <sliceName value="error-metadata" />
+      <min value="0" />
+      <type>
+        <code value="Extension" />
+        <profile value="https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata|#{version}" />
+      </type>
+      <isModifier value="false" />
+    </element>
+    <element id="Task.output:encryptedBundleSize">
+      <path value="Task.output" />
+      <sliceName value="encryptedBundleSize" />
+      <min value="0" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type">
+      <path value="Task.output.type" />
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/ValueSet/data-transfer|#{version}" />
+      </binding>
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <min value="1" />
+      <fixedCode value="encrypted-bundle-size" />
+    </element>
+    <element id="Task.output:encryptedBundleSize.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="unsignedInt" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

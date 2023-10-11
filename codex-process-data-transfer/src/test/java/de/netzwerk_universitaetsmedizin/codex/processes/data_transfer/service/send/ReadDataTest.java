@@ -8,7 +8,6 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import java.io.FileNotFoundException;
@@ -20,14 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FhirResourceValues.FhirResourceValue;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -39,11 +34,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import ca.uhn.fhir.context.FhirContext;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.GeccoFhirClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.service.TaskHelper;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class ReadDataTest
 {
@@ -52,35 +50,43 @@ public class ReadDataTest
 	{
 		FhirContext fhirContext = FhirContext.forR4();
 
-		FhirWebserviceClientProvider clientProvider = Mockito.mock(FhirWebserviceClientProvider.class);
-		TaskHelper taskHelper = Mockito.mock(TaskHelper.class);
-		ReadAccessHelper readAccessHelper = Mockito.mock(ReadAccessHelper.class);
-		GeccoClientFactory geccoClientFactory = Mockito.mock(GeccoClientFactory.class);
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
-		GeccoFhirClient fhirClient = Mockito.mock(GeccoFhirClient.class);
-		Mockito.when(geccoClientFactory.getGeccoClient()).thenReturn(geccoClient);
-		Mockito.when(geccoClient.getFhirClient()).thenReturn(fhirClient);
+		ProcessPluginApi api = Mockito.mock(ProcessPluginApi.class);
+		DataStoreClientFactory dataStoreClientFactory = Mockito.mock(DataStoreClientFactory.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
+		DataStoreFhirClient fhirClient = Mockito.mock(DataStoreFhirClient.class);
+		Mockito.when(dataStoreClientFactory.getDataStoreClient()).thenReturn(dataClient);
+		Mockito.when(dataClient.getFhirClient()).thenReturn(fhirClient);
 		Mockito.when(fhirClient.getNewData(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(readBundle(fhirContext));
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 
-		ReadData readData = new ReadData(clientProvider, taskHelper, readAccessHelper, geccoClientFactory, dataLogger);
+		ReadData readData = new ReadData(api, dataStoreClientFactory, dataLogger);
+
+		Variables variables = Mockito.mock(Variables.class);
 		DelegateExecution execution = Mockito.mock(DelegateExecution.class);
-		Mockito.when(execution.getCurrentActivityId()).thenReturn(UUID.randomUUID().toString());
+		Mockito.when(api.getVariables(execution)).thenReturn(variables);
+
 		Mockito.when(execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE)).thenReturn(PatientReference
 				.from(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original")));
+
 		Task task = createTask();
-		Mockito.when(taskHelper.getCurrentTaskFromExecutionVariables(any())).thenReturn(task);
+		Mockito.when(variables.getStartTask()).thenReturn(task);
+		TaskHelper taskHelper = Mockito.mock(TaskHelper.class);
+		Mockito.when(api.getTaskHelper()).thenReturn(taskHelper);
+
+		Mockito.when(taskHelper.getFirstInputParameterValue(task, CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_EXPORT_TO, InstantType.class))
+				.thenReturn(Optional.of(new InstantType(new Date())));
 
 		readData.execute(execution);
 
 		ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<FhirResourceValue> bundleCaptor = ArgumentCaptor.forClass(FhirResourceValue.class);
-		verify(execution).setVariable(keyCaptor.capture(), bundleCaptor.capture());
+		ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+		verify(variables).setResource(keyCaptor.capture(), bundleCaptor.capture());
 
 		assertEquals(BPMN_EXECUTION_VARIABLE_BUNDLE, keyCaptor.getValue());
 
-		Bundle bundle = (Bundle) bundleCaptor.getValue().getValue();
+		Bundle bundle = (Bundle) bundleCaptor.getValue();
 		assertNotNull(bundle.getEntry());
 		assertEquals(7, bundle.getEntry().size());
 

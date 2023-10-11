@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -14,6 +13,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.IdentifierRemover;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.SliceMinFixer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.structure_definition.StructureDefinitionModifier;
+import dev.dsf.fhir.validation.SnapshotGenerator;
 
 public class PluginSnapshotGeneratorWithModifiers implements SnapshotGenerator, InitializingBean
 {

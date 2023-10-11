@@ -35,7 +35,6 @@ public class FttpClientFactory
 	{
 		private static final Logger logger = LoggerFactory.getLogger(FttpClientStub.class);
 
-		private static final String DIC_PSEUDONYM = "source2/original2";
 		private static final Pattern DIC_PSEUDONYM_PATTERN = Pattern.compile(PSEUDONYM_PATTERN_STRING);
 
 		@Override
@@ -49,6 +48,22 @@ public class FttpClientFactory
 
 			String original = matcher.group(2);
 
+			return sha256(original);
+		}
+
+		@Override
+		public Optional<String> getDicPseudonym(String bloomFilter)
+		{
+			Optional<String> pseudonym = sha256(bloomFilter).map(p -> "dic_test/" + p);
+
+			logger.warn("Returning simulated DIC pseudonym '{}' for bloom filter '{}', fTTP connection not configured.",
+					pseudonym.orElseThrow(), bloomFilter);
+
+			return pseudonym;
+		}
+
+		private Optional<String> sha256(String original)
+		{
 			try
 			{
 				MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -58,16 +73,8 @@ public class FttpClientFactory
 			catch (NoSuchAlgorithmException e)
 			{
 				logger.error("Error while creating CRR pseudonym");
-				return Optional.empty();
+				throw new RuntimeException(e);
 			}
-		}
-
-		@Override
-		public Optional<String> getDicPseudonym(String bloomFilter)
-		{
-			logger.warn("Returning simulated DIC pseudonym '{}' for bloom filter '{}', fTTP connection not configured.",
-					DIC_PSEUDONYM, bloomFilter);
-			return Optional.of(DIC_PSEUDONYM);
 		}
 
 		@Override
@@ -137,8 +144,9 @@ public class FttpClientFactory
 					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
-					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase, fttpApiKey,
-					fttpStudy, fttpTarget, proxyUrl, proxyUsername, proxyPassword != null ? "***" : "null");
+					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase,
+					fttpApiKey != null ? "***" : "null", fttpStudy, fttpTarget, proxyUrl, proxyUsername,
+					proxyPassword != null ? "***" : "null");
 
 			getFttpClient().testConnection();
 		}

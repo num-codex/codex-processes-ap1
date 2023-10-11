@@ -7,8 +7,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
@@ -16,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 
 public class PluginSnapshotGeneratorWithFileSystemCache
 		extends AbstractFhirResourceFileSystemCache<SnapshotWithValidationMessages, StructureDefinition>

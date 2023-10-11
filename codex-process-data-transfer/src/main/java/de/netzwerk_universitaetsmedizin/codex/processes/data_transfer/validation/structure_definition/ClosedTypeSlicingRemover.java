@@ -28,7 +28,16 @@ public class ClosedTypeSlicingRemover implements StructureDefinitionModifier
 				if (DiscriminatorType.TYPE.equals(discriminator.getType()) && "$this".equals(discriminator.getPath()))
 				{
 					logger.info(
-							"Removing Type slicing with slicing.rules != closed from validation rule with id {} in StructureDefinition {}|{}",
+							"Removing 'type' slicing with slicing.rules != closed from validation rule with id {} in StructureDefinition {}|{}",
+							e.getId(), sd.getUrl(), sd.getVersion());
+
+					e.setSlicing(null);
+				}
+				else if (DiscriminatorType.VALUE.equals(discriminator.getType())
+						&& "url".equals(discriminator.getPath()))
+				{
+					logger.info(
+							"Removing 'value' slicing with slicing.rules != closed from validation rule with id {} in StructureDefinition {}|{}",
 							e.getId(), sd.getUrl(), sd.getVersion());
 
 					e.setSlicing(null);

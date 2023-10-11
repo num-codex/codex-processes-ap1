@@ -1,18 +1,11 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.fhir.profile;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.DATE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
-import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -21,25 +14,42 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
+import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelperImpl;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class ActivityDefinitionProfileTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
 
+	private static final DataTransferProcessPluginDefinition def = new DataTransferProcessPluginDefinition();
+
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION, DATE,
-			Arrays.asList("highmed-activity-definition-0.5.0.xml", "highmed-extension-process-authorization-0.5.0.xml",
-					"highmed-extension-process-authorization-consortium-role-0.5.0.xml",
-					"highmed-extension-process-authorization-organization-0.5.0.xml",
-					"highmed-coding-process-authorization-local-all-0.5.0.xml",
-					"highmed-coding-process-authorization-local-consortium-role-0.5.0.xml",
-					"highmed-coding-process-authorization-local-organization-0.5.0.xml",
-					"highmed-coding-process-authorization-remote-all-0.5.0.xml",
-					"highmed-coding-process-authorization-remote-consortium-role-0.5.0.xml",
-					"highmed-coding-process-authorization-remote-organization-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-process-authorization-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-process-authorization-recipient-0.5.0.xml",
-					"highmed-process-authorization-requester-0.5.0.xml"));
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(def.getResourceVersion(),
+			def.getReleaseDate(),
+			Arrays.asList("dsf-activity-definition-1.0.0.xml", "dsf-extension-process-authorization-1.0.0.xml",
+					"dsf-extension-process-authorization-organization-1.0.0.xml",
+					"dsf-extension-process-authorization-organization-practitioner-1.0.0.xml",
+					"dsf-extension-process-authorization-parent-organization-role-1.0.0.xml",
+					"dsf-extension-process-authorization-parent-organization-role-practitioner-1.0.0.xml",
+					"dsf-extension-process-authorization-practitioner-1.0.0.xml",
+					"dsf-coding-process-authorization-local-all-1.0.0.xml",
+					"dsf-coding-process-authorization-local-all-practitioner-1.0.0.xml",
+					"dsf-coding-process-authorization-local-organization-1.0.0.xml",
+					"dsf-coding-process-authorization-local-organization-practitioner-1.0.0.xml",
+					"dsf-coding-process-authorization-local-parent-organization-role-1.0.0.xml",
+					"dsf-coding-process-authorization-local-parent-organization-role-practitioner-1.0.0.xml",
+					"dsf-coding-process-authorization-remote-all-1.0.0.xml",
+					"dsf-coding-process-authorization-remote-parent-organization-role-1.0.0.xml",
+					"dsf-coding-process-authorization-remote-organization-1.0.0.xml"),
+			Arrays.asList("dsf-organization-role-1.0.0.xml", "dsf-practitioner-role-1.0.0.xml",
+					"dsf-process-authorization-1.0.0.xml", "dsf-read-access-tag-1.0.0.xml"),
+			Arrays.asList("dsf-organization-role-1.0.0.xml", "dsf-practitioner-role-1.0.0.xml",
+					"dsf-process-authorization-recipient-1.0.0.xml", "dsf-process-authorization-requester-1.0.0.xml",
+					"dsf-read-access-tag-1.0.0.xml"));
 
 	private final ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -49,8 +59,8 @@ public class ActivityDefinitionProfileTest
 	@Test
 	public void testDataTriggerValid() throws Exception
 	{
-		ActivityDefinition ad = validationRule.readActivityDefinition(
-				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-trigger.xml"));
+		ActivityDefinition ad = validationRule
+				.readActivityDefinition(Paths.get("src/main/resources/fhir/ActivityDefinition/data-trigger.xml"));
 
 		ValidationResult result = resourceValidator.validate(ad);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -58,14 +68,15 @@ public class ActivityDefinitionProfileTest
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, practitionerRole -> true,
+				orgIdentifier -> true, organizationRole -> true));
 	}
 
 	@Test
 	public void testDataSendValid() throws Exception
 	{
-		ActivityDefinition ad = validationRule.readActivityDefinition(
-				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-send.xml"));
+		ActivityDefinition ad = validationRule
+				.readActivityDefinition(Paths.get("src/main/resources/fhir/ActivityDefinition/data-send.xml"));
 
 		ValidationResult result = resourceValidator.validate(ad);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -73,14 +84,15 @@ public class ActivityDefinitionProfileTest
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, practitionerRole -> true,
+				orgIdentifier -> true, organizationRole -> true));
 	}
 
 	@Test
 	public void testDataTranslateValid() throws Exception
 	{
-		ActivityDefinition ad = validationRule.readActivityDefinition(
-				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-translate.xml"));
+		ActivityDefinition ad = validationRule
+				.readActivityDefinition(Paths.get("src/main/resources/fhir/ActivityDefinition/data-translate.xml"));
 
 		ValidationResult result = resourceValidator.validate(ad);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -88,14 +100,15 @@ public class ActivityDefinitionProfileTest
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, practitionerRole -> true,
+				orgIdentifier -> true, organizationRole -> true));
 	}
 
 	@Test
 	public void testDataReceiveValid() throws Exception
 	{
-		ActivityDefinition ad = validationRule.readActivityDefinition(
-				Paths.get("src/main/resources/fhir/ActivityDefinition/num-codex-data-receive.xml"));
+		ActivityDefinition ad = validationRule
+				.readActivityDefinition(Paths.get("src/main/resources/fhir/ActivityDefinition/data-receive.xml"));
 
 		ValidationResult result = resourceValidator.validate(ad);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -103,6 +116,7 @@ public class ActivityDefinitionProfileTest
 		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 
-		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, orgIdentifier -> true, role -> true));
+		assertTrue(processAuthorizationHelper.isValid(ad, taskProfile -> true, practitionerRole -> true,
+				orgIdentifier -> true, organizationRole -> true));
 	}
 }

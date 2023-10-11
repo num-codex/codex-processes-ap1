@@ -4,7 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_GECCO_DATA_FOR_CRR_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_DATA_FOR_CRR_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
@@ -24,36 +24,29 @@ import javax.crypto.ShortBufferException;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.Variables;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.AesGcmUtil;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.RsaAesGcmUtil;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 
 public class EncryptData extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(EncryptData.class);
 
-	private final FhirContext fhirContext;
 	private final CrrKeyProvider crrKeyProvider;
 
-	public EncryptData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, CrrKeyProvider crrKeyProvider)
+	public EncryptData(ProcessPluginApi api, CrrKeyProvider crrKeyProvider)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
-		this.fhirContext = fhirContext;
 		this.crrKeyProvider = crrKeyProvider;
 	}
 
@@ -62,16 +55,16 @@ public class EncryptData extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(crrKeyProvider, "crrKeyProvider");
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, dev.dsf.bpe.v1.variables.Variables variables)
+			throws BpmnError, Exception
 	{
-		String pseudonym = ((PatientReference) execution.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE))
+		String pseudonym = ((PatientReference) variables.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE))
 				.getIdentifier().getValue();
-		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+		Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
 		try
 		{
@@ -84,33 +77,34 @@ public class EncryptData extends AbstractServiceDelegate
 
 			byte[] encrypted = RsaAesGcmUtil.encrypt(crrKeyProvider.getPublicKey(), data);
 
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY, Variables.byteArrayValue(returnKey));
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
+			variables.setByteArray(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY, returnKey);
+			variables.setByteArray(BPMN_EXECUTION_VARIABLE_BUNDLE, encrypted);
 
-			addEncryptedBundleSizeToTask(execution, encrypted.length);
+			Task task = variables.getStartTask();
+			task = addEncryptedBundleSizeToTask(task, encrypted.length);
+			variables.updateTask(task);
 		}
 		catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
 				| ShortBufferException | IOException e)
 		{
-			logger.warn("Unable to encrypt GECCO data for CRR: " + e.getMessage(), e);
-			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_GECCO_DATA_FOR_CRR_FAILED,
-					"Unable to encrypt GECCO data for CRR");
+			logger.warn("Unable to encrypt data for CRR: " + e.getMessage(), e);
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_DATA_FOR_CRR_FAILED,
+					"Unable to encrypt data for CRR");
 		}
 	}
 
-	private void addEncryptedBundleSizeToTask(DelegateExecution execution, int encryptedSize)
+	private Task addEncryptedBundleSizeToTask(Task task, int encryptedSize)
 	{
-		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.addOutput().setValue(new UnsignedIntType(encryptedSize)).getType().getCodingFirstRep()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_SIZE);
-		updateLeadingTaskInExecutionVariables(execution, task);
+		return task;
 	}
 
 	private byte[] toByteArray(String pseudonym, Bundle bundle) throws IOException
 	{
-		String bundleString = fhirContext.newJsonParser().encodeResourceToString(bundle);
+		String bundleString = api.getFhirContext().newJsonParser().encodeResourceToString(bundle);
 
 		return bundleString.replace(pseudonym, PSEUDONYM_PLACEHOLDER)
 				.replace(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM)

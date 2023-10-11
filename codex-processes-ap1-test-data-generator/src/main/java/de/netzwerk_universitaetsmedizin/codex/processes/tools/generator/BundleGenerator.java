@@ -10,10 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
@@ -24,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.netzwerk_universitaetsmedizin.codex.processes.tools.generator.CertificateGenerator.CertificateFiles;
+import dev.dsf.fhir.service.ReferenceCleaner;
+import dev.dsf.fhir.service.ReferenceCleanerImpl;
+import dev.dsf.fhir.service.ReferenceExtractor;
+import dev.dsf.fhir.service.ReferenceExtractorImpl;
 
 public class BundleGenerator
 {
@@ -85,22 +85,22 @@ public class BundleGenerator
 
 		bundle = readAndCleanBundle(medic3BundleTemplateFile);
 
-		Organization organizationGth = (Organization) bundle.getEntry().get(0).getResource();
-		Extension organizationGthThumbprintExtension = organizationGth
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationGthThumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("gth-client").getCertificateSha512ThumbprintHex()));
+		Organization organizationDts = (Organization) bundle.getEntry().get(0).getResource();
+		Extension organizationDtsThumbprintExtension = organizationDts
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		organizationDtsThumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("dts-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationDic = (Organization) bundle.getEntry().get(1).getResource();
-		Extension organizationMedic1thumbprintExtension = organizationDic
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic1thumbprintExtension.setValue(new StringType(
+		Extension organizationDicthumbprintExtension = organizationDic
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		organizationDicthumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("dic-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationCrr = (Organization) bundle.getEntry().get(2).getResource();
-		Extension organizationMedic2thumbprintExtension = organizationCrr
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic2thumbprintExtension.setValue(new StringType(
+		Extension organizationCrrthumbprintExtension = organizationCrr
+				.getExtensionByUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint");
+		organizationCrrthumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("crr-client").getCertificateSha512ThumbprintHex()));
 
 		writeBundle(Paths.get("bundle/bundle.xml"), bundle);
@@ -108,15 +108,15 @@ public class BundleGenerator
 
 	public void copyDockerTestBundles()
 	{
-		Path dicBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/dic/fhir/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", dicBundleFile);
-		writeBundle(dicBundleFile, bundle);
-
 		Path crrBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/crr/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", crrBundleFile);
 		writeBundle(crrBundleFile, bundle);
 
-		Path gthBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/gth/fhir/conf/bundle.xml");
+		Path dicBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/dic/fhir/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", dicBundleFile);
+		writeBundle(dicBundleFile, bundle);
+
+		Path gthBundleFile = Paths.get("../codex-processes-ap1-docker-test-setup/dts/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", gthBundleFile);
 		writeBundle(gthBundleFile, bundle);
 

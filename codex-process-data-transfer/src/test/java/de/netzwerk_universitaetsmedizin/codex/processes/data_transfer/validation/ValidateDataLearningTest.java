@@ -28,11 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.bouncycastle.pkcs.PKCSException;
-import org.highmed.dsf.fhir.json.ObjectMapperFactory;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.validation.ValidationSupportWithCustomResources;
-import org.highmed.dsf.fhir.validation.ValueSetExpanderImpl;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -54,7 +49,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.base.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -63,6 +61,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.ValidationResult;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationSupportWithCustomResources;
+import dev.dsf.fhir.validation.ValueSetExpanderImpl;
 
 public class ValidateDataLearningTest
 {
@@ -70,7 +72,9 @@ public class ValidateDataLearningTest
 
 	private static final Path cacheFolder = Paths.get("target");
 	private static final FhirContext fhirContext = FhirContext.forR4();
-	private static final ObjectMapper mapper = ObjectMapperFactory.createObjectMapper(fhirContext);
+	private static final ObjectMapper mapper = JsonMapper.builder().serializationInclusion(Include.NON_NULL)
+			.serializationInclusion(Include.NON_EMPTY).disable(MapperFeature.AUTO_DETECT_CREATORS)
+			.disable(MapperFeature.AUTO_DETECT_FIELDS).disable(MapperFeature.AUTO_DETECT_SETTERS).build();
 
 	private static final class ResourceAndFilename
 	{
@@ -94,12 +98,12 @@ public class ValidateDataLearningTest
 		}
 
 		X509Certificate certificate = PemIo.readX509CertificateFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate")));
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate")));
 		char[] keyStorePassword = properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key.password")
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key.password")
 				.toCharArray();
 		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(Paths.get(properties.getProperty(
-				"de.netzwerk.universitaetsmedizin.codex.gecco.validation.valueset.expansion.client.authentication.certificate.private.key")),
+				"de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.certificate.private.key")),
 				keyStorePassword);
 		KeyStore keyStore = CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate },
 				UUID.randomUUID().toString(), keyStorePassword);

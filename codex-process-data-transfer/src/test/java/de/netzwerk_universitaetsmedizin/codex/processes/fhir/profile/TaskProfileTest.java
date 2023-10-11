@@ -2,8 +2,8 @@ package de.netzwerk_universitaetsmedizin.codex.processes.fhir.profile;
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_DIC_FAILED;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_GTH_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DIC_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DTS_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DRY_RUN;
@@ -26,10 +26,10 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR_MESSAGE_NAME;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR_MESSAGE_NAME;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI_AND_LATEST_VERSION;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI_AND_LATEST_VERSION;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE_MESSAGE_NAME;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_START_DATA_SEND;
@@ -40,21 +40,12 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER_MESSAGE_NAME;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.DATE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.validation.ResourceValidator;
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
@@ -78,29 +69,34 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorInputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
+import dev.dsf.bpe.v1.constants.CodeSystems;
+import dev.dsf.bpe.v1.constants.NamingSystems;
+import dev.dsf.fhir.validation.ResourceValidator;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.ValidationSupportRule;
 
 public class TaskProfileTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskProfileTest.class);
 
+	private static final DataTransferProcessPluginDefinition def = new DataTransferProcessPluginDefinition();
+
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION, DATE,
-			Arrays.asList("highmed-task-base-0.5.0.xml", "num-codex-extension-error-metadata.xml",
-					"num-codex-task-start-data-trigger.xml", "num-codex-task-stop-data-trigger.xml",
-					"num-codex-task-start-data-send.xml", "num-codex-task-continue-data-send.xml",
-					"num-codex-task-continue-data-send-with-validation-error.xml",
-					"num-codex-task-continue-data-send-with-error.xml", "num-codex-task-start-data-translate.xml",
-					"num-codex-task-continue-data-translate.xml",
-					"num-codex-task-continue-data-translate-with-validation-error.xml",
-					"num-codex-task-continue-data-translate-with-error.xml", "num-codex-task-start-data-receive.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
-					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
-					"num-codex-data-transfer-error.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-bpmn-message-0.5.0.xml",
-					"num-codex-data-transfer.xml", "num-codex-data-transfer-error-source.xml",
-					"num-codex-data-transfer-error.xml"));
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(def.getResourceVersion(),
+			def.getResourceReleaseDate(),
+			Arrays.asList("dsf-task-base-1.0.0.xml", "extension-error-metadata.xml", "task-start-data-trigger.xml",
+					"task-stop-data-trigger.xml", "task-start-data-send.xml", "task-continue-data-send.xml",
+					"task-continue-data-send-with-validation-error.xml", "task-continue-data-send-with-error.xml",
+					"task-start-data-translate.xml", "task-continue-data-translate.xml",
+					"task-continue-data-translate-with-validation-error.xml",
+					"task-continue-data-translate-with-error.xml", "task-start-data-receive.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-bpmn-message-1.0.0.xml", "data-transfer.xml",
+					"data-transfer-error-source.xml", "data-transfer-error.xml"),
+			Arrays.asList("dsf-read-access-tag-1.0.0.xml", "dsf-bpmn-message-1.0.0.xml", "data-transfer.xml",
+					"data-transfer-error-source.xml", "data-transfer-error.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -159,17 +155,17 @@ public class TaskProfileTest
 	private Task createValidTaskStartDataTrigger()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
 
 		return task;
 	}
@@ -190,17 +186,19 @@ public class TaskProfileTest
 	private Task createValidTaskStopDataTrigger()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
 		return task;
 	}
@@ -222,8 +220,8 @@ public class TaskProfileTest
 	public void testTaskStartDataSendValidWithBusinessKey() throws Exception
 	{
 		Task task = createValidTaskStartDataSendWithIdentifierReference();
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 		logTask(task);
 
 		ValidationResult result = resourceValidator.validate(task);
@@ -254,11 +252,13 @@ public class TaskProfileTest
 	{
 		Task task = createValidTaskStartDataSendWithIdentifierReference();
 		task.setStatus(TaskStatus.FAILED);
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.addIssue().setSeverity(IssueSeverity.ERROR).addLocation("Patient.identifier[0].system");
 		new ErrorOutputParameterGenerator()
-				.createMeDicValidationError(new IdType("http://gecco.fhir.server/fhir", "Patient", "42", null), outcome)
+				.createMeDicValidationError(new IdType("http://data.fhir.server/fhir", "Patient", "42", null), outcome)
 				.forEach(task::addOutput);
 
 		logTask(task);
@@ -273,20 +273,17 @@ public class TaskProfileTest
 	private Task createValidTaskStartDataSendWithIdentifierReference()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_SEND_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		// business-key optional
-		// task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-		// .setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
 		task.addInput()
 				.setValue(new Reference().setIdentifier(
 						new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original")))
@@ -315,20 +312,18 @@ public class TaskProfileTest
 	private Task createValidTaskStartDataSendWithAbsoluteReference()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_SEND + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_SEND_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		// business-key optional
-		// task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-		// .setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+
 		task.addInput().setValue(new Reference("https://localhost/fhir/Patient/1")).getType().addCoding()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PATIENT);
@@ -428,19 +423,20 @@ public class TaskProfileTest
 	private Task createValidTaskStartDataTranslate()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(
+				PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 		task.addInput()
 				.setValue(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue("source/original"))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
@@ -486,24 +482,24 @@ public class TaskProfileTest
 	private Task createValidTaskStartDataReceive()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_CRR");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 		task.addInput()
 				.setValue(new Identifier().setSystem(NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM).setValue("target/original"))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM);
-		task.addInput().setValue(new Reference(new IdType("https://gth", "Binary", UUID.randomUUID().toString(), "1")))
+		task.addInput().setValue(new Reference(new IdType("https://dts", "Binary", UUID.randomUUID().toString(), "1")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
 
@@ -526,19 +522,19 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataSend()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
 		return task;
 	}
@@ -559,22 +555,22 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataSendWithValidationError()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_VALIDATION_ERROR);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(
+				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_VALIDATION_ERROR + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput()
 				.setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_VALIDATION_ERROR_MESSAGE_NAME))
-				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
-		task.addInput().setValue(new Reference(new IdType("https://gth", "Binary", UUID.randomUUID().toString(), "1")))
+				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
+		task.addInput().setValue(new Reference(new IdType("https://dts", "Binary", UUID.randomUUID().toString(), "1")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
 
@@ -597,23 +593,23 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataSendWithError()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta()
+				.addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_DIC");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DIC"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR_MESSAGE_NAME))
-				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
-		ParameterComponent error = new ErrorInputParameterGenerator().createGthError(
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_DIC_FAILED,
+		ParameterComponent error = new ErrorInputParameterGenerator().createDtsError(
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DIC_FAILED,
 				"Test Error Message");
 		task.addInput(error);
 
@@ -636,19 +632,20 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataTranslate()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(
+				PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_CRR");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_MESSAGE_NAME)).getType()
-				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
 		return task;
 	}
@@ -669,22 +666,23 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataTranslateWithValidationError()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(
+				PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(
+				PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_CRR");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput()
 				.setValue(new StringType(
 						PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_VALIDATION_ERROR_MESSAGE_NAME))
-				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 		task.addInput().setValue(new Reference(new IdType("https://crr", "Binary", UUID.randomUUID().toString(), "1")))
 				.getType().addCoding().setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
@@ -708,23 +706,24 @@ public class TaskProfileTest
 	private Task createValidTaskContinueDataTranslateWithError()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR);
-		task.setInstantiatesUri(PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta()
+				.addProfile(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR + "|" + def.getResourceVersion());
+		task.setInstantiatesCanonical(
+				PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI + "|" + def.getResourceVersion());
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_CRR");
-		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("Test_GTH");
+		task.getRequester().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_CRR"));
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name())
+				.setIdentifier(NamingSystems.OrganizationIdentifier.withValue("Test_DTS"));
 		task.addInput().setValue(new StringType(PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR_MESSAGE_NAME))
-				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
-				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
+				.getType().addCoding(CodeSystems.BpmnMessage.messageName());
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType()
+				.addCoding(CodeSystems.BpmnMessage.businessKey());
 
 		ParameterComponent error = new ErrorInputParameterGenerator().createCrrError(
-				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_GTH_FAILED,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DTS_FAILED,
 				"Test Error Message");
 		task.addInput(error);
 

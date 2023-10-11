@@ -3,17 +3,13 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.t
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_CODE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_ERROR_SOURCE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED;
 
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
@@ -23,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class LogError extends AbstractServiceDelegate
 {
@@ -31,11 +30,10 @@ public class LogError extends AbstractServiceDelegate
 	private final ErrorOutputParameterGenerator errorOutputParameterGenerator;
 	private final ErrorLogger errorLogger;
 
-	public LogError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, ErrorOutputParameterGenerator errorOutputParameterGenerator,
+	public LogError(ProcessPluginApi api, ErrorOutputParameterGenerator errorOutputParameterGenerator,
 			ErrorLogger errorLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
 		this.errorOutputParameterGenerator = errorOutputParameterGenerator;
 		this.errorLogger = errorLogger;
@@ -51,38 +49,42 @@ public class LogError extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		logger.debug("Setting Task.status failed, adding error");
 
-		Task task = getLeadingTaskFromExecutionVariables(execution);
+		Task task = variables.getStartTask();
 
-		String errorCode = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_CODE);
-		String errorMessage = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE);
-		String errorSource = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_ERROR_SOURCE);
-
-		// only fail if local error
-		if (errorSource == null || CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH.equals(errorSource))
-			task.setStatus(TaskStatus.FAILED);
+		String errorCode = variables.getString(BPMN_EXECUTION_VARIABLE_ERROR_CODE);
+		String errorMessage = variables.getString(BPMN_EXECUTION_VARIABLE_ERROR_MESSAGE);
+		String errorSource = variables.getString(BPMN_EXECUTION_VARIABLE_ERROR_SOURCE);
 
 		if (!CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED.equals(errorCode))
 		{
-			errorSource = errorSource != null ? errorSource : CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH;
+			errorSource = errorSource != null ? errorSource : CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS;
 			TaskOutputComponent output = errorOutputParameterGenerator.createError(errorSource, errorCode,
 					errorMessage);
 
 			task.addOutput(output);
 
-			if (CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH.equals(errorSource))
+			if (CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS.equals(errorSource))
 				logger.error("Error while executing local process; code: '{}', message: {}", errorCode, errorMessage);
 			else // not an error if error source remote
 				logger.warn("Error while executing process at {}; code: '{}', message: {}", errorSource, errorCode,
 						errorMessage);
 
-			errorLogger.logDataTranslateFailed(getLeadingTaskFromExecutionVariables(execution).getIdElement()
-					.withServerBase(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
+			errorLogger.logDataTranslateFailed(task.getIdElement().withServerBase(
+					api.getFhirWebserviceClientProvider().getLocalWebserviceClient().getBaseUrl(),
+					ResourceType.Task.name()));
 		}
 
-		updateLeadingTaskInExecutionVariables(execution, task);
+		// only fail if local error
+		if (errorSource == null || CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS.equals(errorSource))
+		{
+			task.setStatus(TaskStatus.FAILED);
+			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().update(task);
+		}
+
+		variables.updateTask(task);
 	}
 }

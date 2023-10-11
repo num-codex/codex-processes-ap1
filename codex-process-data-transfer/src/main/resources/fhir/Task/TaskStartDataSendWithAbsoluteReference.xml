@@ -1,0 +1,84 @@
+<Task xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|#{version}" />
+	</meta>
+	<identifier>
+		<system value="http://dsf.dev/sid/task-identifier" />
+		<value value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/#{version}/task-start-data-send-absolute-reference" />
+	</identifier>
+	<instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend|#{version}" />
+	<status value="draft" />
+	<intent value="order" />
+	<authoredOn value="#{date}" />
+	<requester>
+		<type value="Organization" />
+		<identifier>
+			<system value="http://dsf.dev/sid/organization-identifier" />
+			<value value="#{organization}" />
+		</identifier>
+	</requester>
+	<restriction>
+		<recipient>
+			<type value="Organization" />
+			<identifier>
+				<system value="http://dsf.dev/sid/organization-identifier" />
+				<value value="#{organization}" />
+			</identifier>
+		</recipient>
+	</restriction>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
+				<code value="message-name" />
+			</coding>
+		</type>
+		<valueString value="startDataSend" />
+	</input>
+	<!-- parameter defined the patient, for whom data should be transferred, specified using an absolute reference -->
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+				<code value="patient" />
+			</coding>
+		</type>
+		<valueReference>
+			<reference value="${de.netzwerk.universitaetsmedizin.rdp.data.base.url:http://dic-fhir-store:8080/fhir}/Patient/1" />
+		</valueReference>
+	</input>
+	<!-- parameter specifying resources should be send stopping at the defined date, resources that have been modified after the specified date 
+		will not be transmitted, typically this will be the current date time -->
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+				<code value="export-to" />
+			</coding>
+		</type>
+		<valueInstant value="2023-12-31T23:59:59+01:00"/>
+	</input>
+	<!-- optional parameter specifying resources should be send starting at the defined date, resources older than the specified date will not be 
+		transported -->
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+				<code value="export-from" />
+			</coding>
+		</type>
+		<valueDateTime value="2020-01-01T00:00:00+01:00" />
+	</input>
+	<!-- optional parameter enabling a dry run of the data-send process. Specifying the 'dry-run' parameter with value 'true' will result in the 
+		data-send process aborting before storing the encrypted transfer bundle in the local DSF FHIR server and sending a Task to start the data-translate 
+		process to the DTS -->
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+				<code value="dry-run" />
+			</coding>
+		</type>
+		<valueBoolean value="false" />
+	</input>
+</Task>

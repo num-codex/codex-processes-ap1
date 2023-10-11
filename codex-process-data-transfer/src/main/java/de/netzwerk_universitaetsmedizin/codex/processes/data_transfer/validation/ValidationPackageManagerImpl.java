@@ -11,16 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-
-import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator;
-import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.validation.ValidationSupportWithCustomResources;
-import org.highmed.dsf.fhir.validation.ValueSetExpander;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
@@ -38,6 +31,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import dev.dsf.fhir.validation.ResourceValidatorImpl;
+import dev.dsf.fhir.validation.SnapshotGenerator;
+import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
+import dev.dsf.fhir.validation.ValidationSupportWithCustomResources;
+import dev.dsf.fhir.validation.ValueSetExpander;
+import jakarta.ws.rs.WebApplicationException;
 
 public class ValidationPackageManagerImpl implements InitializingBean, ValidationPackageManager
 {
@@ -104,25 +103,45 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	@Override
+	public List<ValidationPackageWithDepedencies> downloadPackagesWithDependencies(
+			Collection<? extends ValidationPackageIdentifier> identifiers)
+	{
+		Map<ValidationPackageIdentifier, ValidationPackage> allPackagesByNameAndVersion = new HashMap<>();
+
+		List<ValidationPackageWithDepedencies> packages = new ArrayList<>();
+		for (ValidationPackageIdentifier identifier : identifiers)
+		{
+			Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion = new HashMap<>();
+			downloadPackageWithDependencies(identifier, packagesByNameAndVersion, allPackagesByNameAndVersion);
+			packages.add(ValidationPackageWithDepedencies.from(packagesByNameAndVersion, identifier));
+		}
+
+		return packages;
+	}
+
+	@Override
 	public ValidationPackageWithDepedencies downloadPackageWithDependencies(ValidationPackageIdentifier identifier)
 	{
 		Objects.requireNonNull(identifier, "identifier");
 
 		Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion = new HashMap<>();
-		downloadPackageWithDependencies(identifier, packagesByNameAndVersion);
+		downloadPackageWithDependencies(identifier, packagesByNameAndVersion, new HashMap<>());
 
 		return ValidationPackageWithDepedencies.from(packagesByNameAndVersion, identifier);
 	}
 
 	@Override
 	public IValidationSupport expandValueSetsAndGenerateStructureDefinitionSnapshots(
-			ValidationPackageWithDepedencies packageWithDependencies)
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
 	{
-		Objects.requireNonNull(packageWithDependencies, "packageWithDependencies");
+		List<ValueSet> expandedValueSets = new ArrayList<>();
+		for (ValidationPackageWithDepedencies packageWithDependencies : packagesWithDependencies)
+		{
+			packageWithDependencies.parseResources(fhirContext);
+			expandedValueSets.addAll(withExpandedValueSets(packageWithDependencies));
+		}
 
-		packageWithDependencies.parseResources(fhirContext);
-
-		return withSnapshots(packageWithDependencies, withExpandedValueSets(packageWithDependencies));
+		return withSnapshots(expandedValueSets, packagesWithDependencies);
 	}
 
 	@Override
@@ -132,10 +151,34 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 		Objects.requireNonNull(validationSupport, "validationSupport");
 		Objects.requireNonNull(packageWithDependencies, "packageWithDependencies");
 
-		BundleValidatorImpl validator = new BundleValidatorImpl(fhirContext, packageWithDependencies,
-				new ResourceValidatorImpl(fhirContext, validationSupport));
+		BundleValidatorImpl validator = new BundleValidatorImpl(
+				new ResourceValidatorImpl(fhirContext, validationSupport), fhirContext,
+				Collections.singletonList(packageWithDependencies));
 
 		return validator;
+	}
+
+	@Override
+	public BundleValidator createBundleValidator(IValidationSupport validationSupport,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
+	{
+		Objects.requireNonNull(validationSupport, "validationSupport");
+
+		BundleValidatorImpl validator = new BundleValidatorImpl(
+				new ResourceValidatorImpl(fhirContext, validationSupport), fhirContext, packagesWithDependencies);
+
+		return validator;
+	}
+
+	@Override
+	public BundleValidator createBundleValidator(List<ValidationPackageIdentifier> identifiers)
+	{
+		Objects.requireNonNull(identifiers, "identifiers");
+
+		List<ValidationPackageWithDepedencies> packageWithDependencies = downloadPackagesWithDependencies(identifiers);
+		IValidationSupport validationSupport = expandValueSetsAndGenerateStructureDefinitionSnapshots(
+				packageWithDependencies);
+		return createBundleValidator(validationSupport, packageWithDependencies);
 	}
 
 	@Override
@@ -150,9 +193,10 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	}
 
 	private void downloadPackageWithDependencies(ValidationPackageIdentifier identifier,
-			Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion)
+			Map<ValidationPackageIdentifier, ValidationPackage> packagesByNameAndVersion,
+			Map<ValidationPackageIdentifier, ValidationPackage> allPackagesByNameAndVersion)
 	{
-		if (packagesByNameAndVersion.containsKey(identifier))
+		if (allPackagesByNameAndVersion.containsKey(identifier))
 		{
 			// already downloaded
 			return;
@@ -165,10 +209,11 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 
 		ValidationPackage vPackage = downloadAndHandleException(identifier);
 		packagesByNameAndVersion.put(identifier, vPackage);
+		allPackagesByNameAndVersion.put(identifier, vPackage);
 
 		ValidationPackageDescriptor descriptor = getDescriptorAndHandleException(vPackage);
-		descriptor.getDependencyIdentifiers()
-				.forEach(i -> downloadPackageWithDependencies(i, packagesByNameAndVersion));
+		descriptor.getDependencyIdentifiers().forEach(
+				i -> downloadPackageWithDependencies(i, packagesByNameAndVersion, allPackagesByNameAndVersion));
 	}
 
 	private ValidationPackage downloadAndHandleException(ValidationPackageIdentifier identifier)
@@ -200,7 +245,8 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 	{
 		List<ValueSet> expandedValueSets = new ArrayList<>();
 		ValueSetExpander expander = internalValueSetExpanderFactory.apply(fhirContext,
-				createSupportChain(fhirContext, packageWithDependencies, Collections.emptyList(), expandedValueSets));
+				createSupportChain(fhirContext, new ValidationSupportWithCustomResources(fhirContext, null, null, null),
+						Collections.singletonList(packageWithDependencies)));
 
 		packageWithDependencies.getValueSetsIncludingDependencies(valueSetBindingStrengths, fhirContext).forEach(v ->
 		{
@@ -282,23 +328,31 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 			return Optional.empty();
 	}
 
-	private IValidationSupport withSnapshots(ValidationPackageWithDepedencies packageWithDependencies,
-			List<ValueSet> expandedValueSets)
+	private IValidationSupport withSnapshots(List<ValueSet> expandedValueSets,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
 	{
 		Map<String, StructureDefinition> snapshots = new HashMap<>();
-		ValidationSupportChain supportChain = createSupportChain(fhirContext, packageWithDependencies,
-				snapshots.values(), expandedValueSets);
+
+		ValidationSupportWithCustomResources snapshotsAndExpandedValueSets = new ValidationSupportWithCustomResources(
+				fhirContext, null, null, expandedValueSets);
+		ValidationSupportChain supportChain = createSupportChain(fhirContext, snapshotsAndExpandedValueSets,
+				packagesWithDependencies);
 
 		SnapshotGenerator generator = internalSnapshotGeneratorFactory.apply(fhirContext, supportChain);
 
-		packageWithDependencies.getValidationSupportResources().getStructureDefinitions().stream()
-				.filter(s -> s.hasDifferential() && !s.hasSnapshot())
-				.forEach(diff -> createSnapshot(packageWithDependencies, snapshots, generator, diff));
+		for (ValidationPackageWithDepedencies packageWithDependencies : packagesWithDependencies)
+		{
+			packageWithDependencies.getValidationSupportResources().getStructureDefinitions().stream()
+					.filter(s -> s.hasDifferential() && !s.hasSnapshot())
+					.forEach(diff -> createSnapshot(packageWithDependencies, snapshotsAndExpandedValueSets, snapshots,
+							generator, diff));
+		}
 
 		return supportChain;
 	}
 
 	private void createSnapshot(ValidationPackageWithDepedencies packageWithDependencies,
+			ValidationSupportWithCustomResources snapshotsAndExpandedValueSets,
 			Map<String, StructureDefinition> snapshots, SnapshotGenerator generator, StructureDefinition diff)
 	{
 		if (snapshots.containsKey(diff.getUrl() + "|" + diff.getVersion()))
@@ -321,11 +375,15 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 				{
 					try
 					{
+						logger.debug("Generating snapshot for {}|{}", sd.getUrl(), sd.getVersion());
 						SnapshotWithValidationMessages snapshot = generator.generateSnapshot(sd);
 
 						if (snapshot.getSnapshot().hasSnapshot())
+						{
 							snapshots.put(snapshot.getSnapshot().getUrl() + "|" + snapshot.getSnapshot().getVersion(),
 									snapshot.getSnapshot());
+							snapshotsAndExpandedValueSets.addOrReplace(snapshot.getSnapshot());
+						}
 						else
 							logger.error(
 									"Error while generating snapshot for {}|{}: Not snaphsot returned from generator",
@@ -348,17 +406,30 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 								diff.getVersion(), e.getClass().getName(), e.getMessage());
 					}
 				});
+
+		logger.debug("Generating snapshot for {}|{} [Done]", diff.getUrl(), diff.getVersion());
 	}
 
 	private ValidationSupportChain createSupportChain(FhirContext context,
-			ValidationPackageWithDepedencies packageWithDependencies,
-			Collection<? extends StructureDefinition> snapshots, Collection<? extends ValueSet> expandedValueSets)
+			IValidationSupport snapshotsAndExpandedValueSets,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
 	{
 		return new ValidationSupportChain(new CodeValidatorForExpandedValueSets(context),
-				new InMemoryTerminologyServerValidationSupport(context),
-				new ValidationSupportWithCustomResources(context, snapshots, null, expandedValueSets),
-				new ValidationSupportWithCustomResources(context, packageWithDependencies.getAllStructureDefinitions(),
-						packageWithDependencies.getAllCodeSystems(), packageWithDependencies.getAllValueSets()),
-				new DefaultProfileValidationSupport(context), new CommonCodeSystemsTerminologyService(context));
+				new InMemoryTerminologyServerValidationSupport(context), snapshotsAndExpandedValueSets,
+				new ValidationSupportWithCustomResources(context,
+						getAll(ValidationPackageWithDepedencies::getAllStructureDefinitions, packagesWithDependencies),
+						getAll(ValidationPackageWithDepedencies::getAllCodeSystems, packagesWithDependencies),
+						getAll(ValidationPackageWithDepedencies::getAllValueSets, packagesWithDependencies)),
+				new DefaultProfileValidationSupport(context), new QuietCommonCodeSystemsTerminologyService(context),
+				// TODO remove NonValidatingValidationSupport
+				new NonValidatingValidationSupport(context, "http://fhir.de/CodeSystem/bfarm/icd-10-gm",
+						"http://fhir.de/CodeSystem/dimdi/icd-10-gm", "http://fhir.de/CodeSystem/bfarm/ops",
+						"http://fhir.de/CodeSystem/dimdi/ops", "http://fhir.de/CodeSystem/ifa/pzn"));
+	}
+
+	private <V> List<V> getAll(Function<ValidationPackageWithDepedencies, List<V>> mapper,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
+	{
+		return packagesWithDependencies.stream().map(mapper).flatMap(List::stream).toList();
 	}
 }
