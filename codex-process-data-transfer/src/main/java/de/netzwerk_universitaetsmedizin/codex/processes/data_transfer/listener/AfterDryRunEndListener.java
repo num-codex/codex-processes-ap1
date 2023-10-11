@@ -14,9 +14,6 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.highmed.dsf.bpe.service.MailService;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
@@ -25,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition;
+import dev.dsf.bpe.v1.ProcessPluginApi;
 
 public class AfterDryRunEndListener implements ExecutionListener, InitializingBean
 {
@@ -34,36 +31,19 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 
 	private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	private final TaskHelper taskHelper;
-	private final FhirWebserviceClientProvider clientProvider;
-	private final FhirContext fhirContext;
-	private final MailService mailService;
-
-	private final String localOrganizationIdentifierValue;
+	private final ProcessPluginApi api;
 	private final boolean sendDryRunSuccessMail;
 
-	public AfterDryRunEndListener(TaskHelper taskHelper, FhirWebserviceClientProvider clientProvider,
-			FhirContext fhirContext, MailService mailService, String localOrganizationIdentifierValue,
-			boolean sendDryRunSuccessMail)
+	public AfterDryRunEndListener(ProcessPluginApi api, boolean sendDryRunSuccessMail)
 	{
-		this.taskHelper = taskHelper;
-		this.clientProvider = clientProvider;
-		this.fhirContext = fhirContext;
-		this.mailService = mailService;
-
-		this.localOrganizationIdentifierValue = localOrganizationIdentifierValue;
+		this.api = api;
 		this.sendDryRunSuccessMail = sendDryRunSuccessMail;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(taskHelper, "taskHelper");
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(mailService, "mailService");
-
-		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
+		Objects.requireNonNull(api, "api");
 	}
 
 	@Override
@@ -72,8 +52,9 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 		if (!sendDryRunSuccessMail)
 			return;
 
-		Task task = taskHelper.getLeadingTaskFromExecutionVariables(execution);
-		Task finalTask = clientProvider.getLocalWebserviceClient().read(Task.class, task.getIdElement().getIdPart());
+		Task task = api.getVariables(execution).getStartTask();
+		Task finalTask = api.getFhirWebserviceClientProvider().getLocalWebserviceClient().read(Task.class,
+				task.getIdElement().getIdPart());
 
 		if (!TaskStatus.COMPLETED.equals(finalTask.getStatus()))
 		{
@@ -90,7 +71,8 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 			return;
 		}
 
-		String finalTaskAsXml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(finalTask);
+		String finalTaskAsXml = api.getFhirContext().newXmlParser().setPrettyPrint(true)
+				.encodeResourceToString(finalTask);
 		String attachmentFilename = finalTask.getIdElement().getIdPart() + ".xml";
 
 		MimeBodyPart text = new MimeBodyPart();
@@ -108,7 +90,9 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 		MimeBodyPart message = new MimeBodyPart();
 		message.setContent(body);
 
-		mailService.send("Dry-Run Success: " + localOrganizationIdentifierValue, message);
+		api.getMailService().send(
+				"Dry-Run Success: " + api.getOrganizationProvider().getLocalOrganizationIdentifierValue().orElse("?"),
+				message);
 	}
 
 	private boolean isLocalValidationSuccessful(Task task)
@@ -129,7 +113,7 @@ public class AfterDryRunEndListener implements ExecutionListener, InitializingBe
 		b.append("Send process version ");
 		b.append(DataTransferProcessPluginDefinition.VERSION);
 		b.append(" dry-run at organization with identifier '");
-		b.append(localOrganizationIdentifierValue);
+		b.append(api.getOrganizationProvider().getLocalOrganizationIdentifierValue().orElse("?"));
 		b.append("' successfully completed on ");
 		b.append(DATE_FORMAT.format(finalTask.getMeta().getLastUpdated()));
 		b.append(".\n\nTask resource is attached as '");

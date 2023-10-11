@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
@@ -33,13 +33,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		Date exportTo = new Date();
 
@@ -47,14 +47,14 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
 		SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases&_include=Condition%3Apatient"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose&_include=Condition%3Apatient"
 				+ "&_lastUpdated=lt" + exportToString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -66,13 +66,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
 		Date exportTo = new Date();
@@ -81,7 +81,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -89,7 +89,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases&_include=Condition%3Apatient"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose&_include=Condition%3Apatient"
 				+ "&_lastUpdated=lt" + exportToString + "&_lastUpdated=ge" + exportFromString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -101,13 +101,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPatientIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String patientId = "some-patient-id";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
@@ -117,7 +117,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(63, bundle.getEntry().size());
+		assertEquals(6, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -125,7 +125,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
 				+ "&patient=" + patientId + "&_lastUpdated=lt" + exportToString + "&_lastUpdated=ge" + exportFromString;
 
 		long entriesWithExpectedUrl = bundle.getEntry().stream().filter(e -> e.hasRequest())
@@ -137,13 +137,13 @@ public class AbstractFhirClientTest
 	public void testSetSearchBundleWithPseudonymIdAndExportFromAndExportTo() throws Exception
 	{
 		FhirContext fhirContext = FhirContext.forR4();
-		GeccoClient geccoClient = Mockito.mock(GeccoClient.class);
+		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
-		when(geccoClient.getSearchBundleOverride())
+		when(dataClient.getSearchBundleOverride())
 				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
-		when(geccoClient.getFhirContext()).thenReturn(fhirContext);
+		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
-				Mockito.withSettings().useConstructor(geccoClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
+				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
 
 		String pseudonym = "some-pseudonym";
 		DateWithPrecision exportFrom = new DateWithPrecision(new Date(), TemporalPrecisionEnum.MILLI);
@@ -153,7 +153,7 @@ public class AbstractFhirClientTest
 		assertNotNull(bundle);
 		assertTrue(bundle.hasEntry());
 		assertNotNull(bundle.getEntry());
-		assertEquals(64, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 
 		logger.debug("Search Bundle after replacement: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
 
@@ -162,7 +162,7 @@ public class AbstractFhirClientTest
 		String exportFromString = timeFormat.format(exportFrom).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 		String exportToString = timeFormat.format(exportTo).replaceAll("\\+", "%2B").replaceAll(":", "%3A");
 
-		String expectedUrl = "Condition?_profile=https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/cardiovascular-diseases"
+		String expectedUrl = "Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
 				+ "&patient:identifier=" + namingSystemString + "%7C" + pseudonym + "&_lastUpdated=lt" + exportToString
 				+ "&_lastUpdated=ge" + exportFromString;
 

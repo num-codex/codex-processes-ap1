@@ -1,0 +1,223 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL" />
+		</tag>
+	</meta>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="startDataSend" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|#{version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role-practitioner">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+					<extension url="practitioner-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/practitioner-role" />
+							<code value="DIC_USER" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE_PRACTITIONER" />
+			</valueCoding>
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="continueDataSend" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-send|#{version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://dsf.dev/sid/organization-identifier" />
+						<value value="#{de.netzwerk_universitaetsmedizin.rdp.dts.identifier.value:hs-heilbronn.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ORGANIZATION" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="continueDataSendWithValidationError" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-send-with-validation-error|#{version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://dsf.dev/sid/organization-identifier" />
+						<value value="#{de.netzwerk_universitaetsmedizin.rdp.dts.identifier.value:hs-heilbronn.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ORGANIZATION" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="continueDataSendWithError" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-send-with-error|#{version}" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-organization">
+					<valueIdentifier>
+						<system value="http://dsf.dev/sid/organization-identifier" />
+						<value value="#{de.netzwerk_universitaetsmedizin.rdp.dts.identifier.value:hs-heilbronn.de}" />
+					</valueIdentifier>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ORGANIZATION" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://dsf.dev/fhir/StructureDefinition/extension-process-authorization-parent-organization-role">
+					<extension url="parent-organization">
+						<valueIdentifier>
+							<system value="http://dsf.dev/sid/organization-identifier" />
+							<value value="netzwerk-universitaetsmedizin.de" />
+						</valueIdentifier>
+					</extension>
+					<extension url="organization-role">
+						<valueCoding>
+							<system value="http://dsf.dev/fhir/CodeSystem/organization-role" />
+							<code value="DIC" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://dsf.dev/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<url value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend" />
+	<!-- version managed by bpe -->
+	<version value="#{version}" />
+	<name value="DataSend" />
+	<title value="Data Send Process" />
+	<subtitle value="Data Integration Center - Data Send Process" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<!-- date managed by bpe -->
+	<date value="#{date}" />
+	<publisher value="NUM-RDP" />
+	<contact>
+		<name value="NUM-RDP" />
+		<telecom>
+			<system value="email" />
+			<value value="forschungsnetzwerk-unimedizin@charite.de" />
+		</telecom>
+	</contact>
+	<description value="Process to check consent and read, validate, encrypt and send data to the data transfer site." />
+	<kind value="Task" />
+</ActivityDefinition>

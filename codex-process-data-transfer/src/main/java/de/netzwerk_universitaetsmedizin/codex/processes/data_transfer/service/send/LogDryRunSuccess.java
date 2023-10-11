@@ -5,10 +5,6 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
@@ -16,20 +12,24 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
+
 public class LogDryRunSuccess extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(LogSuccess.class);
 
-	public LogDryRunSuccess(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper)
+	public LogDryRunSuccess(ProcessPluginApi api)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
-		Task task = getLeadingTaskFromExecutionVariables(execution);
+		Task task = variables.getStartTask();
+
 		if (isLocalValidationSuccessful(task))
 		{
 			logger.info("Send process dry-run successfully completed");
@@ -39,7 +39,9 @@ public class LogDryRunSuccess extends AbstractServiceDelegate
 			logger.warn("Send process dry-run unsuccessful");
 
 			task.setStatus(TaskStatus.FAILED);
-			updateLeadingTaskInExecutionVariables(execution, task);
+			api.getFhirWebserviceClientProvider().getLocalWebserviceClient().update(task);
+
+			variables.updateTask(task);
 		}
 	}
 

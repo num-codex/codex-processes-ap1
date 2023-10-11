@@ -17,8 +17,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
-
 public class RsaAesGcmUtil
 {
 	private static final String RSA_CIPHER = "RSA/ECB/PKCS1Padding";

@@ -9,18 +9,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.Variables;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.ConsentClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 
 public class CheckConsent extends AbstractServiceDelegate
 {
@@ -31,11 +29,10 @@ public class CheckConsent extends AbstractServiceDelegate
 	private final List<String> idatMergeGrantedOids = new ArrayList<>();
 	private final List<String> mdatTransferGrantedOids = new ArrayList<>();
 
-	public CheckConsent(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, ConsentClientFactory consentClientFactory,
+	public CheckConsent(ProcessPluginApi api, ConsentClientFactory consentClientFactory,
 			Collection<String> idatMergeGrantedOids, Collection<String> mdatTransferGrantedOids)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
 		this.consentClientFactory = consentClientFactory;
 
@@ -54,9 +51,10 @@ public class CheckConsent extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution, dev.dsf.bpe.v1.variables.Variables variables)
+			throws BpmnError, Exception
 	{
-		PatientReference reference = (PatientReference) execution
+		PatientReference reference = (PatientReference) variables
 				.getVariable(BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE);
 		ConsentClient client = consentClientFactory.getConsentClient();
 
@@ -66,8 +64,7 @@ public class CheckConsent extends AbstractServiceDelegate
 			List<String> consentOids = client.getConsentOidsForIdentifierReference(dicSourceAndPseudonym);
 
 			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, dicSourceAndPseudonym);
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
-					Variables.booleanValue(usageAndTransferGranted));
+			variables.setBoolean(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED, usageAndTransferGranted);
 		}
 		else if (!reference.hasIdentifier() && reference.hasAbsoluteReference())
 		{
@@ -75,11 +72,10 @@ public class CheckConsent extends AbstractServiceDelegate
 			List<String> consentOids = client.getConsentOidsForIdentifierReference(patientAbsoluteReference);
 
 			boolean idatMergeGranted = idatMergeGranted(consentOids, patientAbsoluteReference);
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED, Variables.booleanValue(idatMergeGranted));
+			variables.setBoolean(BPMN_EXECUTION_VARIABLE_IDAT_MERGE_GRANTED, idatMergeGranted);
 
 			boolean usageAndTransferGranted = usageAndTransferGranted(consentOids, patientAbsoluteReference);
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED,
-					Variables.booleanValue(usageAndTransferGranted));
+			variables.setBoolean(BPMN_EXECUTION_VARIABLE_USAGE_AND_TRANSFER_GRANTED, usageAndTransferGranted);
 		}
 		else
 		{

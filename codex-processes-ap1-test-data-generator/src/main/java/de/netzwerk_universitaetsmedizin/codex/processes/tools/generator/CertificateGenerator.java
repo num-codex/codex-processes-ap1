@@ -55,8 +55,8 @@ public class CertificateGenerator
 
 	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
-	private static final String[] SERVER_COMMON_NAMES = { "localhost", "dic", "gth", "crr" };
-	private static final String[] CLIENT_COMMON_NAMES = { "dic-client", "gth-client", "crr-client",
+	private static final String[] SERVER_COMMON_NAMES = { "localhost", "dic", "dts", "crr" };
+	private static final String[] CLIENT_COMMON_NAMES = { "dic-client", "dts-client", "crr-client",
 			"Webbrowser Test User" };
 
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
@@ -493,7 +493,7 @@ public class CertificateGenerator
 		Arrays.stream(CLIENT_COMMON_NAMES).filter(cn -> !cn.equals("Webbrowser Test User"))
 				.forEach(cn -> copyDockerTestClientCertFiles(baseFolder.resolve("secrets").toString(), cn));
 
-		Path fhirCacertFile = baseFolder.resolve("secrets/app_client_trust_certificates.pem");
+		Path fhirCacertFile = baseFolder.resolve("secrets/app_testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
 		writeCertificate(fhirCacertFile, ca.getCertificate());
 	}

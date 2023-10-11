@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
@@ -49,14 +50,14 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClient;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.OutcomeLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReferenceList;
 
-public abstract class AbstractFhirClient implements GeccoFhirClient
+public abstract class AbstractFhirClient implements DataStoreFhirClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirClient.class);
 	private static final OutcomeLogger outcomeLogger = new OutcomeLogger(logger);
@@ -152,7 +153,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 
 	private static final class QueryParameters implements UriTemplateVariables
 	{
-		final List<QuerParameter> parameters = new ArrayList<>();
+		final List<QueryParameter> parameters = new ArrayList<>();
 
 		@Override
 		public Object getValue(String name)
@@ -161,7 +162,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 					.orElseThrow(() -> new IllegalArgumentException("No value for '" + name + "'"));
 		}
 
-		boolean add(QuerParameter param)
+		boolean add(QueryParameter param)
 		{
 			if (param != null)
 				return parameters.add(param);
@@ -175,12 +176,12 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		}
 	}
 
-	private static final class QuerParameter
+	private static final class QueryParameter
 	{
 		final String name;
 		final Map<String, String> valuesByTemplateParameter = new HashMap<>();
 
-		QuerParameter(String templateParameter, String name, String... values)
+		QueryParameter(String templateParameter, String name, String... values)
 		{
 			Objects.requireNonNull(templateParameter, "templateParameter");
 			Objects.requireNonNull(name, "name");
@@ -207,18 +208,18 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		}
 	}
 
-	protected final GeccoClient geccoClient;
+	protected final DataStoreClient dataClient;
 	protected final DataLogger dataLogger;
 
 	/**
-	 * @param geccoClient
+	 * @param dataClient
 	 *            not <code>null</code>
 	 * @param dataLogger
 	 *            not <code>null</code>
 	 */
-	public AbstractFhirClient(GeccoClient geccoClient, DataLogger dataLogger)
+	public AbstractFhirClient(DataStoreClient dataClient, DataLogger dataLogger)
 	{
-		this.geccoClient = geccoClient;
+		this.dataClient = dataClient;
 		this.dataLogger = dataLogger;
 	}
 
@@ -231,7 +232,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 
 		dataLogger.logData("Executing Search-Bundle", searchBundle);
 
-		Bundle resultBundle = geccoClient.getGenericFhirClient().transaction().withBundle(searchBundle)
+		Bundle resultBundle = dataClient.getGenericFhirClient().transaction().withBundle(searchBundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);
@@ -281,7 +282,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	{
 		IdType idElement = patient.getIdElement();
 		return PatientReference
-				.from(new IdType(geccoClient.getServerBase(), idElement.getResourceType(), idElement.getIdPart(), null)
+				.from(new IdType(dataClient.getServerBase(), idElement.getResourceType(), idElement.getIdPart(), null)
 						.getValue());
 	}
 
@@ -319,7 +320,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		if (logger.isDebugEnabled())
 			logger.debug("Executing search: {}", url);
 
-		Bundle resultBundle = (Bundle) geccoClient.getGenericFhirClient().search().byUrl(url)
+		Bundle resultBundle = (Bundle) dataClient.getGenericFhirClient().search().byUrl(url)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "handling=strict").execute();
 
 		dataLogger.logData("Search-Bundle result", resultBundle);
@@ -397,7 +398,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 	{
 		try
 		{
-			Path searchBundleOverride = geccoClient.getSearchBundleOverride();
+			Path searchBundleOverride = dataClient.getSearchBundleOverride();
 
 			if (searchBundleOverride != null)
 			{
@@ -412,7 +413,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 					try (InputStream in = Files.newInputStream(searchBundleOverride))
 					{
 						logger.warn("Using Search-Bundle override from {}", searchBundleOverride.toString());
-						return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
+						return dataClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 					}
 				}
 			}
@@ -421,7 +422,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 				try (InputStream in = getClass().getResourceAsStream("/fhir/Bundle/SearchBundle.xml"))
 				{
 					logger.debug("Using internal Search-Bundle");
-					return geccoClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
+					return dataClient.getFhirContext().newXmlParser().parseResource(Bundle.class, in);
 				}
 
 			}
@@ -463,8 +464,16 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 				else
 					queryParameters.add(createPatPrefixPseudonymSearchUrlPart(pseudonym));
 
+				List<String> values = new ArrayList<>();
+
 				if (includePatient)
-					queryParameters.add(createIncludeSearchUrlPart(resource));
+					values.add(":patient");
+				if (ResourceType.MedicationAdministration.name().equals(resource)
+						|| ResourceType.MedicationStatement.name().equals(resource))
+					values.add(":medication");
+
+				if (!values.isEmpty())
+					queryParameters.add(createIncludeSearchUrlPart(resource, values));
 			}
 			else if ("Patient".equals(resource))
 			{
@@ -483,7 +492,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 						+ resource + " not supported");
 			}
 
-			queryParameters.add(new QuerParameter("from_to", "_lastUpdated", createExportFromSearchUrlPart(exportFrom),
+			queryParameters.add(new QueryParameter("from_to", "_lastUpdated", createExportFromSearchUrlPart(exportFrom),
 					createExportToSearchUrlPart(exportTo)));
 
 			queryParameters.replace(urlBuilder);
@@ -494,29 +503,29 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		};
 	}
 
-	private QuerParameter createPseudonymSearchUrlPart(String pseudonym)
+	private QueryParameter createPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym == null || pseudonym.isBlank())
 			return null;
 		else
-			return new QuerParameter("pseudonym", "identifier",
+			return new QueryParameter("pseudonym", "identifier",
 					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
-	private QuerParameter createPatIdSearchUrlPart(String patientId)
+	private QueryParameter createPatIdSearchUrlPart(String patientId)
 	{
 		if (patientId == null || patientId.isBlank())
 			return null;
 		else
-			return new QuerParameter("patientId", "patient", patientId);
+			return new QueryParameter("patientId", "patient", patientId);
 	}
 
-	private QuerParameter createPatPrefixPseudonymSearchUrlPart(String pseudonym)
+	private QueryParameter createPatPrefixPseudonymSearchUrlPart(String pseudonym)
 	{
 		if (pseudonym == null || pseudonym.isBlank())
 			return null;
 		else
-			return new QuerParameter("pseudonym", "patient:identifier",
+			return new QueryParameter("pseudonym", "patient:identifier",
 					NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM + "|" + pseudonym);
 	}
 
@@ -561,21 +570,21 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 			return "lt" + TIME_FORMAT.format(exportTo);
 	}
 
-	private QuerParameter createIncludeSearchUrlPart(String resource)
+	private QueryParameter createIncludeSearchUrlPart(String resource, List<String> values)
 	{
 		if (resource == null)
 			return null;
 		else
-			return new QuerParameter("include_resource", "_include", resource + ":patient");
+			return new QueryParameter("include_resource", "_include",
+					values.stream().map(v -> resource + v).toArray(String[]::new));
 	}
 
 	protected Stream<DomainResource> getDomainResources(Bundle bundle)
 	{
 		Stream<DomainResource> domainResources = getDomainResourcesFromBundle(bundle);
 
-		if (bundle.getTotal() > bundle.getEntry().size())
-			return Stream.concat(domainResources,
-					doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl(), bundle.getEntry().size()));
+		if (bundle.getLink(Bundle.LINK_NEXT) != null)
+			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl()));
 		else
 			return domainResources;
 	}
@@ -594,14 +603,13 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 						.map(r -> (DomainResource) r));
 	}
 
-	private Stream<DomainResource> doGetDomainResources(String nextUrl, int subTotal)
+	private Stream<DomainResource> doGetDomainResources(String nextUrl)
 	{
 		Bundle bundle = continueSearch(nextUrl);
 		Stream<DomainResource> domainResources = getDomainResourcesFromBundle(bundle);
 
-		if (bundle.getTotal() > bundle.getEntry().size() + subTotal)
-			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl(),
-					bundle.getEntry().size() + subTotal));
+		if (bundle.getLink(Bundle.LINK_NEXT) != null)
+			return Stream.concat(domainResources, doGetDomainResources(bundle.getLink(Bundle.LINK_NEXT).getUrl()));
 		else
 			return domainResources;
 	}
@@ -614,7 +622,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 		logger.info("Requesting patient {}", reference);
 
 		IdType idType = new IdType(reference);
-		IGenericClient client = geccoClient.getGenericFhirClient();
+		IGenericClient client = dataClient.getGenericFhirClient();
 
 		if (client.getServerBase().equals(idType.getBaseUrl()))
 		{
@@ -625,13 +633,17 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 			}
 			catch (Exception e)
 			{
-				logger.warn("Patient " + reference + " not found", e);
+				logger.warn("Patient {} not found: {} - {}", reference, e.getClass().getName(), e.getMessage());
+
+				if (logger.isDebugEnabled())
+					logger.debug("Error while reading patient " + reference, e);
+
 				return Optional.empty();
 			}
 		}
 		else
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_BAD_PATIENT_REFERENCE,
-					"Patient reference not an absolute reference to a resouce at the local GECCO FHIR server: "
+					"Patient reference not an absolute reference to a resouce at the local data FHIR server: "
 							+ client.getServerBase());
 	}
 
@@ -645,7 +657,7 @@ public abstract class AbstractFhirClient implements GeccoFhirClient
 
 		try
 		{
-			MethodOutcome outcome = geccoClient.getGenericFhirClient().update().resource(patient)
+			MethodOutcome outcome = dataClient.getGenericFhirClient().update().resource(patient)
 					.prefer(PreferReturnEnum.OPERATION_OUTCOME).execute();
 
 			if (outcome.getOperationOutcome() != null && outcome.getOperationOutcome() instanceof OperationOutcome)

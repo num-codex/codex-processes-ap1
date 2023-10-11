@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -22,53 +21,30 @@ public class EnvGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(EnvGenerator.class);
 
-	private static final String USER_THUMBPRINTS = "USER_THUMBPRINTS";
-	private static final String USER_THUMBPRINTS_PERMANENTDELETE = "USER_THUMBPRINTS_PERMANENT_DELETE";
 	private static final String PROCESS_VERSION = "PROCESS_VERSION";
+	private static final String WEBBROSER_TEST_USER_THUMBPRINT = "WEBBROSER_TEST_USER_THUMBPRINT";
 
 	private static final class EnvEntry
 	{
-		final String userThumbprintsVariableName;
-		final Stream<String> userThumbprints;
-		final String userThumbprintsPermanentDeleteVariableName;
-		final Stream<String> userThumbprintsPermanentDelete;
+		final String userThumbprintVariableName;
+		final String userThumbprint;
 
-		EnvEntry(String userThumbprintsVariableName, Stream<String> userThumbprints,
-				String userThumbprintsPermanentDeleteVariableName, Stream<String> userThumbprintsPermanentDelete)
+		EnvEntry(String userThumbprintVariableName, String userThumbprint)
 		{
-			this.userThumbprintsVariableName = userThumbprintsVariableName;
-			this.userThumbprints = userThumbprints;
-			this.userThumbprintsPermanentDeleteVariableName = userThumbprintsPermanentDeleteVariableName;
-			this.userThumbprintsPermanentDelete = userThumbprintsPermanentDelete;
+			this.userThumbprintVariableName = userThumbprintVariableName;
+			this.userThumbprint = userThumbprint;
 		}
 	}
 
 	public void generateAndWriteDockerTestFhirEnvFiles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		Stream<String> dicUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "dic-client",
-				"Webbrowser Test User");
-		Stream<String> dicUserThumbprintsPermanentDelete = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"dic-client", "Webbrowser Test User");
+		String webbroserTestUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"Webbrowser Test User").findFirst().get();
 
-		Stream<String> crrUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "crr-client",
-				"Webbrowser Test User");
-		Stream<String> crrUserThumbprintsPermanentDelete = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"crr-client", "Webbrowser Test User");
+		List<EnvEntry> entries = List.of(new EnvEntry(WEBBROSER_TEST_USER_THUMBPRINT, webbroserTestUserThumbprint));
 
-		Stream<String> gthUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "gth-client",
-				"Webbrowser Test User");
-		Stream<String> gthUserThumbprintsPermanentDelete = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"gth-client", "Webbrowser Test User");
-
-		List<EnvEntry> entries = List.of(
-				new EnvEntry("DIC_" + USER_THUMBPRINTS, dicUserThumbprints, "DIC_" + USER_THUMBPRINTS_PERMANENTDELETE,
-						dicUserThumbprintsPermanentDelete),
-				new EnvEntry("CRR_" + USER_THUMBPRINTS, crrUserThumbprints, "CRR_" + USER_THUMBPRINTS_PERMANENTDELETE,
-						crrUserThumbprintsPermanentDelete),
-				new EnvEntry("GTH_" + USER_THUMBPRINTS, gthUserThumbprints, "GTH_" + USER_THUMBPRINTS_PERMANENTDELETE,
-						gthUserThumbprintsPermanentDelete));
-
-		Map<String, String> additionalEntries = Map.of(PROCESS_VERSION, DataTransferProcessPluginDefinition.VERSION);
+		Map<String, String> additionalEntries = Map.of(PROCESS_VERSION,
+				new DataTransferProcessPluginDefinition().getResourceVersion());
 
 		writeEnvFile(Paths.get("../codex-processes-ap1-docker-test-setup/.env"), entries, additionalEntries);
 	}
@@ -90,16 +66,12 @@ public class EnvGenerator
 		{
 			EnvEntry entry = entries.get(i);
 
-			builder.append(entry.userThumbprintsVariableName);
+			builder.append(entry.userThumbprintVariableName);
 			builder.append('=');
-			builder.append(entry.userThumbprints.collect(Collectors.joining(",")));
-			builder.append('\n');
-			builder.append(entry.userThumbprintsPermanentDeleteVariableName);
-			builder.append('=');
-			builder.append(entry.userThumbprintsPermanentDelete.collect(Collectors.joining(",")));
+			builder.append(entry.userThumbprint);
 
 			if ((i + 1) < entries.size())
-				builder.append("\n\n");
+				builder.append("\n");
 		}
 
 		if (!additionalEntries.isEmpty())

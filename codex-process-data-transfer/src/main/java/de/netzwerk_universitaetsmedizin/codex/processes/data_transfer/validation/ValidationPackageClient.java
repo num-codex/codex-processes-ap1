@@ -2,7 +2,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validatio
 
 import java.io.IOException;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 public interface ValidationPackageClient
 {

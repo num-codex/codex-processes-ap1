@@ -7,21 +7,18 @@
 		<format>zip</format>
 	</formats>
 	<baseDirectory></baseDirectory>
+	<files>
+		<file>
+			<source>${project.build.directory}/original-${artifact.artifactId}-${artifact.version}.jar</source>
+			<outputDirectory></outputDirectory>
+			<destName>${artifact.artifactId}-${artifact.version}.jar</destName>
+		</file>
+		<file>
+			<source>${project.basedir}/src/assembly/application.properties</source>
+			<outputDirectory></outputDirectory>
+		</file>
+	</files>
 	<fileSets>
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<outputDirectory></outputDirectory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
-		</fileSet>
-		<fileSet>
-			<directory>${project.basedir}/src/assembly</directory>
-			<outputDirectory></outputDirectory>
-			<includes>
-				<include>application.properties</include>
-			</includes>
-		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/lib</directory>
 			<outputDirectory>lib</outputDirectory>

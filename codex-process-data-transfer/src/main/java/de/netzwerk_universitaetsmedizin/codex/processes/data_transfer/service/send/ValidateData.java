@@ -14,11 +14,6 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -37,6 +32,9 @@ import org.slf4j.LoggerFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.ErrorOutputParameterGenerator;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.BundleValidatorFactory;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class ValidateData extends AbstractServiceDelegate
 {
@@ -46,11 +44,10 @@ public class ValidateData extends AbstractServiceDelegate
 	private final ErrorOutputParameterGenerator errorOutputParameterGenerator;
 	private final ErrorLogger errorLogger;
 
-	public ValidateData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, BundleValidatorFactory bundleValidatorSupplier,
+	public ValidateData(ProcessPluginApi api, BundleValidatorFactory bundleValidatorSupplier,
 			ErrorOutputParameterGenerator errorOutputParameterGenerator, ErrorLogger errorLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
 		this.bundleValidatorSupplier = bundleValidatorSupplier;
 		this.errorOutputParameterGenerator = errorOutputParameterGenerator;
@@ -68,26 +65,28 @@ public class ValidateData extends AbstractServiceDelegate
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
+		Task task = variables.getStartTask();
+
 		if (!bundleValidatorSupplier.isEnabled())
 		{
 			logger.warn("Validation disabled, skipping validation. Modify configuration to enable validation");
 
-			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+			Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
-			Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(execution,
+			Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(variables,
 					bundle);
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
 
-			addValidationStatusAndBundleEntryCountToTask(execution, false, bundle);
+			addValidationStatusAndBundleEntryCountToTask(task, false, bundle);
 
 			return;
 		}
 
 		bundleValidatorSupplier.create().ifPresentOrElse(validator ->
 		{
-			Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+			Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
 			logger.info("Validating bundle with {} entr{}", bundle.getEntry().size(),
 					bundle.getEntry().size() == 1 ? "y" : "ies");
@@ -102,7 +101,7 @@ public class ValidateData extends AbstractServiceDelegate
 					logger.warn(
 							"Validation result bundle has entries wihout response.outcome instance of OperationOutcome");
 
-					addValidationStatusAndBundleEntryCountToTask(execution, false, bundle);
+					addValidationStatusAndBundleEntryCountToTask(task, false, bundle);
 				}
 				else
 				{
@@ -117,17 +116,17 @@ public class ValidateData extends AbstractServiceDelegate
 													|| IssueSeverity.ERROR.equals(i.getSeverity())))
 							.filter(b -> b).count();
 
-					addValidationStatusAndBundleEntryCountToTask(execution, resourcesWithErrorCount <= 0, bundle);
+					addValidationStatusAndBundleEntryCountToTask(task, resourcesWithErrorCount <= 0, bundle);
 
 					if (resourcesWithErrorCount > 0)
 					{
 						logger.error("Validation of transfer bundle failed, {} resource{} with error",
 								resourcesWithErrorCount, resourcesWithErrorCount != 1 ? "s" : "");
 
-						addErrorsToTask(execution, bundle);
-						errorLogger.logValidationFailedLocal(
-								getLeadingTaskFromExecutionVariables(execution).getIdElement().withServerBase(
-										getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Task.name()));
+						addErrorsToTask(task, bundle);
+						errorLogger.logValidationFailedLocal(task.getIdElement().withServerBase(
+								api.getFhirWebserviceClientProvider().getLocalWebserviceClient().getBaseUrl(),
+								ResourceType.Task.name()));
 
 						throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED,
 								"Validation of transfer bundle failed, " + resourcesWithErrorCount + " resource"
@@ -136,7 +135,7 @@ public class ValidateData extends AbstractServiceDelegate
 					else
 					{
 						Map<String, String> sourceIdsByBundleUuid = removeValidationResultsCollectSourceIdsIntoMap(
-								execution, bundle);
+								variables, bundle);
 						execution.setVariable(BPMN_EXECUTION_VARIABLE_SOURCE_IDS_BY_BUNDLE_UUID, sourceIdsByBundleUuid);
 					}
 				}
@@ -144,15 +143,15 @@ public class ValidateData extends AbstractServiceDelegate
 			else
 			{
 				logger.warn("Validation result bundle has no entries");
-				addValidationStatusAndBundleEntryCountToTask(execution, false, bundle);
+				addValidationStatusAndBundleEntryCountToTask(task, false, bundle);
 			}
 		}, () ->
 		{
 			logger.warn(
 					"{} not initialized, skipping validation. This is likely due to an error during startup of the process plugin",
 					BundleValidatorFactory.class.getSimpleName());
-			addValidationStatusAndBundleEntryCountToTask(execution, false,
-					(Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE));
+			addValidationStatusAndBundleEntryCountToTask(task, false,
+					variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE));
 		});
 	}
 
@@ -206,23 +205,21 @@ public class ValidateData extends AbstractServiceDelegate
 		}
 	}
 
-	private void addValidationStatusAndBundleEntryCountToTask(DelegateExecution execution, boolean validationSuccessful,
+	private void addValidationStatusAndBundleEntryCountToTask(Task task, boolean validationSuccessful,
 			Bundle transferBundle)
 	{
-		Task task = getLeadingTaskFromExecutionVariables(execution);
 		task.addOutput().setValue(new BooleanType(validationSuccessful)).getType().getCodingFirstRep()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_LOCAL_VALIDATION_SUCCESSFUL);
 		task.addOutput().setValue(new UnsignedIntType(transferBundle.getEntry().size())).getType().getCodingFirstRep()
 				.setSystem(CODESYSTEM_NUM_CODEX_DATA_TRANSFER)
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_RESOURCES_COUNT);
-		updateLeadingTaskInExecutionVariables(execution, task);
+		// TODO
+		// updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
-	private void addErrorsToTask(DelegateExecution execution, Bundle validationBundle)
+	private void addErrorsToTask(Task task, Bundle validationBundle)
 	{
-		Task task = getLeadingTaskFromExecutionVariables(execution);
-
 		validationBundle.getEntry().stream()
 				.filter(e -> e.hasResponse() && e.getResponse().hasOutcome()
 						&& (e.getResponse().getOutcome() instanceof OperationOutcome)
@@ -237,12 +234,11 @@ public class ValidateData extends AbstractServiceDelegate
 					errorOutputParameterGenerator.createMeDicValidationError(sourceId, outcome)
 							.forEach(task::addOutput);
 				});
-
-		updateLeadingTaskInExecutionVariables(execution, task);
+		// TODO
+		// updateLeadingTaskInExecutionVariables(execution, task);
 	}
 
-	private Map<String, String> removeValidationResultsCollectSourceIdsIntoMap(DelegateExecution execution,
-			Bundle bundle)
+	private Map<String, String> removeValidationResultsCollectSourceIdsIntoMap(Variables variables, Bundle bundle)
 	{
 		Map<String, String> sourceIdByBundleUuid = new HashMap<>();
 		bundle.getEntry().stream().forEach(e ->
@@ -253,7 +249,7 @@ public class ValidateData extends AbstractServiceDelegate
 			e.clearUserData(HAPI_USER_DATA_SOURCE_ID_ELEMENT);
 			e.setResponse(null);
 		});
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
+		variables.setResource(BPMN_EXECUTION_VARIABLE_BUNDLE, bundle);
 
 		return sourceIdByBundleUuid;
 	}

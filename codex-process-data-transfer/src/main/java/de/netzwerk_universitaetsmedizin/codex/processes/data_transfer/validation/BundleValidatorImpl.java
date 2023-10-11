@@ -1,13 +1,14 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import dev.dsf.fhir.validation.ResourceValidator;
 
 public class BundleValidatorImpl implements BundleValidator
 {
@@ -32,18 +34,22 @@ public class BundleValidatorImpl implements BundleValidator
 	private final Set<String> expectedStructureDefinitionUrls;
 	private final Set<String> expectedStructureDefinitionUrlsWithVersion;
 
-	public BundleValidatorImpl(FhirContext fhirContext, ValidationPackageWithDepedencies packageWithDependencies,
-			ResourceValidator delegate)
+	public BundleValidatorImpl(ResourceValidator delegate, FhirContext fhirContext,
+			Collection<? extends ValidationPackageWithDepedencies> packagesWithDependencies)
 	{
 		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 
-		Set<StructureDefinition> sds = Objects.requireNonNull(packageWithDependencies, "packageWithDependencies")
-				.getValidationSupportResources().getStructureDefinitions().stream()
-				.flatMap(sd -> Stream.concat(Stream.of(sd),
-						packageWithDependencies.getStructureDefinitionDependencies(sd).stream()))
-				.filter(sd -> StructureDefinitionKind.RESOURCE.equals(sd.getKind()))
-				.filter(sd -> !sd.hasAbstract() || !sd.getAbstract()).filter(StructureDefinition::hasUrl)
-				.collect(Collectors.toSet());
+		Set<StructureDefinition> sds = new HashSet<>();
+
+		packagesWithDependencies.forEach(packageWithDependencies ->
+		{
+			sds.addAll(packageWithDependencies.getValidationSupportResources().getStructureDefinitions().stream()
+					.flatMap(sd -> Stream.concat(Stream.of(sd),
+							packageWithDependencies.getStructureDefinitionDependencies(sd).stream()))
+					.filter(sd -> StructureDefinitionKind.RESOURCE.equals(sd.getKind()))
+					.filter(sd -> !sd.hasAbstract() || !sd.getAbstract()).filter(StructureDefinition::hasUrl)
+					.collect(Collectors.toSet()));
+		});
 
 		expectedStructureDefinitionUrls = sds.stream().map(StructureDefinition::getUrl).collect(Collectors.toSet());
 		expectedStructureDefinitionUrlsWithVersion = sds.stream().filter(StructureDefinition::hasVersion)

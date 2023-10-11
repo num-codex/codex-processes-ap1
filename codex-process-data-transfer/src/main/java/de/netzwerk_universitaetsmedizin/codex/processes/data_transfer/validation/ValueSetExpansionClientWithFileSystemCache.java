@@ -7,8 +7,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Function;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
+import jakarta.ws.rs.WebApplicationException;
 
 public class ValueSetExpansionClientWithFileSystemCache extends AbstractFhirResourceFileSystemCache<ValueSet, ValueSet>
 		implements ValueSetExpansionClient, InitializingBean

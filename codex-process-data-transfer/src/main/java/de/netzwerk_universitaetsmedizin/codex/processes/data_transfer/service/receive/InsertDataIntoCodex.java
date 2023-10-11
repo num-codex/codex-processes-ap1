@@ -8,32 +8,30 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.GeccoClientFactory;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(InsertDataIntoCodex.class);
 
-	private final GeccoClientFactory geccoClientFactory;
+	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
 
-	public InsertDataIntoCodex(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, GeccoClientFactory geccoClientFactory, DataLogger dataLogger)
+	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
-		this.geccoClientFactory = geccoClientFactory;
+		this.dataClientFactory = dataClientFactory;
 		this.dataLogger = dataLogger;
 	}
 
@@ -42,14 +40,14 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(geccoClientFactory, "geccoClientFactory");
+		Objects.requireNonNull(dataClientFactory, "dataClientFactory");
 		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
-		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+		Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
 		try
 		{
@@ -58,7 +56,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 				logger.info("Executing bundle against FHIR store ...");
 				dataLogger.logData("Received bundle", bundle);
 
-				geccoClientFactory.getGeccoClient().getFhirClient().storeBundle(bundle);
+				dataClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
 
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 			}

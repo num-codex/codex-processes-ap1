@@ -1,11 +1,11 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.DataTransferProcessPluginDefinition.VERSION;
-
 import java.nio.charset.StandardCharsets;
 
 public interface ConstantsDataTransfer
 {
+	String NUM_PARENT_ORGANIZATION_IDENTIFIER = "netzwerk-universitaetsmedizin.de";
+
 	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE_LIST = "patientReferenceList";
 	String BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE = "patientReference";
 	String BPMN_EXECUTION_VARIABLE_PSEUDONYM = "pseudonym";
@@ -47,17 +47,13 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_LOCAL_VALIDATION_SUCCESSFUL = "local-validation-successful";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_ENCRYPTED_BUNDLE_RESOURCES_COUNT = "encrypted-bundle-resources-count";
 
-	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/";
-	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI
-			+ VERSION;
+	String PROFILE_NUM_CODEX_TASK_DATA_TRIGGER_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRIGGER_MESSAGE_NAME = "startDataTrigger";
 	String PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger";
 	String PROFILE_NUM_CODEX_TASK_STOP_DATA_TRIGGER_MESSAGE_NAME = "stopDataTrigger";
 
-	String PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend/";
-	String PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI
-			+ VERSION;
+	String PROFILE_NUM_CODEX_TASK_DATA_SEND_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_SEND_MESSAGE_NAME = "startDataSend";
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-send";
@@ -67,9 +63,7 @@ public interface ConstantsDataTransfer
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-send-with-error";
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_SEND_WITH_ERROR_MESSAGE_NAME = "continueDataSendWithError";
 
-	String PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate/";
-	String PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI
-			+ VERSION;
+	String PROFILE_NUM_CODEX_TASK_DATA_TRANSLATE_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTranslate";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-translate";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_TRANSLATE_MESSAGE_NAME = "startDataTranslate";
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate";
@@ -79,9 +73,7 @@ public interface ConstantsDataTransfer
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-continue-data-translate-with-error";
 	String PROFILE_NUM_CODEX_TASK_CONTINUE_DATA_TRANSLATE_WITH_ERROR_MESSAGE_NAME = "continueDataTranslateWithError";
 
-	String PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive/";
-	String PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI_AND_LATEST_VERSION = PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI
-			+ VERSION;
+	String PROFILE_NUM_CODEX_TASK_DATA_RECEIVE_PROCESS_URI = "http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataReceive";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE = "http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-receive";
 	String PROFILE_NUM_CODEX_TASK_START_DATA_RECEIVE_MESSAGE_NAME = "startDataReceive";
 
@@ -100,26 +92,26 @@ public interface ConstantsDataTransfer
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE = "fttp-not-reachable";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER = "no-dic-pseudonym-for-bloomfilter";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_VALIDATION_FAILED = "validation-failed";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_GECCO_DATA_FOR_CRR_FAILED = "ecryption-of-gecco-data-for-crr-failed";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_GECCO_DATA = "unable-to-store-ecrypted-gecco-data";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_GTH_NOT_REACHABLE = "gth-not-reachable";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_VALIDATION_ERROR_FROM_GTH_FAILED = "download-of-encrypted-validation-error-from-gth-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_DATA_FOR_CRR_FAILED = "ecryption-of-data-for-crr-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_DATA = "unable-to-store-ecrypted-data";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DTS_NOT_REACHABLE = "dts-not-reachable";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_VALIDATION_ERROR_FROM_DTS_FAILED = "download-of-encrypted-validation-error-from-dts-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_VALIDATION_ERROR_FROM_CRR_FAILED = "decryption-of-validation-error-from-crr-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_CRR = "timeout-waiting-for-response-from-crr";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_CRR_NOT_REACHABLE = "crr-not-reachable";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_DIC_FAILED = "download-of-encrypted-gecco-data-from-dic-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DIC_FAILED = "download-of-encrypted-data-from-dic-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_CRR_PSEUDONYM_FOR_DIC_PSEUDONYM = "no-crr-pseudonym-for-dic-pseudonym";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_GTH = "timeout-waiting-for-response-from-gth";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_GECCO_DATA_FROM_GTH_FAILED = "download-of-encrypted-gecco-data-from-gth-failed";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_GECCO_DATA_FROM_DIC_FAILED = "decryption-of-gecco-data-from-dic-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_TIMEOUT_WAITING_FOR_RESPONSE_FROM_DTS = "timeout-waiting-for-response-from-dts";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DTS_FAILED = "download-of-encrypted-data-from-dts-failed";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED = "decryption-of-data-from-dic-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED = "insert-into-crr-fhir-respository-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_VALIDATION_ERROR_FOR_DIC_FAILED = "ecryption-of-validation-error-for-dic-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYTPED_VALIDATION_ERROR_FROM_CRR_FAILED = "download-of-encrytped-validation-error-from-crr-failed";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR = "unable-to-store-ecrypted-validation-error";
 
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE = "http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer-error-source";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_MEDIC = "MeDIC";
-	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_GTH = "GTH";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DIC = "DIC";
+	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_DTS = "DTS";
 	String CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_SOURCE_VALUE_CRR = "CRR";
 
 	String EXTENSION_ERROR_METADATA = "https://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/error-metadata";

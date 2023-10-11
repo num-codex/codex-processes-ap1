@@ -1,16 +1,16 @@
 version: '3.8'
 services:
   dic-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
   dic-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe
 
-  gth-fhir:
-    image: highmed/fhir
-  gth-bpe:
-    image: highmed/bpe
+  dts-fhir:
+    image: datasharingframework/fhir
+  dts-bpe:
+    image: datasharingframework/bpe
 
   crr-fhir:
-    image: highmed/fhir
+    image: datasharingframework/fhir
   crr-bpe:
-    image: highmed/bpe
+    image: datasharingframework/bpe

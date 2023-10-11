@@ -2,11 +2,12 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging;
 
 import java.util.Objects;
 
-import org.highmed.dsf.bpe.service.MailService;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import dev.dsf.bpe.v1.service.MailService;
 
 public class ErrorLogger implements InitializingBean
 {

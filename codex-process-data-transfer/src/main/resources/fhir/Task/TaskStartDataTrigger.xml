@@ -1,0 +1,48 @@
+<Task xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger|#{version}" />
+	</meta>
+	<identifier>
+		<system value="http://dsf.dev/sid/task-identifier" />
+		<value value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger/#{version}/task-start-data-trigger" />
+	</identifier>
+	<instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger|#{version}" />
+	<status value="draft" />
+	<intent value="order" />
+	<authoredOn value="#{date}" />
+	<requester>
+		<type value="Organization" />
+		<identifier>
+			<system value="http://dsf.dev/sid/organization-identifier" />
+			<value value="#{organization}" />
+		</identifier>
+	</requester>
+	<restriction>
+		<recipient>
+			<type value="Organization" />
+			<identifier>
+				<system value="http://dsf.dev/sid/organization-identifier" />
+				<value value="#{organization}" />
+			</identifier>
+		</recipient>
+	</restriction>
+	<input>
+		<type>
+			<coding>
+				<system value="http://dsf.dev/fhir/CodeSystem/bpmn-message" />
+				<code value="message-name" />
+			</coding>
+		</type>
+		<valueString value="startDataTrigger" />
+	</input>
+	<!-- optional date specifying what data is defined as 'new', if not defined every resource is new and triggers the send process -->
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
+				<code value="export-from" />
+			</coding>
+		</type>
+		<valueDateTime value="2020-01-01T00:00:00+01:00" />
+	</input>
+</Task>

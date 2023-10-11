@@ -1,0 +1,47 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://dsf.dev/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-stop-data-trigger" />
+  <!-- version managed by bpe -->
+  <version value="#{version}" />
+  <name value="TaskStopDataTrigger" />
+  <!-- status managed by bpe -->
+  <status value="unknown" />
+  <experimental value="false" />
+  <!-- date managed by bpe -->
+  <date value="#{date}" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesCanonical">
+      <path value="Task.instantiatesCanonical" />
+      <fixedCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger|#{version}" />
+    </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <min value="1" />
+      <max value="2" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="stopDataTrigger" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+  </differential>
+</StructureDefinition>

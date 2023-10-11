@@ -21,20 +21,20 @@ services:
     networks:
       dic-fhir-frontend:
         ipv4_address: 172.20.0.66
-      gth-fhir-frontend:
+      dts-fhir-frontend:
         ipv4_address: 172.20.0.82
       crr-fhir-frontend:
         ipv4_address: 172.20.0.98
       internet:
         aliases:
           - dic
-          - gth
+          - dts
           - crr
     environment:
       TZ: Europe/Berlin
 
   db:
-    image: postgres:13
+    image: postgres:15
     restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U liquibase_user -d postgres"]
@@ -48,10 +48,10 @@ services:
       POSTGRES_DB: postgres
     networks:
       - dic-fhir-backend
-      - gth-fhir-backend
+      - dts-fhir-backend
       - crr-fhir-backend
       - dic-bpe-backend
-      - gth-bpe-backend
+      - dts-bpe-backend
       - crr-bpe-backend
     secrets:
       - db_liquibase.password
@@ -74,7 +74,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/highmed/fhir:0.9.0
+    image: ghcr.io/datasharingframework/fhir:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5000:5000
@@ -82,6 +82,7 @@ services:
       - db_liquibase.password
       - db_dic_fhir_user.password
       - db_dic_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_dic_client_certificate.pem
       - app_dic_client_certificate_private_key.pem
@@ -96,22 +97,36 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000
-      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_fhir_user.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic_fhir_user_permanent_delete.password
-      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic_fhir
-      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: dic_fhir_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: dic_fhir_server_user
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic_fhir_permanent_delete_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic_fhir_server_permanent_delete_user
-      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://dic/fhir
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${DIC_USER_THUMBPRINTS}
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${DIC_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dic_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dic_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: dic_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: dic_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dic_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dic_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://dic/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DIC_USER
     networks:
       dic-fhir-frontend:
         ipv4_address: 172.20.0.67
@@ -121,7 +136,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/highmed/bpe:0.9.0
+    image: ghcr.io/datasharingframework/bpe:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5003:5003
@@ -129,11 +144,12 @@ services:
       - db_liquibase.password
       - db_dic_bpe_user.password
       - db_dic_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_dic_client_certificate.pem
       - app_dic_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
-      - codex_crr_public_key.pem
+      - crr_public_key.pem
     volumes:
       - type: bind
         source: ./dic/bpe/plugin
@@ -152,35 +168,37 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
-      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_bpe_user.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic_bpe_user_camunda.password
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/dic_bpe
-      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: dic_bpe_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: dic_bpe_server_user
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic_camunda_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic_camunda_server_user
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DIC
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic/fhir
-      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
-      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
-      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@dic
-      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@dic
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
-        wwwnetzwerk-universitaetsmedizinde_dataTranslate/${PROCESS_VERSION}
-        wwwnetzwerk-universitaetsmedizinde_dataReceive/${PROCESS_VERSION}
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PUBLIC_KEY: /run/secrets/codex_crr_public_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://dic-fhir-store:8080/fhir
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
+      DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dic_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dic_bpe_user_camunda.password
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dic_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dic_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dic_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: dic_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: dic_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dic_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dic_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dic/fhir
+      DEV_DSF_BPE_MAIL_HOST: mailhog
+      DEV_DSF_BPE_MAIL_PORT: 1025
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@dic
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@dic
+      DEV_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTranslate|${PROCESS_VERSION}
+        wwwnetzwerk-universitaetsmedizinde_dataReceive|${PROCESS_VERSION}
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PUBLIC_KEY: /run/secrets/crr_public_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_EXPANSION_SERVER_BASEURL: https://r4.ontoserver.csiro.au/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_MAIL_SENDDRYRUNSUCCESSMAIL: 'true'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION: 'false'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
     networks:
       dic-bpe-frontend:
       dic-bpe-backend:
@@ -213,117 +231,132 @@ services:
           - dic-fhir-store
 
 
-  gth-fhir:
-    image: ghcr.io/highmed/fhir:0.9.0
+  dts-fhir:
+    image: ghcr.io/datasharingframework/fhir:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5001:5001
     secrets:
       - db_liquibase.password
-      - db_gth_fhir_user.password
-      - db_gth_fhir_user_permanent_delete.password
+      - db_dts_fhir_user.password
+      - db_dts_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_gth_client_certificate.pem
-      - app_gth_client_certificate_private_key.pem
+      - app_dts_client_certificate.pem
+      - app_dts_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./gth/fhir/conf/bundle.xml
+        source: ./dts/fhir/conf/bundle.xml
         target: /opt/fhir/conf/bundle.xml
       - type: bind
-        source: ./gth/fhir/log
+        source: ./dts/fhir/log
         target: /opt/fhir/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
-      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_gth_fhir_user.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_gth_fhir_user_permanent_delete.password
-      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_gth_client_certificate.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_gth_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/gth_fhir
-      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: gth_fhir_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: gth_fhir_server_user
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: gth_fhir_permanent_delete_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: gth_fhir_server_permanent_delete_user
-      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://gth/fhir
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${GTH_USER_THUMBPRINTS}
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${GTH_USER_THUMBPRINTS_PERMANENT_DELETE}
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
+      DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_dts_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_dts_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dts_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dts_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/dts_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: dts_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: dts_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: dts_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: dts_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://dts/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_DTS
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
     networks:
-      gth-fhir-frontend:
+      dts-fhir-frontend:
         ipv4_address: 172.20.0.83
-      gth-fhir-backend:
+      dts-fhir-backend:
       internet:
     depends_on:
       - db
       - proxy
-  gth-bpe:
-    image: ghcr.io/highmed/bpe:0.9.0
+  dts-bpe:
+    image: ghcr.io/datasharingframework/bpe:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5004:5004
     secrets:
       - db_liquibase.password
-      - db_gth_bpe_user.password
-      - db_gth_bpe_user_camunda.password
+      - db_dts_bpe_user.password
+      - db_dts_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
-      - app_gth_client_certificate.pem
-      - app_gth_client_certificate_private_key.pem
+      - app_dts_client_certificate.pem
+      - app_dts_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./gth/bpe/plugin
+        source: ./dts/bpe/plugin
         target: /opt/bpe/plugin
         read_only: true
       - type: bind
-        source: ./gth/bpe/process
+        source: ./dts/bpe/process
         target: /opt/bpe/process
         read_only: true
       - type: bind
-        source: ./gth/bpe/log
+        source: ./dts/bpe/log
         target: /opt/bpe/log
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
-      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_gth_bpe_user.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_gth_bpe_user_camunda.password
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_gth_client_certificate.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_gth_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/gth_bpe
-      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: gth_bpe_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: gth_bpe_server_user
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: gth_camunda_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: gth_camunda_server_user
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_GTH
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://gth/fhir
-      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
-      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
-      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@gth
-      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@gth
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
-        wwwnetzwerk-universitaetsmedizinde_dataTrigger/${PROCESS_VERSION}
-        wwwnetzwerk-universitaetsmedizinde_dataSend/${PROCESS_VERSION}
-        wwwnetzwerk-universitaetsmedizinde_dataReceive/${PROCESS_VERSION}
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
+      DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_dts_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_dts_bpe_user_camunda.password
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_dts_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_dts_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/dts_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: dts_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: dts_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: dts_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: dts_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://dts/fhir
+      DEV_DSF_BPE_MAIL_HOST: mailhog
+      DEV_DSF_BPE_MAIL_PORT: 1025
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@dts
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@dts
+      DEV_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTrigger|${PROCESS_VERSION}
+        wwwnetzwerk-universitaetsmedizinde_dataSend|${PROCESS_VERSION}
+        wwwnetzwerk-universitaetsmedizinde_dataReceive|${PROCESS_VERSION}
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
     networks:
-      gth-bpe-frontend:
-      gth-bpe-backend:
+      dts-bpe-frontend:
+      dts-bpe-backend:
       internet:
     depends_on:
       - db
-      - gth-fhir
+      - dts-fhir
       - mailhog
 
 
   crr-fhir:
-    image: ghcr.io/highmed/fhir:0.9.0
+    image: ghcr.io/datasharingframework/fhir:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5002:5002
@@ -331,6 +364,7 @@ services:
       - db_liquibase.password
       - db_crr_fhir_user.password
       - db_crr_fhir_user_permanent_delete.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_crr_client_certificate.pem
       - app_crr_client_certificate_private_key.pem
@@ -345,22 +379,35 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
-      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_fhir_user.password
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_crr_fhir_user_permanent_delete.password
-      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/crr_fhir
-      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: crr_fhir_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: crr_fhir_server_user
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: crr_fhir_permanent_delete_users
-      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: crr_fhir_server_permanent_delete_user
-      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://crr/fhir
-      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${CRR_USER_THUMBPRINTS}
-      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${CRR_USER_THUMBPRINTS_PERMANENT_DELETE}
+      DEV_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_fhir_user.password
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_crr_fhir_user_permanent_delete.password
+      DEV_DSF_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
+      DEV_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_FHIR_DB_URL: jdbc:postgresql://db/crr_fhir
+      DEV_DSF_FHIR_DB_USER_GROUP: crr_fhir_users
+      DEV_DSF_FHIR_DB_USER_USERNAME: crr_fhir_server_user
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: crr_fhir_permanent_delete_users
+      DEV_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: crr_fhir_server_permanent_delete_user
+      DEV_DSF_FHIR_SERVER_BASE_URL: https://crr/fhir
+      DEV_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DEV_DSF_FHIR_SERVER_ROLECONFIG: |
+        - webbrowser_test_user:
+            thumbprint: ${WEBBROSER_TEST_USER_THUMBPRINT}
+            token-role: admin
+            dsf-role:
+              - CREATE
+              - READ
+              - UPDATE
+              - DELETE
+              - SEARCH
+              - HISTORY
+              - PERMANENT_DELETE
+            practitioner-role:
+              - http://dsf.dev/fhir/CodeSystem/practitioner-role|DSF_ADMIN
     networks:
       crr-fhir-frontend:
         ipv4_address: 172.20.0.99
@@ -370,7 +417,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/highmed/bpe:0.9.0
+    image: ghcr.io/datasharingframework/bpe:1.3.0
     restart: "no"
     ports:
       - 127.0.0.1:5005:5005
@@ -378,11 +425,12 @@ services:
       - db_liquibase.password
       - db_crr_bpe_user.password
       - db_crr_bpe_user_camunda.password
+      - app_server_trust_certificates.pem
       - app_client_trust_certificates.pem
       - app_crr_client_certificate.pem
       - app_crr_client_certificate_private_key.pem
       - app_client_certificate_private_key.pem.password
-      - codex_crr_private_key.pem
+      - crr_private_key.pem
     volumes:
       - type: bind
         source: ./crr/bpe/plugin
@@ -398,32 +446,33 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
-      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_bpe_user.password
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_crr_bpe_user_camunda.password
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
-      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
-      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/crr_bpe
-      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: crr_bpe_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: crr_bpe_server_user
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: crr_camunda_users
-      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: crr_camunda_server_user
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_CRR
-      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://crr/fhir
-      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
-      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
-      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@crr
-      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@crr
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
-        wwwnetzwerk-universitaetsmedizinde_dataTrigger/${PROCESS_VERSION}
-        wwwnetzwerk-universitaetsmedizinde_dataSend/${PROCESS_VERSION}
-        wwwnetzwerk-universitaetsmedizinde_dataTranslate/${PROCESS_VERSION}
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GTH_IDENTIFIER_VALUE: Test_GTH
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_IDENTIFIER_VALUE: Test_CRR
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_CRR_PRIVATE_KEY: /run/secrets/codex_crr_private_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_CODEX_GECCO_SERVER_BASE_URL: http://crr-fhir-bridge:8888/fhir-bridge/fhir
+      DEV_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      DEV_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_crr_bpe_user.password
+      DEV_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_crr_bpe_user_camunda.password
+      DEV_DSF_BPE_FHIR_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/app_server_trust_certificates.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_crr_client_certificate.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_crr_client_certificate_private_key.pem
+      DEV_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      DEV_DSF_BPE_DB_URL: jdbc:postgresql://db/crr_bpe
+      DEV_DSF_BPE_DB_USER_GROUP: crr_bpe_users
+      DEV_DSF_BPE_DB_USER_USERNAME: crr_bpe_server_user
+      DEV_DSF_BPE_DB_USER_CAMUNDA_GROUP: crr_camunda_users
+      DEV_DSF_BPE_DB_USER_CAMUNDA_USERNAME: crr_camunda_server_user
+      DEV_DSF_BPE_FHIR_SERVER_BASE_URL: https://crr/fhir
+      DEV_DSF_BPE_MAIL_HOST: mailhog
+      DEV_DSF_BPE_MAIL_PORT: 1025
+      DEV_DSF_BPE_MAIL_FROMADDRESS: bpe@crr
+      DEV_DSF_BPE_MAIL_TOADDRESSES: bpe@crr
+      DEV_DSF_BPE_PROCESS_EXCLUDED: |
+        wwwnetzwerk-universitaetsmedizinde_dataTrigger|${PROCESS_VERSION}
+        wwwnetzwerk-universitaetsmedizinde_dataSend|${PROCESS_VERSION}
+        wwwnetzwerk-universitaetsmedizinde_dataTranslate|${PROCESS_VERSION}
+      DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
@@ -478,6 +527,16 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase
+  crr-fhir-store-hapi:
+    build: ./crr/hapi
+    restart: "no"
+    ports:
+      - 127.0.0.1:8888:8080
+    environment:
+      TZ: Europe/Berlin
+      hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
+    networks:
+      - crr-bpe-backend
 
 
 secrets:
@@ -500,14 +559,14 @@ secrets:
   db_dic_bpe_user_camunda.password:
     file: ./secrets/db_dic_bpe_user_camunda.password
 
-  db_gth_fhir_user.password:
-    file: ./secrets/db_gth_fhir_user.password
-  db_gth_fhir_user_permanent_delete.password:
-    file: ./secrets/db_gth_fhir_user_permanent_delete.password
-  db_gth_bpe_user.password:
-    file: ./secrets/db_gth_bpe_user.password
-  db_gth_bpe_user_camunda.password:
-    file: ./secrets/db_gth_bpe_user_camunda.password
+  db_dts_fhir_user.password:
+    file: ./secrets/db_dts_fhir_user.password
+  db_dts_fhir_user_permanent_delete.password:
+    file: ./secrets/db_dts_fhir_user_permanent_delete.password
+  db_dts_bpe_user.password:
+    file: ./secrets/db_dts_bpe_user.password
+  db_dts_bpe_user_camunda.password:
+    file: ./secrets/db_dts_bpe_user_camunda.password
 
   db_crr_fhir_user.password:
     file: ./secrets/db_crr_fhir_user.password
@@ -518,8 +577,11 @@ secrets:
   db_crr_bpe_user_camunda.password:
     file: ./secrets/db_crr_bpe_user_camunda.password
 
+  app_server_trust_certificates.pem:
+    file: ./secrets/app_testca_certificate.pem
   app_client_trust_certificates.pem:
-    file: ./secrets/app_client_trust_certificates.pem
+    file: ./secrets/app_testca_certificate.pem
+
   app_client_certificate_private_key.pem.password:
     file: ./secrets/app_client_certificate_private_key.pem.password
 
@@ -528,20 +590,20 @@ secrets:
   app_dic_client_certificate_private_key.pem:
     file: ./secrets/app_dic_client_certificate_private_key.pem
 
-  app_gth_client_certificate.pem:
-    file: ./secrets/app_gth_client_certificate.pem
-  app_gth_client_certificate_private_key.pem:
-    file: ./secrets/app_gth_client_certificate_private_key.pem
+  app_dts_client_certificate.pem:
+    file: ./secrets/app_dts_client_certificate.pem
+  app_dts_client_certificate_private_key.pem:
+    file: ./secrets/app_dts_client_certificate_private_key.pem
 
   app_crr_client_certificate.pem:
     file: ./secrets/app_crr_client_certificate.pem
   app_crr_client_certificate_private_key.pem:
     file: ./secrets/app_crr_client_certificate_private_key.pem
 
-  codex_crr_public_key.pem:
-    file: ./secrets/codex_crr_public_key.pem
-  codex_crr_private_key.pem:
-    file: ./secrets/codex_crr_private_key.pem
+  crr_public_key.pem:
+    file: ./secrets/crr_public_key.pem
+  crr_private_key.pem:
+    file: ./secrets/crr_private_key.pem
 
 networks:
   internet:
@@ -554,15 +616,15 @@ networks:
   dic-fhir-backend:
   dic-bpe-frontend:
   dic-bpe-backend:
-  gth-fhir-frontend:
+  dts-fhir-frontend:
     driver: bridge
     ipam:
       driver: default
       config:
         - subnet: 172.20.0.80/28
-  gth-fhir-backend:
-  gth-bpe-frontend:
-  gth-bpe-backend:
+  dts-fhir-backend:
+  dts-bpe-frontend:
+  dts-bpe-backend:
   crr-fhir-frontend:
     driver: bridge
     ipam:

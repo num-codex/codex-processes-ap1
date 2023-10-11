@@ -75,10 +75,9 @@ public class RsaKeyPairGenerator
 
 	public void copyDockerTestRsaKeyPair()
 	{
-		Path crrPrivateKeyFile = Paths
-				.get("../codex-processes-ap1-docker-test-setup/secrets/codex_crr_private_key.pem");
+		Path crrPrivateKeyFile = Paths.get("../codex-processes-ap1-docker-test-setup/secrets/crr_private_key.pem");
 
-		Path crrPublicKeyFile = Paths.get("../codex-processes-ap1-docker-test-setup/secrets/codex_crr_public_key.pem");
+		Path crrPublicKeyFile = Paths.get("../codex-processes-ap1-docker-test-setup/secrets/crr_public_key.pem");
 
 		try
 		{

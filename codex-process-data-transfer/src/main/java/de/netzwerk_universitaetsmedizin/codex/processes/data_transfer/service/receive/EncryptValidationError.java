@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -24,52 +23,36 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.Variables;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.AesGcmUtil;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class EncryptValidationError extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(EncryptValidationError.class);
 
-	private final FhirContext fhirContext;
-
-	public EncryptValidationError(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext)
+	public EncryptValidationError(ProcessPluginApi api)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
-
-		this.fhirContext = fhirContext;
+		super(api);
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(fhirContext, "fhirContext");
-	}
-
-	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
-	{
-		Bundle bundle = (Bundle) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
-		String pseudonym = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
-		byte[] returnKey = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY);
+		Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
+		String pseudonym = variables.getString(BPMN_EXECUTION_VARIABLE_PSEUDONYM);
+		byte[] returnKey = variables.getByteArray(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY);
 
 		try
 		{
 			byte[] bundleData = toByteArray(pseudonym, bundle);
 			byte[] encrypted = AesGcmUtil.encrypt(bundleData, RETURN_AAD, new SecretKeySpec(returnKey, "AES"));
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, Variables.byteArrayValue(encrypted));
+			variables.setByteArray(BPMN_EXECUTION_VARIABLE_BUNDLE, encrypted);
 		}
 		catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
@@ -84,7 +67,7 @@ public class EncryptValidationError extends AbstractServiceDelegate
 
 	private byte[] toByteArray(String pseudonym, Bundle bundle) throws IOException
 	{
-		String bundleString = fhirContext.newJsonParser().encodeResourceToString(bundle);
+		String bundleString = api.getFhirContext().newJsonParser().encodeResourceToString(bundle);
 
 		return bundleString.replace(pseudonym, PSEUDONYM_PLACEHOLDER)
 				.replace(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM, NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM)

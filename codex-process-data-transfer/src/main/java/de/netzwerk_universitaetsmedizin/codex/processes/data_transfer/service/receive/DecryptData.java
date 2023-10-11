@@ -4,7 +4,7 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_GECCO_DATA_FROM_DIC_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.PSEUDONYM_PLACEHOLDER;
 
@@ -23,12 +23,6 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.variable.Variables;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
@@ -36,23 +30,22 @@ import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.CrrKeyProvider;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.crypto.RsaAesGcmUtil;
+import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.variables.Variables;
 
 public class DecryptData extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(DecryptData.class);
 
-	private final FhirContext fhirContext;
 	private final CrrKeyProvider crrKeyProvider;
 
-	public DecryptData(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			ReadAccessHelper readAccessHelper, FhirContext fhirContext, CrrKeyProvider crrKeyProvider)
+	public DecryptData(ProcessPluginApi api, CrrKeyProvider crrKeyProvider)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		super(api);
 
-		this.fhirContext = fhirContext;
 		this.crrKeyProvider = crrKeyProvider;
 	}
 
@@ -61,34 +54,33 @@ public class DecryptData extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(crrKeyProvider, "crrKeyProvider");
 	}
 
 	@Override
-	protected void doExecute(DelegateExecution execution) throws BpmnError, Exception
+	protected void doExecute(DelegateExecution execution, Variables variables) throws BpmnError, Exception
 	{
 		try
 		{
-			decryptGeccoData(execution);
+			decryptData(variables);
 		}
 		catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
 				| NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e)
 		{
-			logger.warn("Unable to decrypt GECCO data from DIC: " + e.getMessage(), e);
-			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_GECCO_DATA_FROM_DIC_FAILED,
-					"Error while decrypting GECCO data from DIC");
+			logger.warn("Unable to decrypt data from DIC: " + e.getMessage(), e);
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED,
+					"Error while decrypting data from DIC");
 		}
 	}
 
-	private void decryptGeccoData(DelegateExecution execution)
+	private void decryptData(Variables variables)
 			throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException,
 			NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException
 	{
-		Task task = getCurrentTaskFromExecutionVariables(execution);
+		Task task = variables.getStartTask();
 		Optional<String> pseudonym = getPseudonym(task);
 
-		byte[] encrypted = (byte[]) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE);
+		byte[] encrypted = variables.getByteArray(BPMN_EXECUTION_VARIABLE_BUNDLE);
 		byte[] decrypted = RsaAesGcmUtil.decrypt(crrKeyProvider.getPrivateKey(), encrypted);
 
 		byte[] returnKey = new byte[32];
@@ -99,9 +91,9 @@ public class DecryptData extends AbstractServiceDelegate
 
 		Bundle bundle = fromByteArray(pseudonym.get(), bundleData);
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE, FhirResourceValues.create(bundle));
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY, Variables.byteArrayValue(returnKey));
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_PSEUDONYM, Variables.stringValue(pseudonym.get()));
+		variables.setResource(BPMN_EXECUTION_VARIABLE_BUNDLE, bundle);
+		variables.setByteArray(BPMN_EXECUTION_VARIABLE_AES_RETURN_KEY, returnKey);
+		variables.setString(BPMN_EXECUTION_VARIABLE_PSEUDONYM, pseudonym.get());
 	}
 
 	private Optional<String> getPseudonym(Task task)
@@ -122,6 +114,6 @@ public class DecryptData extends AbstractServiceDelegate
 	private Bundle fromByteArray(String pseudonym, byte[] bundle) throws IOException
 	{
 		String bundleString = new String(bundle, StandardCharsets.UTF_8).replace(PSEUDONYM_PLACEHOLDER, pseudonym);
-		return fhirContext.newJsonParser().parseResource(Bundle.class, bundleString);
+		return api.getFhirContext().newJsonParser().parseResource(Bundle.class, bundleString);
 	}
 }
