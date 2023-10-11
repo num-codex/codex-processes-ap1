@@ -534,6 +534,7 @@ services:
       - 127.0.0.1:8888:8080
     environment:
       TZ: Europe/Berlin
+      hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
     networks:
       - crr-bpe-backend
 

@@ -92,7 +92,7 @@ public class TransferDataConfig
 
 	@ProcessDocumentation(description = "Data FHIR Server client implementation class", processNames = {
 			"wwwnetzwerk-universitaetsmedizinde_dataSend", "wwwnetzwerk-universitaetsmedizinde_dataReceive" })
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.data.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.HapiClient}")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.data.client:de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.StoreBundleClient}")
 	private String fhirStoreClientClass;
 
 	@ProcessDocumentation(description = "To enable verbose logging of requests and replies to the data FHIR server set to `true`", processNames = {
