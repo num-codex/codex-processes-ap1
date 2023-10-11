@@ -44,7 +44,7 @@
 			</coding>
 		</type>
 		<valueReference>
-			<reference value="http://dic-fhir-store:8080/fhir/Patient/change-me" />
+			<reference value="${de.netzwerk.universitaetsmedizin.rdp.data.base.url:http://dic-fhir-store:8080/fhir}/Patient/1" />
 		</valueReference>
 	</input>
 	<!-- parameter specifying resources should be send stopping at the defined date, resources that have been modified after the specified date 
