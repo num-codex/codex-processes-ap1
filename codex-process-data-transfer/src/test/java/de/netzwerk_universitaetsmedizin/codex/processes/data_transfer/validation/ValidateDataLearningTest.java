@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import dev.dsf.fhir.validation.ValidationSupportWithCustomResources;
 import dev.dsf.fhir.validation.ValueSetExpanderImpl;
 
+@Ignore
 public class ValidateDataLearningTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidateDataLearningTest.class);

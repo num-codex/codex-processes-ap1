@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Identifier;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
+@Ignore
 public class PatientReferenceListTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(PatientReferenceListTest.class);

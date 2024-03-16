@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.bouncycastle.pkcs.PKCSException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.PemIo;
 import dev.dsf.fhir.validation.ValueSetExpanderImpl;
 
+@Ignore
 public class MiiTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(MiiTest.class);

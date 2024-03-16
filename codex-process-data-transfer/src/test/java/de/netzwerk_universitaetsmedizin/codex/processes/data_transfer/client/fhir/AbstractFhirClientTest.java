@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Dat
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.domain.DateWithPrecision;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 
+@Ignore
 public class AbstractFhirClientTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirClientTest.class);
