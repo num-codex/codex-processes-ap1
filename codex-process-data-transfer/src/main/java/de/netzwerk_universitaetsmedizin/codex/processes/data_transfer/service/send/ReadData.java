@@ -25,51 +25,30 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.r4.model.Condition.ConditionStageComponent;
-import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Consent.ConsentVerificationComponent;
 import org.hl7.fhir.r4.model.Consent.provisionActorComponent;
 import org.hl7.fhir.r4.model.Consent.provisionComponent;
 import org.hl7.fhir.r4.model.Consent.provisionDataComponent;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportMediaComponent;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.DiagnosisComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterHospitalizationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationReactionComponent;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Medication.MedicationIngredientComponent;
-import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationAdministration.MedicationAdministrationPerformerComponent;
-import org.hl7.fhir.r4.model.MedicationStatement;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
 import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
-import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent;
 import org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -645,7 +624,6 @@ public class ReadData extends AbstractServiceDelegate
 			cleanUnsupportedReferences(o, "Observation.focus", Observation::hasFocus, Observation::setFocus);
 			cleanUnsupportedReferences(o, "Observation.performer", Observation::hasPerformer,
 					Observation::setPerformer);
-			cleanUnsupportedReference(o, "Observation.specimen", Observation::hasSpecimen, Observation::setSpecimen);
 			cleanUnsupportedReference(o, "Observation.device", Observation::hasDevice, Observation::setDevice);
 			cleanUnsupportedReferences(o, "Observation.derivedFrom", Observation::hasDerivedFrom,
 					Observation::setDerivedFrom);
@@ -673,6 +651,11 @@ public class ReadData extends AbstractServiceDelegate
 					ProcedureFocalDeviceComponent::setManipulated);
 			cleanUnsupportedReferences(p, "Procedure.usedReference", Procedure::hasUsedReference,
 					Procedure::setUsedReference);
+		}
+		else if (resource instanceof Specimen s)
+		{
+			// todo
+
 		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
@@ -740,6 +723,12 @@ public class ReadData extends AbstractServiceDelegate
 			{
 				p.setIdentifier(Collections.emptyList());
 				p.setSubject(patientRef);
+			}
+			else if (resource instanceof Specimen s)
+			{
+				s.setIdentifier(Collections.emptyList());
+				s.setAccessionIdentifier(null);
+				s.setSubject(patientRef);
 			}
 			else
 				throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
