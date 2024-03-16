@@ -4,7 +4,7 @@
 
 	<groupId>de.netzwerk-universitaetsmedizin.codex</groupId>
 	<artifactId>codex-processes-ap1</artifactId>
-	<version>1.0.0.0</version>
+	<version>1.0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -20,7 +20,7 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 		<hapi.version>5.1.0</hapi.version>
-		<dsf.version>1.3.0</dsf.version>
+		<dsf.version>1.5.0</dsf.version>
 	</properties>
 
 	<description>Business processes for the NUM RDP project (AP1) as plugins for the Data Sharing Framework.</description>
