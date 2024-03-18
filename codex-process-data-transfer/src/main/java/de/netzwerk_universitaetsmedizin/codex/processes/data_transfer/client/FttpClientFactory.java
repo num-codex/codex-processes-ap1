@@ -62,6 +62,18 @@ public class FttpClientFactory
 			return pseudonym;
 		}
 
+		@Override
+		public Optional<String> getDicPseudonymForLocalPseudonym(String localPseudonym)
+		{
+			Optional<String> pseudonym = sha256(localPseudonym).map(p -> "dic_test/" + p);
+
+			logger.warn(
+					"Returning simulated DIC pseudonym '{}' for local pseudonym '{}', fTTP connection not configured.",
+					pseudonym.orElseThrow(), localPseudonym);
+
+			return pseudonym;
+		}
+
 		private Optional<String> sha256(String original)
 		{
 			try
@@ -142,7 +154,7 @@ public class FttpClientFactory
 		{
 			logger.info(
 					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
+							+ " basicAuthUsername: {}, basicAuthPassword: {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl: {}, proxyUsername: {}, proxyPassword: {}}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
 					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase,
 					fttpApiKey != null ? "***" : "null", fttpStudy, fttpTarget, proxyUrl, proxyUsername,

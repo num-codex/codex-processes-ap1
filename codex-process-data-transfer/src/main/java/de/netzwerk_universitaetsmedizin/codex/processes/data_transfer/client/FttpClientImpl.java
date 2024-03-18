@@ -154,6 +154,18 @@ public class FttpClientImpl implements FttpClient
 		return p;
 	}
 
+	protected Parameters createParametersForPsnWorkflowLocalPseudonym(String localPseudonym)
+	{
+		Parameters p = new Parameters();
+		p.addParameter("study", fttpStudy);
+		p.addParameter("original", localPseudonym);
+		p.addParameter("source", "local");
+		p.addParameter("target", fttpTarget);
+		p.addParameter("apikey", fttpApiKey);
+
+		return p;
+	}
+
 	@Override
 	public Optional<String> getDicPseudonym(String bloomFilter)
 	{
@@ -168,6 +180,30 @@ public class FttpClientImpl implements FttpClient
 			Parameters parameters = client.operation().onServer().named("$requestPsnFromBfWorkflow")
 					.withParameters(createParametersForBfWorkflow(bloomFilter)).accept(Constants.CT_FHIR_XML_NEW)
 					.encoded(EncodingEnum.XML).execute();
+
+			return getPseudonym(parameters).map(p -> fttpTarget + "/" + p);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while retrieving DIC pseudonym: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_FTTP_NOT_REACHABLE, e.getMessage());
+		}
+	}
+
+	@Override
+	public Optional<String> getDicPseudonymForLocalPseudonym(String localPseudonym)
+	{
+		Objects.requireNonNull(localPseudonym, "localPseudonym");
+
+		logger.info("Requesting DIC Pseudonym for local Pseudonym {} ...", localPseudonym);
+
+		try
+		{
+			IGenericClient client = createGenericClient();
+
+			Parameters parameters = client.operation().onServer().named("requestPsnWorkflow")
+					.withParameters(createParametersForPsnWorkflowLocalPseudonym(localPseudonym))
+					.accept(Constants.CT_FHIR_XML_NEW).encoded(EncodingEnum.XML).execute();
 
 			return getPseudonym(parameters).map(p -> fttpTarget + "/" + p);
 		}
