@@ -52,7 +52,7 @@ public class TranslateConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StoreDataForCrr storeDataForCodex()
 	{
-		return new StoreDataForCrr(api, transferDataConfig.crrIdentifierValue());
+		return new StoreDataForCrr(api, transferDataConfig.crrIdentifierValue(), transferDataConfig.dataLogger());
 	}
 
 	@Bean
@@ -108,7 +108,7 @@ public class TranslateConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StoreValidationErrorForDic storeValidationErrorForDic()
 	{
-		return new StoreValidationErrorForDic(api);
+		return new StoreValidationErrorForDic(api, transferDataConfig.dataLogger());
 	}
 
 	@Bean
