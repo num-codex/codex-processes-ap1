@@ -150,10 +150,10 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 
 	private String resolveLocalPseudonym(String localPseudonym)
 	{
-		return fttpClientFactory.getFttpClient().getDicPseudonym(localPseudonym)
+		return fttpClientFactory.getFttpClient().getDicPseudonymForLocalPseudonym(localPseudonym)
 				.orElseThrow(() -> new BpmnError(
 						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER,
-						"Unable to get DIC pseudonym for given BloomFilter"));
+						"Unable to get DIC pseudonym for given localPseudonym"));
 	}
 
 

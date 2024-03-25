@@ -653,6 +653,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		Objects.requireNonNull(patient, "patient");
 
 		String id = patient.getIdElement().toVersionless().getValue();
+		patient.setId(id);
 		logger.info("Updating patient {}", id);
 
 		try
