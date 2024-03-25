@@ -71,9 +71,9 @@ public class MiiTest
 
 		for (ValidationPackageWithDepedencies p : packagesWithDependencies)
 		{
-			logger.info(p.getName() + "|" + p.getVersion());
+			logger.info("{}|{}", p.getName(), p.getVersion());
 			for (ValidationPackage d : p.getDependencies())
-				logger.info("\t" + d.getName() + "|" + d.getVersion());
+				logger.info("\t{}|{}", d.getName(), d.getVersion());
 		}
 	}
 

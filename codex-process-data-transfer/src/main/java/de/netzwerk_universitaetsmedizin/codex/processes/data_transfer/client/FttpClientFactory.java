@@ -154,11 +154,10 @@ public class FttpClientFactory
 		{
 			logger.info(
 					"Testing connection to fTTP with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername: {}, basicAuthPassword: {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxyUrl: {}, proxyUsername: {}, proxyPassword: {}}",
+							+ " basicAuthUsername: {}, basicAuthPassword: {}, serverBase: {}, apiKey: {}, study: {}, target: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
 					fttpBasicAuthUsername, fttpBasicAuthPassword != null ? "***" : "null", fttpServerBase,
-					fttpApiKey != null ? "***" : "null", fttpStudy, fttpTarget, proxyUrl, proxyUsername,
-					proxyPassword != null ? "***" : "null");
+					fttpApiKey != null ? "***" : "null", fttpStudy, fttpTarget);
 
 			getFttpClient().testConnection();
 		}

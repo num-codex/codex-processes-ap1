@@ -49,7 +49,7 @@ public class DecryptValidationErrorFromDts extends AbstractServiceDelegate
 		catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | IOException e)
 		{
-			logger.warn("Unable to decrypt validation error from CRR: " + e.getMessage(), e);
+			logger.warn("Unable to decrypt validation error from CRR: {}", e.getMessage(), e);
 			throw new BpmnError(
 					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_VALIDATION_ERROR_FROM_CRR_FAILED,
 					"Error while decrypting validation error from CRR");

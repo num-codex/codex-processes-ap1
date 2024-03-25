@@ -101,8 +101,7 @@ public class FttpClientImpl implements FttpClient
 				clientFactory.setProxy(url.getHost(), url.getPort());
 				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
 
-				logger.info("Using proxy for fTTP connection with {host: {}, port: {}, username: {}}", url.getHost(),
-						url.getPort(), proxyUsername);
+				logger.info("Using proxy for fTTP connection with values from 'DEV_DSF_PROXY'... config");
 			}
 			catch (MalformedURLException e)
 			{
