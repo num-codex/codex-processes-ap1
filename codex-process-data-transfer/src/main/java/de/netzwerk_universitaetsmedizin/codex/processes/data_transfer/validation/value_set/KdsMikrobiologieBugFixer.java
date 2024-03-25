@@ -8,8 +8,8 @@ import ca.uhn.fhir.context.FhirContext;
 
 /**
  * Replace a few ValueSets from MII KDS Mikrobiologie module. This ValueSetModifier currently resolves the following
- * issues: *
- * <a href="https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/15">#15</a> *
+ * issues:
+ * <a href="https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/15">#15</a>
  * <a href="https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/16">#16</a>
  */
 public class KdsMikrobiologieBugFixer implements ValueSetModifier
