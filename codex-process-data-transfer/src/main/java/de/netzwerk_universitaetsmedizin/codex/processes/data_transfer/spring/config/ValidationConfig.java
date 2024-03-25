@@ -54,6 +54,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
+import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValueSetExpander;
@@ -64,6 +65,9 @@ import jakarta.ws.rs.WebApplicationException;
 public class ValidationConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationConfig.class);
+
+	@Autowired
+	private ProcessPluginApi api;
 
 	public static enum TerminologyServerConnectionTestStatus
 	{
@@ -114,18 +118,6 @@ public class ValidationConfig
 	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.authentication.basic.password:#{null}}")
 	private char[] packageClientBasicAuthPassword;
 
-	@ProcessDocumentation(description = "Forwarding proxy server url, set if the FHIR implementation guide package server can only be reached via a proxy server", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", example = "http://proxy.foo:8080")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.schemeHostPort:#{null}}")
-	private String packageClientProxySchemeHostPort;
-
-	@ProcessDocumentation(description = "Forwarding proxy server basic authentication username, set if the FHIR implementation guide package server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.username:#{null}}")
-	private String packageClientProxyUsername;
-
-	@ProcessDocumentation(description = "Forwarding proxy server basic authentication password, set if the FHIR implementation guide package server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/validation_package_server_proxy_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.proxy.password:#{null}}")
-	private char[] packageClientProxyPassword;
-
 	@ProcessDocumentation(description = "Connection timeout in milliseconds used when accessing the FHIR implementation guide package server, time until a connection needs to be established before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.package.client.timeout.connect:10000}")
 	private int packageClientConnectTimeout;
@@ -173,18 +165,6 @@ public class ValidationConfig
 	@ProcessDocumentation(description = "Basic authentication password to authenticate against the terminology server, set if the server requests authentication using basic authentication ", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_basicauth.password")
 	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.authentication.basic.password:#{null}}")
 	private char[] valueSetExpansionClientBasicAuthPassword;
-
-	@ProcessDocumentation(description = "Forwarding proxy server url, set if the terminology server can only be reached via a proxy server", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", example = "http://proxy.foo:8080")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.schemeHostPort:#{null}}")
-	private String valueSetExpansionClientProxySchemeHostPort;
-
-	@ProcessDocumentation(description = "Forwarding proxy server basic authentication username, set if the terminology server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.username:#{null}}")
-	private String valueSetExpansionClientProxyUsername;
-
-	@ProcessDocumentation(description = "Forwarding proxy server basic authentication password, set if the terminology server can only be reached via a proxy server that requires basic authentication", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend", recommendation = "Use docker secret file to configure by using `${env_variable}_FILE`", example = "/run/secrets/terminology_server_proxy_basicauth.password")
-	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.proxy.password:#{null}}")
-	private char[] valueSetExpansionClientProxyPassword;
 
 	@ProcessDocumentation(description = "Connection timeout in milliseconds used when accessing the terminology server, time until a connection needs to be established before aborting", processNames = "wwwnetzwerk-universitaetsmedizinde_dataSend")
 	@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.valueset.expansion.client.timeout.connect:10000}")
@@ -394,9 +374,13 @@ public class ValidationConfig
 					"Package client basic authentication username or password not specified");
 		}
 
-		if ((packageClientProxyUsername != null) != (packageClientProxyPassword != null))
+		String proxyUrl = null, proxyUsername = null;
+		char[] proxyPassword = null;
+		if (api.getProxyConfig().isEnabled() && !api.getProxyConfig().isNoProxyUrl(packageServerBaseUrl))
 		{
-			throw new IllegalArgumentException("Package client proxy username or password not specified");
+			proxyUrl = api.getProxyConfig().getUrl();
+			proxyUsername = api.getProxyConfig().getUsername();
+			proxyPassword = api.getProxyConfig().getPassword() == null ? null : api.getProxyConfig().getPassword();
 		}
 
 		KeyStore packageClientTrustStore = trustStore("FHIR package client", packageClientTrustCertificates);
@@ -407,9 +391,8 @@ public class ValidationConfig
 
 		return new ValidationPackageClientJersey(packageServerBaseUrl, packageClientTrustStore, packageClientKeyStore,
 				packageClientKeyStore == null ? null : packageClientKeyStorePassword, packageClientBasicAuthUsername,
-				packageClientBasicAuthPassword, packageClientProxySchemeHostPort, packageClientProxyUsername,
-				packageClientProxyPassword, packageClientConnectTimeout, packageClientReadTimeout,
-				packageClientVerbose);
+				packageClientBasicAuthPassword, proxyUrl, proxyUsername, proxyPassword, packageClientConnectTimeout,
+				packageClientReadTimeout, packageClientVerbose);
 	}
 
 	@Bean
@@ -454,9 +437,13 @@ public class ValidationConfig
 					"ValueSet expansion client basic authentication username or password not specified");
 		}
 
-		if ((valueSetExpansionClientProxyUsername != null) != (valueSetExpansionClientProxyPassword != null))
+		String proxyUrl = null, proxyUsername = null;
+		char[] proxyPassword = null;
+		if (api.getProxyConfig().isEnabled() && !api.getProxyConfig().isNoProxyUrl(valueSetExpansionServerBaseUrl))
 		{
-			throw new IllegalArgumentException("ValueSet expansion client proxy username or password not specified");
+			proxyUrl = api.getProxyConfig().getUrl();
+			proxyUsername = api.getProxyConfig().getUsername();
+			proxyPassword = api.getProxyConfig().getPassword() == null ? null : api.getProxyConfig().getPassword();
 		}
 
 		KeyStore valueSetExpansionClientTrustStore = trustStore("ValueSet expansion client",
@@ -469,10 +456,9 @@ public class ValidationConfig
 		return new ValueSetExpansionClientJersey(valueSetExpansionServerBaseUrl, valueSetExpansionClientTrustStore,
 				valueSetExpansionClientKeyStore,
 				valueSetExpansionClientKeyStore == null ? null : valueSetExpansionClientKeyStorePassword,
-				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword,
-				valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
-				valueSetExpansionClientProxyPassword, valueSetExpansionClientConnectTimeout,
-				valueSetExpansionClientReadTimeout, valueSetExpansionClientVerbose, objectMapper, fhirContext);
+				valueSetExpansionClientBasicAuthUsername, valueSetExpansionClientBasicAuthPassword, proxyUrl,
+				proxyUsername, proxyPassword, valueSetExpansionClientConnectTimeout, valueSetExpansionClientReadTimeout,
+				valueSetExpansionClientVerbose, objectMapper, fhirContext);
 	}
 
 	public TerminologyServerConnectionTestStatus testConnectionToTerminologyServer()
@@ -480,25 +466,21 @@ public class ValidationConfig
 		if (validationEnabled)
 			logger.info(
 					"Testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}",
+							+ " basicAuthUsername: {}, basicAuthPassword: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
 					valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
 					valueSetExpansionClientCertificatePrivateKey,
 					valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
 					valueSetExpansionClientBasicAuthUsername,
-					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
-					valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
-					valueSetExpansionClientProxyPassword != null ? "***" : "null");
+					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl);
 		else
 			logger.warn(
 					"Not testing connection to terminology server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername {}, basicAuthPassword {}, serverBase: {}, proxyUrl {}, proxyUsername {}, proxyPassword {}}, validation disabled",
+							+ " basicAuthUsername: {}, basicAuthPassword: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}, validation disabled",
 					valueSetExpansionClientTrustCertificates, valueSetExpansionClientCertificate,
 					valueSetExpansionClientCertificatePrivateKey,
 					valueSetExpansionClientCertificatePrivateKeyPassword != null ? "***" : "null",
 					valueSetExpansionClientBasicAuthUsername,
-					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl,
-					valueSetExpansionClientProxySchemeHostPort, valueSetExpansionClientProxyUsername,
-					valueSetExpansionClientProxyPassword != null ? "***" : "null");
+					valueSetExpansionClientBasicAuthPassword != null ? "***" : "null", valueSetExpansionServerBaseUrl);
 
 		if (!validationEnabled)
 			return TerminologyServerConnectionTestStatus.DISABLED;

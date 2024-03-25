@@ -44,7 +44,7 @@ public class DownloadDataFromDts extends AbstractServiceDelegate
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while reading Binary resoruce: " + e.getMessage(), e);
+			logger.warn("Error while reading Binary resoruce: {}", e.getMessage(), e);
 
 			throw new BpmnError(
 					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DOWNLOAD_OF_ENCRYPTED_DATA_FROM_DTS_FAILED,

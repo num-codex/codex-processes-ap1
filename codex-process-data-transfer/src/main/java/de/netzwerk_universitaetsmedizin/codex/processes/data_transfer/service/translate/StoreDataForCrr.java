@@ -76,7 +76,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		catch (Exception e)
 		{
 			dataLogger.logData("Binary to create", binary);
-			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
+			logger.warn("Error while creating Binary resource: {}", e.getMessage(), e);
 
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_DATA,
 					"Unable to create Binary resource with encrypted data for CRR in local DSF FHIR server");

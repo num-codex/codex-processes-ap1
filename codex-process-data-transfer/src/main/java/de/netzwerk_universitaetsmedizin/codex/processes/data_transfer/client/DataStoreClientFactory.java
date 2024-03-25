@@ -155,11 +155,10 @@ public class DataStoreClientFactory
 		{
 			logger.info(
 					"Testing connection to Data Store FHIR server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername {}, basicAuthPassword {}, bearerToken {}, serverBase: {}, proxyUrl {}, proxyUsername, proxyPassword {}}",
+							+ " basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
 					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
 					dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword != null ? "***" : "null",
-					dataStoreServerBearerToken != null ? "***" : "null", dataStoreServerBase, proxyUrl, proxyUsername,
-					proxyPassword != null ? "***" : "null");
+					dataStoreServerBearerToken != null ? "***" : "null", dataStoreServerBase);
 
 			getDataStoreClient().testConnection();
 		}

@@ -155,11 +155,11 @@ public class ValidationPackage
 					|| (entry.getFileName() != null && (entry.getFileName().startsWith("package/example")
 							|| entry.getFileName().endsWith(".index.json") || !entry.getFileName().endsWith(".json"))))
 			{
-				logger.debug("Ignoring " + entry.getFileName());
+				logger.debug("Ignoring {}", entry.getFileName());
 				return;
 			}
 
-			logger.debug("Reading " + entry.getFileName());
+			logger.debug("Reading {}", entry.getFileName());
 
 			try
 			{

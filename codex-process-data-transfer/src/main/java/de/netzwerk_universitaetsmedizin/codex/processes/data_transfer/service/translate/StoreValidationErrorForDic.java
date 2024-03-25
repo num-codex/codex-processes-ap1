@@ -76,7 +76,7 @@ public class StoreValidationErrorForDic extends AbstractServiceDelegate implemen
 		catch (Exception e)
 		{
 			dataLogger.logData("Binary to create", binary);
-			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
+			logger.warn("Error while creating Binary resource: {}", e.getMessage(), e);
 
 			throw new BpmnError(
 					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR,

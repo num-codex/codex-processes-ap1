@@ -276,7 +276,7 @@ public class PolarDataTest
 
 			fixIdentifier(eTrace, resource);
 
-			if (resource instanceof Patient patient)
+			if (resource instanceof Patient)
 			{
 				// nothing to do
 			}
@@ -305,7 +305,7 @@ public class PolarDataTest
 			{
 				fixReference(eTrace + "/subject", condition.getSubject(), idTranslation);
 			}
-			else if (resource instanceof Medication medication)
+			else if (resource instanceof Medication)
 			{
 				// nothing to do
 			}

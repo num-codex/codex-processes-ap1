@@ -81,8 +81,7 @@ public class DataStoreClientImpl implements DataStoreClient
 				clientFactory.setProxy(url.getHost(), url.getPort());
 				clientFactory.setProxyCredentials(proxyUsername, proxyPassword);
 
-				logger.info("Using proxy for data FHIR server connection with {host: {}, port: {}, username: {}}",
-						url.getHost(), url.getPort(), proxyUsername);
+				logger.info("Using proxy for data FHIR server connection with values from 'DEV_DSF_PROXY'... config");
 			}
 			catch (MalformedURLException e)
 			{

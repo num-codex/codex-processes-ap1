@@ -252,7 +252,7 @@ public class ValidationMain implements InitializingBean
 		}
 		catch (Exception e)
 		{
-			logger.warn("Unable to read " + file + " as JSON, {}: {}", e.getClass().getName(), e.getMessage());
+			logger.warn("Unable to read {} as JSON, {}: {}", file, e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}
@@ -267,7 +267,7 @@ public class ValidationMain implements InitializingBean
 		}
 		catch (Exception e)
 		{
-			logger.warn("Unable to read " + file + " as XML, {}: {}", e.getClass().getName(), e.getMessage());
+			logger.warn("Unable to read {} as XML, {}: {}", file, e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

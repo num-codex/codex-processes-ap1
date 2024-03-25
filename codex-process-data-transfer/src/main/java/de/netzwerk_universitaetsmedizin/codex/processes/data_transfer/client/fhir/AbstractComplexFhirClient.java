@@ -66,7 +66,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 			e.setSubject(patientRef);
 		else if (resource instanceof Immunization i)
 			i.setPatient(patientRef);
-		else if (resource instanceof Medication m)
+		else if (resource instanceof Medication)
 			; // nothing to do
 		else if (resource instanceof MedicationAdministration ma)
 			ma.setSubject(patientRef);
@@ -94,7 +94,7 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 			return Optional.of(e.getSubject());
 		else if (resource instanceof Immunization i)
 			return Optional.of(i.getPatient());
-		else if (resource instanceof Medication m)
+		else if (resource instanceof Medication)
 			return Optional.empty();
 		else if (resource instanceof MedicationAdministration ma)
 			return Optional.of(ma.getSubject());
@@ -198,8 +198,8 @@ public abstract class AbstractComplexFhirClient extends AbstractFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while searching for Patient with pseudonym " + NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM
-					+ "|" + pseudonym, e);
+			logger.warn("Error while searching for Patient with pseudonym {}|{}", NAMING_SYSTEM_NUM_CODEX_CRR_PSEUDONYM,
+					pseudonym, e);
 			throw e;
 		}
 	}

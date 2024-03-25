@@ -372,9 +372,8 @@ public class ReadData extends AbstractServiceDelegate
 						&& uuidsById.containsKey(oldReference.getReference()))
 				{
 					logger.debug(
-							"Replacing reference at " + path
-									+ " from resource {} with bundle temporary id in transport bundle",
-							i, getAbsoluteId(resource).getValue());
+							"Replacing reference at {}[{}] from resource {} with bundle temporary id in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
 					setReference.apply(component, new Reference(uuidsById.get(oldReference.getReference())));
 				}
 				else if ((oldReference.hasReference() && oldReference.getReference() == null
@@ -382,11 +381,13 @@ public class ReadData extends AbstractServiceDelegate
 								.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 						|| oldReference.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 				{
-					logger.debug("Not removing empty reference at " + path + " with data-absent-reason extension", i);
+					logger.debug(
+							"Not removing empty reference at {}[{}] with data-absent-reason extension from resource {} in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
 				}
 				else
 				{
-					logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReference.apply(component, null);
 				}
@@ -454,7 +455,7 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReference.apply(component))
 				{
-					logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReference.apply(component, null);
 				}
@@ -471,7 +472,7 @@ public class ReadData extends AbstractServiceDelegate
 			C component = getComponents.apply(resource);
 			if (hasReference.apply(component))
 			{
-				logger.warn("Removing reference at " + path + " from resource {} in transport bundle",
+				logger.warn("Removing reference at {} from resource {} in transport bundle", path,
 						getAbsoluteId(resource).getValue());
 				setReference.apply(component, null);
 			}
@@ -490,7 +491,7 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReferences.apply(component))
 				{
-					logger.warn("Removing references at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing references at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReferences.apply(component, null);
 				}
@@ -514,7 +515,7 @@ public class ReadData extends AbstractServiceDelegate
 					C2 component2 = components2.get(i);
 					if (hasReference.apply(component2))
 					{
-						logger.warn("Removing reference at " + path + "[{}] from resource {} in transport bundle", i,
+						logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 								getAbsoluteId(resource).getValue());
 						setReference.apply(component2, null);
 					}
