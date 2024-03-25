@@ -1,0 +1,46 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <type value="batch"/>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="Patient?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="Encounter?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-fall/StructureDefinition/KontaktGesundheitseinrichtung"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="Observation?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/ObservationLab"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="MedicationAdministration?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationAdministration"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="MedicationStatement?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-medikation/StructureDefinition/MedicationStatement"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="Procedure?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"/>
+        </request>
+    </entry>
+    <entry>
+        <request>
+            <method value="GET"/>
+            <url value="Condition?_profile=https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"/>
+        </request>
+    </entry>
+
+</Bundle>

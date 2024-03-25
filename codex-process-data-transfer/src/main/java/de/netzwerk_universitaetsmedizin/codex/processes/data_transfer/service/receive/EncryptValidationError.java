@@ -58,7 +58,7 @@ public class EncryptValidationError extends AbstractServiceDelegate
 				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
 				| ShortBufferException e)
 		{
-			logger.warn("Unable to encrypt validation error for DIC: " + e.getMessage(), e);
+			logger.warn("Unable to encrypt validation error for DIC: {}", e.getMessage(), e);
 			throw new BpmnError(
 					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_ECRYPTION_OF_VALIDATION_ERROR_FOR_DIC_FAILED,
 					"Unable to encrypt validation error for DIC");

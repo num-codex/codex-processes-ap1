@@ -1,0 +1,48 @@
+{
+  "resourceType": "ValueSet",
+  "url": "https://www.medizininformatik-initiative.de/fhir/modul-mikrobio/ValueSet/mii-vs-mikrobio-mre-klasse-snomedct",
+  "title": "MII VS Mikrobio MRE Klasse [SNOMED CT]",
+  "name": "MII_VS_Mikrobio_MRE_Klasse_SNOMEDCT",
+  "status": "active",
+  "version": "2024.0.0",
+  "compose": {
+    "include": [
+      {
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "409795000"
+          }
+        ],
+        "system": "http://snomed.info/sct"
+      },
+      {
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "409794001"
+          }
+        ],
+        "system": "http://snomed.info/sct"
+      },
+      {
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "409793007"
+          }
+        ],
+        "system": "http://snomed.info/sct"
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>MII VS Mikrobio MRE Klasse</h2><tt>https://www.medizininformatik-initiative.de/fhir/ext/modul-mikrobio/ValueSet/mii-vs-mikrobio-mre-klasse-snomedct</tt></div>"
+  },
+  "id": "mii-vs-mikrobio-mre-klasse-snomedct",
+  "date": "2023-03-02T00:00:00.000Z"
+}

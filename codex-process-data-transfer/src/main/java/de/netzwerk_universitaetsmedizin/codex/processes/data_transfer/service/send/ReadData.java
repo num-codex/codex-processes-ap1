@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -69,6 +70,7 @@ import org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent;
 import org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,6 +178,7 @@ public class ReadData extends AbstractServiceDelegate
 				.collect(Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless().getValue(),
 						r -> "urn:uuid:" + UUID.randomUUID().toString()));
 
+
 		List<DomainResource> resourcesWithTemporaryReferences = fixReferences(resources, resourcesById, uuidsById);
 		List<BundleEntryComponent> entries = resourcesWithTemporaryReferences.stream().map(r ->
 		{
@@ -240,12 +243,20 @@ public class ReadData extends AbstractServiceDelegate
 					Observation::setEncounter);
 			fixReferences(o, uuidsById, "Observation.hasMember", Observation::hasHasMember, Observation::getHasMember,
 					Observation::setHasMember);
+			fixReference(o, uuidsById, "Observation.specimen", Observation::hasSpecimen, Observation::getSpecimen,
+					Observation::setSpecimen);
 		}
 		else if (resource instanceof Procedure p)
 		{
 			fixReference(p, uuidsById, "Procedure.encounter", Procedure::hasEncounter, Procedure::getEncounter,
 					Procedure::setEncounter);
 		}
+		else if (resource instanceof Specimen s)
+		{
+			fixReferences(s, uuidsById, "Specimen.parent", Specimen::hasParent, Specimen::getParent,
+					Specimen::setParent);
+		}
+
 
 		return resource;
 	}
@@ -268,6 +279,18 @@ public class ReadData extends AbstractServiceDelegate
 					.getReferenceElement_().hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 			{
 				logger.debug("Not removing empty reference at {} with data-absent-reason extension", path);
+			}
+			else if (!oldReference.getResource().isEmpty())
+			{
+				String internalId = "#" + UUID.randomUUID();
+				Reference fixedReference = new Reference(internalId);
+				IBaseResource oldContainedResource = clean((DomainResource) oldReference.getResource());
+				oldContainedResource.setId(internalId);
+				fixedReference.setResource(oldContainedResource);
+				setReference.apply(resource, fixedReference);
+				logger.debug(
+						"Replacing reference to contained resource at {} from resource {} with bundle temporary id in transport bundle",
+						path, getAbsoluteId(resource).getValue());
 			}
 			else
 			{
@@ -307,6 +330,18 @@ public class ReadData extends AbstractServiceDelegate
 					logger.debug("Not removing empty reference at {}[{}] with data-absent-reason extension", path, i);
 					fixedReferences.add(oldReference);
 				}
+				else if (!oldReference.getResource().isEmpty())
+				{
+					String internalId = "#" + UUID.randomUUID();
+					Reference fixedReference = new Reference(internalId);
+					IBaseResource oldContainedResource = clean((DomainResource) oldReference.getResource());
+					oldContainedResource.setId(internalId);
+					fixedReference.setResource(oldContainedResource);
+					fixedReferences.add(fixedReference);
+					logger.debug(
+							"Replacing reference to contained resource at {}[{}] from resource {} with bundle temporary id in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
+				}
 				else
 				{
 					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
@@ -337,20 +372,22 @@ public class ReadData extends AbstractServiceDelegate
 						&& uuidsById.containsKey(oldReference.getReference()))
 				{
 					logger.debug(
-							"Replacing reference at " + path
-									+ " from resource {} with bundle temporary id in transport bundle",
-							i, getAbsoluteId(resource).getValue());
+							"Replacing reference at {}[{}] from resource {} with bundle temporary id in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
 					setReference.apply(component, new Reference(uuidsById.get(oldReference.getReference())));
 				}
-				else if (oldReference.hasReference() && oldReference.getReference() == null
+				else if ((oldReference.hasReference() && oldReference.getReference() == null
 						&& oldReference.getReferenceElement_()
 								.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
+						|| oldReference.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 				{
-					logger.debug("Not removing empty reference at " + path + " with data-absent-reason extension", i);
+					logger.debug(
+							"Not removing empty reference at {}[{}] with data-absent-reason extension from resource {} in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
 				}
 				else
 				{
-					logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReference.apply(component, null);
 				}
@@ -418,7 +455,7 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReference.apply(component))
 				{
-					logger.warn("Removing reference at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReference.apply(component, null);
 				}
@@ -435,7 +472,7 @@ public class ReadData extends AbstractServiceDelegate
 			C component = getComponents.apply(resource);
 			if (hasReference.apply(component))
 			{
-				logger.warn("Removing reference at " + path + " from resource {} in transport bundle",
+				logger.warn("Removing reference at {} from resource {} in transport bundle", path,
 						getAbsoluteId(resource).getValue());
 				setReference.apply(component, null);
 			}
@@ -454,7 +491,7 @@ public class ReadData extends AbstractServiceDelegate
 				C component = components.get(i);
 				if (hasReferences.apply(component))
 				{
-					logger.warn("Removing references at " + path + " from resource {} in transport bundle", i,
+					logger.warn("Removing references at {}[{}] from resource {} in transport bundle", path, i,
 							getAbsoluteId(resource).getValue());
 					setReferences.apply(component, null);
 				}
@@ -478,7 +515,7 @@ public class ReadData extends AbstractServiceDelegate
 					C2 component2 = components2.get(i);
 					if (hasReference.apply(component2))
 					{
-						logger.warn("Removing reference at " + path + "[{}] from resource {} in transport bundle", i,
+						logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
 								getAbsoluteId(resource).getValue());
 						setReference.apply(component2, null);
 					}
@@ -645,7 +682,6 @@ public class ReadData extends AbstractServiceDelegate
 			cleanUnsupportedReferences(o, "Observation.focus", Observation::hasFocus, Observation::setFocus);
 			cleanUnsupportedReferences(o, "Observation.performer", Observation::hasPerformer,
 					Observation::setPerformer);
-			cleanUnsupportedReference(o, "Observation.specimen", Observation::hasSpecimen, Observation::setSpecimen);
 			cleanUnsupportedReference(o, "Observation.device", Observation::hasDevice, Observation::setDevice);
 			cleanUnsupportedReferences(o, "Observation.derivedFrom", Observation::hasDerivedFrom,
 					Observation::setDerivedFrom);
@@ -673,6 +709,20 @@ public class ReadData extends AbstractServiceDelegate
 					ProcedureFocalDeviceComponent::setManipulated);
 			cleanUnsupportedReferences(p, "Procedure.usedReference", Procedure::hasUsedReference,
 					Procedure::setUsedReference);
+		}
+		else if (resource instanceof Specimen s)
+		{
+			cleanUnsupportedReferences(s, "Specimen.request", Specimen::hasRequest, Specimen::setRequest);
+			cleanUnsupportedReferenceFromComponent(s, "Specimen.collection.collector", Specimen::hasCollection,
+					Specimen::getCollection, Specimen.SpecimenCollectionComponent::hasCollector,
+					Specimen.SpecimenCollectionComponent::setCollector);
+			cleanUnsupportedReferencesFromComponents(s, "Specimen.processing[{}].additive", Specimen::hasProcessing,
+					Specimen::getProcessing, Specimen.SpecimenProcessingComponent::hasAdditive,
+					Specimen.SpecimenProcessingComponent::setAdditive);
+			cleanUnsupportedReferenceFromComponents(s, "Specimen.container[{}].additiveReference",
+					Specimen::hasContainer, Specimen::getContainer,
+					Specimen.SpecimenContainerComponent::hasAdditiveReference,
+					Specimen.SpecimenContainerComponent::setAdditive);
 		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
@@ -741,9 +791,20 @@ public class ReadData extends AbstractServiceDelegate
 				p.setIdentifier(Collections.emptyList());
 				p.setSubject(patientRef);
 			}
+			else if (resource instanceof Specimen s)
+			{
+				s.setIdentifier(Collections.emptyList());
+				s.setAccessionIdentifier(null);
+				s.setSubject(patientRef);
+			}
 			else
 				throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
 		}
+
+		if (resource instanceof DomainResource d)
+			d.getContained().forEach(r -> setSubjectOrIdentifier(r, pseudonym));
+		else
+			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
 
 		return resource;
 	}

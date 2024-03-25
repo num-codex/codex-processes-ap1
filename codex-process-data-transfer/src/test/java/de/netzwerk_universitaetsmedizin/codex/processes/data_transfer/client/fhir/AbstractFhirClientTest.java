@@ -36,7 +36,7 @@ public class AbstractFhirClientTest
 		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(dataClient.getSearchBundleOverride())
-				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
+				.thenReturn(Paths.get("src/test/resources/fhir/Bundle/SearchBundle.xml"));
 		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
 				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
@@ -69,7 +69,7 @@ public class AbstractFhirClientTest
 		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(dataClient.getSearchBundleOverride())
-				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
+				.thenReturn(Paths.get("src/test/resources/fhir/Bundle/SearchBundle.xml"));
 		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
 				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
@@ -104,7 +104,7 @@ public class AbstractFhirClientTest
 		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(dataClient.getSearchBundleOverride())
-				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
+				.thenReturn(Paths.get("src/test/resources/fhir/Bundle/SearchBundle.xml"));
 		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
 				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));
@@ -140,7 +140,7 @@ public class AbstractFhirClientTest
 		DataStoreClient dataClient = Mockito.mock(DataStoreClient.class);
 		DataLogger dataLogger = Mockito.mock(DataLogger.class);
 		when(dataClient.getSearchBundleOverride())
-				.thenReturn(Paths.get("src/main/resources/fhir/Bundle/SearchBundle.xml"));
+				.thenReturn(Paths.get("src/test/resources/fhir/Bundle/SearchBundle.xml"));
 		when(dataClient.getFhirContext()).thenReturn(fhirContext);
 		AbstractFhirClient client = Mockito.mock(AbstractFhirClient.class,
 				Mockito.withSettings().useConstructor(dataClient, dataLogger).defaultAnswer(CALLS_REAL_METHODS));

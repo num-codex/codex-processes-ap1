@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.InitializingBean;
 
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.KdsMikrobiologieBugFixer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.MissingEntriesIncluder;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation.value_set.ValueSetModifier;
 import jakarta.ws.rs.WebApplicationException;
@@ -18,13 +19,14 @@ import jakarta.ws.rs.WebApplicationException;
 public class ValueSetExpansionClientWithModifiers implements ValueSetExpansionClient, InitializingBean
 {
 	public static final ValueSetModifier MISSING_ENTRIES_INCLUDER = new MissingEntriesIncluder();
+	public static final KdsMikrobiologieBugFixer KDS_MIKROBIOLOGIE_BUG_FIXER = new KdsMikrobiologieBugFixer();
 
 	private final ValueSetExpansionClient delegate;
 	private final List<ValueSetModifier> valueSetModifiers = new ArrayList<>();
 
 	public ValueSetExpansionClientWithModifiers(ValueSetExpansionClient delegate)
 	{
-		this(delegate, Arrays.asList(MISSING_ENTRIES_INCLUDER));
+		this(delegate, Arrays.asList(KDS_MIKROBIOLOGIE_BUG_FIXER, MISSING_ENTRIES_INCLUDER));
 	}
 
 	public ValueSetExpansionClientWithModifiers(ValueSetExpansionClient delegate,

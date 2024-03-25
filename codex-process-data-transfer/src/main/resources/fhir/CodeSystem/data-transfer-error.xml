@@ -82,6 +82,11 @@
 		<definition value="The fTTP did not return a DIC pseudonym for the given Bloomfilter" />
 	</concept>
 	<concept>
+		<code value="no-dic-pseudonym-for-local-pseudonym" />
+		<display value="No DIC Pseudonym For local pseudonym" />
+		<definition value="The fTTP did not return a DIC pseudonym for the given local pseudonym" />
+	</concept>
+	<concept>
 		<code value="no-crr-pseudonym-for-dic-pseudonym" />
 		<display value="No CRR Pseudonym For DIC pseudonym" />
 		<definition value="The fTTP did not return a CRR pseudonym for the given DIC pseudonym" />

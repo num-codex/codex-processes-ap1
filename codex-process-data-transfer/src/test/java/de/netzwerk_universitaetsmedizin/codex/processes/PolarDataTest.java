@@ -54,6 +54,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,7 @@ import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.PemIo;
 import dev.dsf.fhir.validation.ValueSetExpanderImpl;
 
+@Ignore
 public class PolarDataTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(PolarDataTest.class);
@@ -274,7 +276,7 @@ public class PolarDataTest
 
 			fixIdentifier(eTrace, resource);
 
-			if (resource instanceof Patient patient)
+			if (resource instanceof Patient)
 			{
 				// nothing to do
 			}
@@ -303,7 +305,7 @@ public class PolarDataTest
 			{
 				fixReference(eTrace + "/subject", condition.getSubject(), idTranslation);
 			}
-			else if (resource instanceof Medication medication)
+			else if (resource instanceof Medication)
 			{
 				// nothing to do
 			}

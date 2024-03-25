@@ -636,7 +636,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 				logger.warn("Patient {} not found: {} - {}", reference, e.getClass().getName(), e.getMessage());
 
 				if (logger.isDebugEnabled())
-					logger.debug("Error while reading patient " + reference, e);
+					logger.debug("Error while reading patient {}", reference, e);
 
 				return Optional.empty();
 			}
@@ -653,6 +653,8 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		Objects.requireNonNull(patient, "patient");
 
 		String id = patient.getIdElement().toVersionless().getValue();
+		// set the patient id to versionless id to workaround a `If-Match`-header bug in hapi fhir client
+		patient.setId(id);
 		logger.info("Updating patient {}", id);
 
 		try
@@ -682,7 +684,7 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Could not update patient " + id, e);
+			logger.warn("Could not update patient {}", id, e);
 			throw e;
 		}
 	}

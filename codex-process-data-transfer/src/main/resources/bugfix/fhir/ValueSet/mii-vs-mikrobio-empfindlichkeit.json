@@ -1,0 +1,38 @@
+{
+  "resourceType": "ValueSet",
+  "id": "mii-vs-mikrobio-empfindlichkeit-genotyp-loinc",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>MII VS Mikrobio Empfänglichkeit  Genotyp</h2><tt>https://www.medizininformatik-initiative.de/fhir/ext/modul-mikrobio/ValueSet/mii-vs-mikrobio-empfindlichkeit-genotyp-loinc</tt></div>"
+  },
+  "url": "https://www.medizininformatik-initiative.de/fhir/modul-mikrobio/ValueSet/mii-vs-mikrobio-empfindlichkeit-genotyp-loinc",
+  "version": "2024.0.0",
+  "name": "MII_VS_Mikrobio_Empfänglichkeit_Genotyp_LOINC",
+  "title": "MII VS Mikrobio Empfänglichkeit Genotyp [LOINC]",
+  "status": "active",
+  "date": "2023-03-02T00:00:00.000Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "filter": [
+          {
+            "property": "CLASS",
+            "op": "=",
+            "value": "ABXBACT"
+          },
+          {
+            "property": "PROPERTY",
+            "op": "=",
+            "value": "LP6870-2"
+          },
+          {
+            "property": "METHOD_TYP",
+            "op": "=",
+            "value": "LP28723-2"
+          }
+        ]
+      }
+    ]
+  }
+}

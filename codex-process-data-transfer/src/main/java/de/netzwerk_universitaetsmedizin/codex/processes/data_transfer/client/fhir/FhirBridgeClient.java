@@ -167,7 +167,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Could not update patient " + newPatient.getIdElement().toString(), e);
+			logger.warn("Could not update patient {}", newPatient.getIdElement().toString(), e);
 			throw e;
 		}
 	}
@@ -230,7 +230,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Could not create patient " + newPatient.getIdElement().toString(), e);
+			logger.warn("Could not create patient {}", newPatient.getIdElement().toString(), e);
 			throw e;
 		}
 	}
@@ -318,7 +318,7 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while searching for Resource with url " + url, e);
+			logger.warn("Error while searching for Resource with url {}", url, e);
 			throw e;
 		}
 	}
@@ -426,8 +426,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Count not update " + newResource.getResourceType().name() + " "
-					+ newResource.getIdElement().toString(), e);
+			logger.warn("Count not update {} {}", newResource.getResourceType().name(),
+					newResource.getIdElement().toString(), e);
 			throw e;
 		}
 	}
@@ -497,8 +497,8 @@ public class FhirBridgeClient extends AbstractComplexFhirClient
 		}
 		catch (Exception e)
 		{
-			logger.warn("Could not create " + newResource.getResourceType().name() + " "
-					+ newResource.getIdElement().toString(), e);
+			logger.warn("Could not create {} {}", newResource.getResourceType().name(),
+					newResource.getIdElement().toString(), e);
 			throw e;
 		}
 	}

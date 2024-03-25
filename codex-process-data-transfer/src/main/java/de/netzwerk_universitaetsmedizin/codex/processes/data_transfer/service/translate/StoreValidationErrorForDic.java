@@ -4,6 +4,8 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR;
 
+import java.util.Objects;
+
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.Binary;
@@ -12,21 +14,34 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.context.FhirContext;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 import dev.dsf.bpe.v1.constants.NamingSystems;
 import dev.dsf.bpe.v1.variables.Variables;
 import jakarta.ws.rs.core.MediaType;
 
-public class StoreValidationErrorForDic extends AbstractServiceDelegate
+public class StoreValidationErrorForDic extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(StoreValidationErrorForDic.class);
 
-	public StoreValidationErrorForDic(ProcessPluginApi api)
+	private DataLogger dataLogger;
+
+	public StoreValidationErrorForDic(ProcessPluginApi api, DataLogger dataLogger)
 	{
 		super(api);
+
+		this.dataLogger = dataLogger;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
@@ -60,8 +75,8 @@ public class StoreValidationErrorForDic extends AbstractServiceDelegate
 		}
 		catch (Exception e)
 		{
-			logger.debug("Binary to create {}", FhirContext.forR4().newJsonParser().encodeResourceToString(binary));
-			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
+			dataLogger.logData("Binary to create", binary);
+			logger.warn("Error while creating Binary resource: {}", e.getMessage(), e);
 
 			throw new BpmnError(
 					CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_VALIDATION_ERROR,

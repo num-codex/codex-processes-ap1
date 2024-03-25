@@ -2,11 +2,13 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.s
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_LOCAL_PSEUDONYM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_PATIENT_NOT_FOUND;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_CODE;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.IDENTIFIER_NUM_CODEX_DIC_PSEUDONYM_TYPE_SYSTEM;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.RFC_4122_SYSTEM;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -94,8 +96,33 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 
 	private String resolvePseudonymAndUpdatePatient(Patient patient)
 	{
-		String bloomFilter = getBloomFilter(patient);
-		String pseudonym = resolveBloomFilter(bloomFilter);
+		String pseudonym;
+		// first try to find a bloom filter
+		Optional<String> bloomFilter = getBloomFilter(patient);
+		if (bloomFilter.isPresent())
+		{
+			pseudonym = resolveBloomFilter(bloomFilter.get());
+		}
+		else
+		{
+			// otherwise try to find a local pseudonym
+			// --> no record linkage
+			logger.info(
+					"No bloom filter present for patient {}. Try to use the local pseudonym for data transfer without record linkage",
+					patient.getIdElement().getValue());
+			Optional<String> localPseudonym = getLocalPseudonym(patient);
+			if (localPseudonym.isPresent())
+			{
+				pseudonym = resolveLocalPseudonym(localPseudonym.get());
+			}
+			else
+			{
+				logger.info("No local pseudonym present for patient {}. Aborted", patient.getIdElement().getValue());
+				throw new RuntimeException("Could not find pseudonym");
+			}
+
+
+		}
 
 		patient.getIdentifier().removeIf(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem()));
 		patient.addIdentifier().setSystem(NAMING_SYSTEM_NUM_CODEX_DIC_PSEUDONYM).setValue(pseudonym).getType()
@@ -107,12 +134,18 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 		return pseudonym;
 	}
 
-	private String getBloomFilter(Patient patient)
+	private Optional<String> getBloomFilter(Patient patient)
 	{
 		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
 				.filter(i -> NAMING_SYSTEM_NUM_CODEX_BLOOM_FILTER.equals(i.getSystem())).filter(Identifier::hasValue)
-				.findFirst().map(Identifier::getValue).orElseThrow(() -> new RuntimeException(
-						"No bloom filter present in patient " + patient.getIdElement().getValue()));
+				.findFirst().map(Identifier::getValue);
+	}
+
+	private Optional<String> getLocalPseudonym(Patient patient)
+	{
+		return patient.getIdentifier().stream().filter(Identifier::hasSystem)
+				.filter(i -> RFC_4122_SYSTEM.equals(i.getSystem())).filter(Identifier::hasValue).findFirst()
+				.map(Identifier::getValue);
 	}
 
 	private String resolveBloomFilter(String bloomFilter)
@@ -122,6 +155,15 @@ public class ResolvePsn extends AbstractServiceDelegate implements InitializingB
 						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_BLOOMFILTER,
 						"Unable to get DIC pseudonym for given BloomFilter"));
 	}
+
+	private String resolveLocalPseudonym(String localPseudonym)
+	{
+		return fttpClientFactory.getFttpClient().getDicPseudonymForLocalPseudonym(localPseudonym)
+				.orElseThrow(() -> new BpmnError(
+						CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_NO_DIC_PSEUDONYM_FOR_LOCAL_PSEUDONYM,
+						"Unable to get DIC pseudonym for given localPseudonym"));
+	}
+
 
 	private void updatePatient(Patient patient)
 	{

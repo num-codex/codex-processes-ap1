@@ -67,7 +67,7 @@ public class DecryptData extends AbstractServiceDelegate
 		catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
 				| NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e)
 		{
-			logger.warn("Unable to decrypt data from DIC: " + e.getMessage(), e);
+			logger.warn("Unable to decrypt data from DIC: {}", e.getMessage(), e);
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DECRYPTION_OF_DATA_FROM_DIC_FAILED,
 					"Error while decrypting data from DIC");
 		}

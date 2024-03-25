@@ -155,16 +155,19 @@ public class ValidationPackage
 					|| (entry.getFileName() != null && (entry.getFileName().startsWith("package/example")
 							|| entry.getFileName().endsWith(".index.json") || !entry.getFileName().endsWith(".json"))))
 			{
-				logger.debug("Ignoring " + entry.getFileName());
+				logger.debug("Ignoring {}", entry.getFileName());
 				return;
 			}
 
-			logger.debug("Reading " + entry.getFileName());
+			logger.debug("Reading {}", entry.getFileName());
 
 			try
 			{
-				IBaseResource resource = context.newJsonParser()
-						.parseResource(new String(entry.getContent(), StandardCharsets.UTF_8));
+				String resourceString = new String(entry.getContent(), StandardCharsets.UTF_8);
+				// fix profiles because their text contains invalid html
+				// Issue: https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/18
+				resourceString = resourceString.replaceAll("<h2>[\\s\\w\\[\\]]*</tt>", "");
+				IBaseResource resource = context.newJsonParser().parseResource(resourceString);
 
 				if (resource instanceof CodeSystem)
 					codeSystems.add((CodeSystem) resource);

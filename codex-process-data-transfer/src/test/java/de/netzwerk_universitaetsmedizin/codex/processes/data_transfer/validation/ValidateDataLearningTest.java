@@ -190,8 +190,8 @@ public class ValidateDataLearningTest
 		});
 
 		ValidationPackageDescriptor descriptor = validationPackage.getDescriptor(mapper);
-		logger.debug(descriptor.getName() + "/" + descriptor.getVersion() + ":");
-		descriptor.getDependencies().forEach((k, v) -> logger.debug("\t" + k + "/" + v));
+		logger.debug("{}/{}:", descriptor.getName(), descriptor.getVersion());
+		descriptor.getDependencies().forEach((k, v) -> logger.debug("\t{}/{}", k, v));
 	}
 
 	@Test
@@ -372,7 +372,7 @@ public class ValidateDataLearningTest
 		packageWithDependencies.getAllStructureDefinitions().stream()
 				.sorted(Comparator.comparing(StructureDefinition::getUrl)
 						.thenComparing(Comparator.comparing(StructureDefinition::getVersion)))
-				.forEach(s -> logger.debug(s.getUrl() + " " + s.getVersion()));
+				.forEach(s -> logger.debug("{} {}", s.getUrl(), s.getVersion()));
 
 		StructureDefinition miiRef = packageWithDependencies.getAllStructureDefinitions().stream()
 				.filter(s -> "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/MII-Reference"
@@ -427,13 +427,13 @@ public class ValidateDataLearningTest
 		{
 			logger.debug("");
 			logger.debug("  Profile-Dependencies:");
-			profileDependencies.stream().sorted().forEach(url -> logger.debug("    " + url));
+			profileDependencies.stream().sorted().forEach(url -> logger.debug("    {}", url));
 		}
 		if (!targetProfileDependencies.isEmpty())
 		{
 			logger.debug("");
 			logger.debug("  TargetProfile-Dependencies:");
-			targetProfileDependencies.stream().sorted().forEach(url -> logger.debug("    " + url));
+			targetProfileDependencies.stream().sorted().forEach(url -> logger.debug("    {}", url));
 		}
 	}
 
@@ -441,13 +441,13 @@ public class ValidateDataLearningTest
 			Map<String, StructureDefinition> structureDefinitionsByUrl, String indentation,
 			Set<String> profileDependencies, Set<String> targetProfileDependencies)
 	{
-		logger.debug(indentation + "Profile: " + k);
+		logger.debug("{}Profile: {}", indentation, k);
 		for (ElementDefinition element : def.getDifferential().getElement())
 		{
 			if (element.getType().stream().filter(t -> !t.getProfile().isEmpty() || !t.getTargetProfile().isEmpty())
 					.findAny().isPresent())
 			{
-				logger.debug(indentation + "  Element: " + element.getId() + " (Path: " + element.getPath() + ")");
+				logger.debug("{}  Element: {} (Path: {})", indentation, element.getId(), element.getPath());
 				for (TypeRefComponent type : element.getType())
 				{
 					if (!type.getProfile().isEmpty())
@@ -461,7 +461,7 @@ public class ValidateDataLearningTest
 										structureDefinitionsByUrl, indentation + "    ", profileDependencies,
 										targetProfileDependencies);
 							else
-								logger.debug(indentation + "    Profile: " + profile.getValue() + " ?");
+								logger.debug("{}    Profile: {} ?", indentation, profile.getValue());
 						}
 					}
 					if (!type.getTargetProfile().isEmpty())
@@ -469,7 +469,7 @@ public class ValidateDataLearningTest
 						for (CanonicalType targetProfile : type.getTargetProfile())
 						{
 							targetProfileDependencies.add(targetProfile.getValue());
-							logger.debug(indentation + "    TargetProfile: " + targetProfile.getValue());
+							logger.debug("{}    TargetProfile: {}", indentation, targetProfile.getValue());
 						}
 					}
 				}
