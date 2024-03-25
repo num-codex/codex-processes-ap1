@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -155,6 +156,7 @@ public class ReadData extends AbstractServiceDelegate
 				.collect(Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless().getValue(),
 						r -> "urn:uuid:" + UUID.randomUUID().toString()));
 
+
 		List<DomainResource> resourcesWithTemporaryReferences = fixReferences(resources, resourcesById, uuidsById);
 		List<BundleEntryComponent> entries = resourcesWithTemporaryReferences.stream().map(r ->
 		{
@@ -219,12 +221,20 @@ public class ReadData extends AbstractServiceDelegate
 					Observation::setEncounter);
 			fixReferences(o, uuidsById, "Observation.hasMember", Observation::hasHasMember, Observation::getHasMember,
 					Observation::setHasMember);
+			fixReference(o, uuidsById, "Observation.specimen", Observation::hasSpecimen, Observation::getSpecimen,
+					Observation::setSpecimen);
 		}
 		else if (resource instanceof Procedure p)
 		{
 			fixReference(p, uuidsById, "Procedure.encounter", Procedure::hasEncounter, Procedure::getEncounter,
 					Procedure::setEncounter);
 		}
+		else if (resource instanceof Specimen s)
+		{
+			fixReferences(s, uuidsById, "Specimen.parent", Specimen::hasParent, Specimen::getParent,
+					Specimen::setParent);
+		}
+
 
 		return resource;
 	}
@@ -247,6 +257,18 @@ public class ReadData extends AbstractServiceDelegate
 					.getReferenceElement_().hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 			{
 				logger.debug("Not removing empty reference at {} with data-absent-reason extension", path);
+			}
+			else if (!oldReference.getResource().isEmpty())
+			{
+				String internalId = "#" + UUID.randomUUID();
+				Reference fixedReference = new Reference(internalId);
+				IBaseResource oldContainedResource = clean((DomainResource) oldReference.getResource());
+				oldContainedResource.setId(internalId);
+				fixedReference.setResource(oldContainedResource);
+				setReference.apply(resource, fixedReference);
+				logger.debug(
+						"Replacing reference to contained resource at {} from resource {} with bundle temporary id in transport bundle",
+						path, getAbsoluteId(resource).getValue());
 			}
 			else
 			{
@@ -286,6 +308,18 @@ public class ReadData extends AbstractServiceDelegate
 					logger.debug("Not removing empty reference at {}[{}] with data-absent-reason extension", path, i);
 					fixedReferences.add(oldReference);
 				}
+				else if (!oldReference.getResource().isEmpty())
+				{
+					String internalId = "#" + UUID.randomUUID();
+					Reference fixedReference = new Reference(internalId);
+					IBaseResource oldContainedResource = clean((DomainResource) oldReference.getResource());
+					oldContainedResource.setId(internalId);
+					fixedReference.setResource(oldContainedResource);
+					fixedReferences.add(fixedReference);
+					logger.debug(
+							"Replacing reference to contained resource at {}[{}] from resource {} with bundle temporary id in transport bundle",
+							path, i, getAbsoluteId(resource).getValue());
+				}
 				else
 				{
 					logger.warn("Removing reference at {}[{}] from resource {} in transport bundle", path, i,
@@ -321,9 +355,10 @@ public class ReadData extends AbstractServiceDelegate
 							i, getAbsoluteId(resource).getValue());
 					setReference.apply(component, new Reference(uuidsById.get(oldReference.getReference())));
 				}
-				else if (oldReference.hasReference() && oldReference.getReference() == null
+				else if ((oldReference.hasReference() && oldReference.getReference() == null
 						&& oldReference.getReferenceElement_()
 								.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
+						|| oldReference.hasExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason"))
 				{
 					logger.debug("Not removing empty reference at " + path + " with data-absent-reason extension", i);
 				}
@@ -654,8 +689,17 @@ public class ReadData extends AbstractServiceDelegate
 		}
 		else if (resource instanceof Specimen s)
 		{
-			// todo
-
+			cleanUnsupportedReferences(s, "Specimen.request", Specimen::hasRequest, Specimen::setRequest);
+			cleanUnsupportedReferenceFromComponent(s, "Specimen.collection.collector", Specimen::hasCollection,
+					Specimen::getCollection, Specimen.SpecimenCollectionComponent::hasCollector,
+					Specimen.SpecimenCollectionComponent::setCollector);
+			cleanUnsupportedReferencesFromComponents(s, "Specimen.processing[{}].additive", Specimen::hasProcessing,
+					Specimen::getProcessing, Specimen.SpecimenProcessingComponent::hasAdditive,
+					Specimen.SpecimenProcessingComponent::setAdditive);
+			cleanUnsupportedReferenceFromComponents(s, "Specimen.container[{}].additiveReference",
+					Specimen::hasContainer, Specimen::getContainer,
+					Specimen.SpecimenContainerComponent::hasAdditiveReference,
+					Specimen.SpecimenContainerComponent::setAdditive);
 		}
 		else
 			throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
@@ -733,6 +777,8 @@ public class ReadData extends AbstractServiceDelegate
 			else
 				throw new RuntimeException("Resource of type " + resource.getResourceType().name() + " not supported");
 		}
+
+		((DomainResource) resource).getContained().forEach(r -> setSubjectOrIdentifier(r, pseudonym));
 
 		return resource;
 	}
