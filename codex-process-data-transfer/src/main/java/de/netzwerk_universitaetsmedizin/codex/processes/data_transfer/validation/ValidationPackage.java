@@ -163,8 +163,11 @@ public class ValidationPackage
 
 			try
 			{
-				IBaseResource resource = context.newJsonParser()
-						.parseResource(new String(entry.getContent(), StandardCharsets.UTF_8));
+				String resourceString = new String(entry.getContent(), StandardCharsets.UTF_8);
+				// fix profiles because their text contains invalid html
+				// Issue: https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/18
+				resourceString = resourceString.replaceAll("<h2>[\\s\\w\\[\\]]*</tt>", "");
+				IBaseResource resource = context.newJsonParser().parseResource(resourceString);
 
 				if (resource instanceof CodeSystem)
 					codeSystems.add((CodeSystem) resource);

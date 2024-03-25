@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 import dev.dsf.bpe.v1.constants.NamingSystems;
@@ -27,12 +27,14 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 	private static final Logger logger = LoggerFactory.getLogger(StoreDataForCrr.class);
 
 	private final String crrIdentifierValue;
+	private final DataLogger dataLogger;
 
-	public StoreDataForCrr(ProcessPluginApi api, String crrIdentifierValue)
+	public StoreDataForCrr(ProcessPluginApi api, String crrIdentifierValue, DataLogger dataLogger)
 	{
 		super(api);
 
 		this.crrIdentifierValue = crrIdentifierValue;
+		this.dataLogger = dataLogger;
 	}
 
 	@Override
@@ -41,6 +43,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(crrIdentifierValue, "crrIdentifierValue");
+		Objects.requireNonNull(dataLogger, "dataLogger");
 	}
 
 	@Override
@@ -72,7 +75,7 @@ public class StoreDataForCrr extends AbstractServiceDelegate
 		}
 		catch (Exception e)
 		{
-			logger.debug("Binary to create {}", FhirContext.forR4().newJsonParser().encodeResourceToString(binary));
+			dataLogger.logData("Binary to create", binary);
 			logger.warn("Error while creating Binary resource: " + e.getMessage(), e);
 
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_UNABLE_TO_STORE_ECRYPTED_DATA,

@@ -125,7 +125,7 @@ public class SendConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StoreDataForDts storeDataForDts()
 	{
-		return new StoreDataForDts(api, transferDataConfig.dtsIdentifierValue());
+		return new StoreDataForDts(api, transferDataConfig.dtsIdentifierValue(), transferDataConfig.dataLogger());
 	}
 
 	@Bean

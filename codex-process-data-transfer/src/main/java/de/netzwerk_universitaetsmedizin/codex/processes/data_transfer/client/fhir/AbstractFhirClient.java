@@ -653,6 +653,8 @@ public abstract class AbstractFhirClient implements DataStoreFhirClient
 		Objects.requireNonNull(patient, "patient");
 
 		String id = patient.getIdElement().toVersionless().getValue();
+		// set the patient id to versionless id to workaround a `If-Match`-header bug in hapi fhir client
+		patient.setId(id);
 		logger.info("Updating patient {}", id);
 
 		try

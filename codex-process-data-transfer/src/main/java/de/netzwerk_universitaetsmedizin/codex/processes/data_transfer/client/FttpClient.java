@@ -18,5 +18,7 @@ public interface FttpClient
 	 */
 	Optional<String> getDicPseudonym(String bloomFilter);
 
+	Optional<String> getDicPseudonymForLocalPseudonym(String localPseudonym);
+
 	void testConnection();
 }

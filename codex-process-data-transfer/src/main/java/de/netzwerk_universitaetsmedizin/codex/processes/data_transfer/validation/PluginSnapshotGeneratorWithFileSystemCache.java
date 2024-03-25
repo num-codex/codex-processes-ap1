@@ -105,7 +105,7 @@ public class PluginSnapshotGeneratorWithFileSystemCache
 
 		if (PublicationStatus.DRAFT.equals(snapshot.getSnapshot().getStatus()))
 		{
-			logger.info("Not writing StructureDefinition {}|{} with snapshot and status {} to cache",
+			logger.warn("Not writing StructureDefinition {}|{} with snapshot and status {} to cache",
 					snapshot.getSnapshot().getUrl(), snapshot.getSnapshot().getVersion(),
 					snapshot.getSnapshot().getStatus());
 			return snapshot;

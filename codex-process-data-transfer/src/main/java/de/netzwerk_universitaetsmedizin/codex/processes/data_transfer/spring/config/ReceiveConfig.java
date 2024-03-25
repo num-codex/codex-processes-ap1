@@ -84,7 +84,8 @@ public class ReceiveConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StoreValidationErrorForDts storeValidationErrorForDts()
 	{
-		return new StoreValidationErrorForDts(api, transferDataConfig.dtsIdentifierValue());
+		return new StoreValidationErrorForDts(api, transferDataConfig.dtsIdentifierValue(),
+				transferDataConfig.dataLogger());
 	}
 
 	@Bean

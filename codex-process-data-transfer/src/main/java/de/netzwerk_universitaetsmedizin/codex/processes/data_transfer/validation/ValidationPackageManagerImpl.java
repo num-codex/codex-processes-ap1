@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -367,8 +368,21 @@ public class ValidationPackageManagerImpl implements InitializingBean, Validatio
 				definitions.stream()
 						.filter(sd -> !sd.equals(diff) && !sd.getUrl().equals(diff.getBaseDefinition())
 								&& !(sd.getUrl() + "|" + sd.getVersion()).equals(diff.getBaseDefinition()))
-						.map(sd -> sd.getUrl() + "|" + sd.getVersion()).sorted()
+						.map(sd -> sd.getUrl() + "|" + sd.getVersion()).distinct().sorted()
 						.collect(Collectors.joining(", ", "[", "]")));
+
+		String dependenciesWithDifferentStatus = definitions.stream()
+				.filter(sd -> !sd.equals(diff) && !sd.getUrl().equals(diff.getBaseDefinition())
+						&& !(sd.getUrl() + "|" + sd.getVersion()).equals(diff.getBaseDefinition()))
+				.filter(sd -> !sd.getStatus().equals(diff.getStatus()))
+				.map(sd -> sd.getUrl() + "|" + sd.getVersion() + ": " + sd.getStatus().toCode()).distinct().sorted()
+				.collect(Collectors.joining(", "));
+
+		if (PublicationStatus.ACTIVE.equals(diff.getStatus()) && !dependenciesWithDifferentStatus.isEmpty())
+		{
+			logger.warn("StructureDefinition {}|{}, has dependencies with no active status [{}]", diff.getUrl(),
+					diff.getVersion(), dependenciesWithDifferentStatus);
+		}
 
 		definitions.stream().filter(sd -> sd.hasDifferential() && !sd.hasSnapshot()
 				&& !snapshots.containsKey(sd.getUrl() + "|" + sd.getVersion())).forEach(sd ->

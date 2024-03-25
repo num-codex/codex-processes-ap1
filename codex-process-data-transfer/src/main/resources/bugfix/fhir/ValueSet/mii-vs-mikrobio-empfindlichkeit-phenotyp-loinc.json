@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "url": "https://www.medizininformatik-initiative.de/fhir/modul-mikrobio/ValueSet/mii-vs-mikrobio-empfindlichkeit-phenotyp-loinc",
+  "title": "MII VS Mikrobio Empfindlichkeit Phenotyp [LOINC]",
+  "name": "MII_VS_Mikrobio_Empfindlichkeit_Phenotyp_LOINC",
+  "status": "active",
+  "version": "2024.0.0",
+  "compose": {
+    "include": [
+      {
+        "filter": [
+          {
+            "property": "CLASS",
+            "op": "=",
+            "value": "ABXBACT"
+          },
+          {
+            "property": "PROPERTY",
+            "value": "LP6870-2",
+            "op": "="
+          },
+          {
+            "property": "STATUS",
+            "value": "ACTIVE",
+            "op": "="
+          },
+          {
+            "property": "ORDER_OBS",
+            "value": "Observation",
+            "op": "="
+          }
+        ],
+        "system": "http://loinc.org"
+      }
+    ],
+    "exclude": [
+      {
+        "system": "http://loinc.org",
+        "filter": [
+          {
+            "property": "METHOD_TYP",
+            "value": "LP28723-2",
+            "op": "="
+          }
+        ]
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>MII VS Mikrobio Empfindlichkeit Phenotyp [LOINC]</h2><tt>https://www.medizininformatik-initiative.de/fhir/ext/modul-mikrobiologie/ValueSet/mii-vs-mikrobio-empfindlichkeit-phenotyp-loinc</tt></div>"
+  },
+  "id": "mii-vs-mikrobio-empfindlichkeit-phenotyp-loinc",
+  "date": "2023-03-02T00:00:00.000Z"
+}
