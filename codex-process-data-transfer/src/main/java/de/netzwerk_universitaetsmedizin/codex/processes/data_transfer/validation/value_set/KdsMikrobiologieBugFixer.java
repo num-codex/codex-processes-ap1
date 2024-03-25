@@ -6,9 +6,14 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
 
+/**
+ * Replace a few ValueSets from MII KDS Mikrobiologie module. This ValueSetModifier currently resolves the following
+ * issues: *
+ * <a href="https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/15">#15</a> *
+ * <a href="https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/16">#16</a>
+ */
 public class KdsMikrobiologieBugFixer implements ValueSetModifier
 {
-
 	private final Map<String, String> fixedValueSets = Map.of(
 			"https://www.medizininformatik-initiative.de/fhir/modul-mikrobio/ValueSet/mii-vs-mikrobio-empfindlichkeit-phenotyp-loinc",
 			"mii-vs-mikrobio-empfindlichkeit-phenotyp-loinc.json",
@@ -20,7 +25,6 @@ public class KdsMikrobiologieBugFixer implements ValueSetModifier
 	@Override
 	public ValueSet modifyPreExpansion(ValueSet vs)
 	{
-
 		if (vs.getUrl() != null && vs.getVersion() != null && vs.getVersion().equals("2024.0.0"))
 		{
 			String fileName = fixedValueSets.get(vs.getUrl());

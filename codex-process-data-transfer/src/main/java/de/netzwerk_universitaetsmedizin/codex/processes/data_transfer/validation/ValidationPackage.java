@@ -165,6 +165,7 @@ public class ValidationPackage
 			{
 				String resourceString = new String(entry.getContent(), StandardCharsets.UTF_8);
 				// fix profiles because their text contains invalid html
+				// Issue: https://github.com/medizininformatik-initiative/kerndatensatzmodul-mikrobiologie/issues/18
 				resourceString = resourceString.replaceAll("<h2>[\\s\\w\\[\\]]*</tt>", "");
 				IBaseResource resource = context.newJsonParser().parseResource(resourceString);
 
