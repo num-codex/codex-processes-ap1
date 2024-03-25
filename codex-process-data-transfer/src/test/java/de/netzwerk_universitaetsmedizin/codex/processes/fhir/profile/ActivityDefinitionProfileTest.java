@@ -8,7 +8,6 @@ import java.util.Arrays;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import dev.dsf.fhir.validation.ResourceValidator;
 import dev.dsf.fhir.validation.ResourceValidatorImpl;
 import dev.dsf.fhir.validation.ValidationSupportRule;
 
-@Ignore
 public class ActivityDefinitionProfileTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProfileTest.class);
