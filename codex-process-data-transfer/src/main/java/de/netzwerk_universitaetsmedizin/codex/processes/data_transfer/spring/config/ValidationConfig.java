@@ -54,7 +54,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
-import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.config.ProxyConfig;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.ValueSetExpander;
@@ -65,9 +65,6 @@ import jakarta.ws.rs.WebApplicationException;
 public class ValidationConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationConfig.class);
-
-	@Autowired
-	private ProcessPluginApi api;
 
 	public static enum TerminologyServerConnectionTestStatus
 	{
@@ -209,6 +206,9 @@ public class ValidationConfig
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	// not using process plugin api to enable reuse of this config class in stand-alone validator
+	@Autowired
+	private ProxyConfig proxyConfig;
 
 	@Bean
 	public ValidationPackageManager validationPackageManager()
@@ -376,11 +376,11 @@ public class ValidationConfig
 
 		String proxyUrl = null, proxyUsername = null;
 		char[] proxyPassword = null;
-		if (api.getProxyConfig().isEnabled() && !api.getProxyConfig().isNoProxyUrl(packageServerBaseUrl))
+		if (proxyConfig.isEnabled() && !proxyConfig.isNoProxyUrl(packageServerBaseUrl))
 		{
-			proxyUrl = api.getProxyConfig().getUrl();
-			proxyUsername = api.getProxyConfig().getUsername();
-			proxyPassword = api.getProxyConfig().getPassword() == null ? null : api.getProxyConfig().getPassword();
+			proxyUrl = proxyConfig.getUrl();
+			proxyUsername = proxyConfig.getUsername();
+			proxyPassword = proxyConfig.getPassword() == null ? null : proxyConfig.getPassword();
 		}
 
 		KeyStore packageClientTrustStore = trustStore("FHIR package client", packageClientTrustCertificates);
@@ -439,11 +439,11 @@ public class ValidationConfig
 
 		String proxyUrl = null, proxyUsername = null;
 		char[] proxyPassword = null;
-		if (api.getProxyConfig().isEnabled() && !api.getProxyConfig().isNoProxyUrl(valueSetExpansionServerBaseUrl))
+		if (proxyConfig.isEnabled() && !proxyConfig.isNoProxyUrl(valueSetExpansionServerBaseUrl))
 		{
-			proxyUrl = api.getProxyConfig().getUrl();
-			proxyUsername = api.getProxyConfig().getUsername();
-			proxyPassword = api.getProxyConfig().getPassword() == null ? null : api.getProxyConfig().getPassword();
+			proxyUrl = proxyConfig.getUrl();
+			proxyUsername = proxyConfig.getUsername();
+			proxyPassword = proxyConfig.getPassword() == null ? null : proxyConfig.getPassword();
 		}
 
 		KeyStore valueSetExpansionClientTrustStore = trustStore("ValueSet expansion client",

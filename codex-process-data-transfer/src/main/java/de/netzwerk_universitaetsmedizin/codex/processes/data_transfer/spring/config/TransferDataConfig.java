@@ -21,6 +21,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.error.Erro
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.ErrorLogger;
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.config.ProxyConfig;
 import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 @Configuration
@@ -366,5 +367,12 @@ public class TransferDataConfig
 	public ErrorLogger errorLogger()
 	{
 		return new ErrorLogger(api.getMailService(), sendValidationFailedMail, sendProcessFailedMail);
+	}
+
+	// for validation config
+	@Bean
+	public ProxyConfig proxyConfig()
+	{
+		return api.getProxyConfig();
 	}
 }

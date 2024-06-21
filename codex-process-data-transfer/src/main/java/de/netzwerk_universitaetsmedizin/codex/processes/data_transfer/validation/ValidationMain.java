@@ -1,6 +1,8 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.validation;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,6 +39,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.ValidationResult;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig.TerminologyServerConnectionTestStatus;
+import dev.dsf.bpe.v1.config.ProxyConfig;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
 
 public class ValidationMain implements InitializingBean
 {
@@ -73,6 +78,22 @@ public class ValidationMain implements InitializingBean
 		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.output.pretty:true}")
 		private boolean outputPretty;
 
+		@ProcessDocumentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
+		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.proxy.url:#{null}}")
+		private String proxyUrl;
+
+		@ProcessDocumentation(description = "Forward proxy username", recommendation = "Configure username if proxy requires authentication")
+		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.proxy.username:#{null}}")
+		private String proxyUsername;
+
+		@ProcessDocumentation(description = "Forward Proxy password", recommendation = "Configure password if proxy requires authentication, use docker secret file to configure using *${env_variable}_FILE*")
+		@Value("${de.netzwerk.universitaetsmedizin.rdp.validation.proxy.password:#{null}}")
+		private char[] proxyPassword;
+
+		@ProcessDocumentation(description = "Forward proxy no-proxy list, entries will match exactly or agianst (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+		@Value("#{'${de.netzwerk.universitaetsmedizin.rdp.validation.proxy.noProxy:}'.trim().split('(,[ ]?)|(\\n)')}")
+		private List<String> proxyNoProxy;
+
 		@Autowired
 		private ValidationPackageManager packageManager;
 
@@ -86,7 +107,7 @@ public class ValidationMain implements InitializingBean
 		private ConfigurableEnvironment environment;
 
 		@Bean
-		public ObjectMapper getObjectMapper()
+		public ObjectMapper objectMapper()
 		{
 			return JsonMapper.builder().serializationInclusion(Include.NON_NULL)
 					.serializationInclusion(Include.NON_EMPTY).disable(MapperFeature.AUTO_DETECT_CREATORS)
@@ -94,7 +115,7 @@ public class ValidationMain implements InitializingBean
 		}
 
 		@Bean
-		public FhirContext getFhirContext()
+		public FhirContext fhirContext()
 		{
 			FhirContext context = FhirContext.forR4();
 			HapiLocalizer localizer = new HapiLocalizer()
@@ -110,10 +131,90 @@ public class ValidationMain implements InitializingBean
 		}
 
 		@Bean
+		public ProxyConfig proxyConfig()
+		{
+			return new ProxyConfig()
+			{
+				@Override
+				public boolean isNoProxyUrl(String targetUrl)
+				{
+					if (proxyNoProxy.contains("*"))
+						return true;
+
+					if (targetUrl == null || targetUrl.isBlank())
+						return false;
+
+					try
+					{
+						URI u = new URI(targetUrl);
+
+						String host = u.getHost();
+						if (host == null)
+						{
+							logger.debug("Given targetUrl '{}' is malformed, no host value", targetUrl);
+							return false;
+						}
+
+						String subHost = Stream.of(u.getHost().split("\\.")).skip(1).collect(Collectors.joining("."));
+						int port = u.getPort() == -1 ? getDefaultPort(u.getScheme()) : u.getPort();
+
+						return proxyNoProxy.stream().anyMatch(s -> s.equals(host) || s.equals(host + ":" + port)
+								|| s.equals(subHost) || s.equals(subHost + ":" + port));
+					}
+					catch (URISyntaxException e)
+					{
+						logger.debug("Given targetUrl '{}' is malformed: {}", targetUrl, e.getMessage());
+						return false;
+					}
+				}
+
+				private int getDefaultPort(String scheme)
+				{
+					return switch (scheme)
+					{
+						case "http", "ws" -> 80;
+						case "https", "wss" -> 443;
+						default -> throw new IllegalArgumentException("Schema " + scheme + " not supported");
+					};
+				}
+
+				@Override
+				public boolean isEnabled()
+				{
+					return getUrl() != null;
+				}
+
+				@Override
+				public String getUsername()
+				{
+					return proxyUsername;
+				}
+
+				@Override
+				public String getUrl()
+				{
+					return proxyUrl;
+				}
+
+				@Override
+				public char[] getPassword()
+				{
+					return proxyPassword;
+				}
+
+				@Override
+				public List<String> getNoProxyUrls()
+				{
+					return proxyNoProxy;
+				}
+			};
+		}
+
+		@Bean
 		public ValidationMain validatorMain()
 		{
-			return new ValidationMain(environment, getFhirContext(), packageManager, validationPackageIdentifiers,
-					output, outputPretty, valueSetExpansionClient);
+			return new ValidationMain(environment, fhirContext(), packageManager, validationPackageIdentifiers, output,
+					outputPretty, valueSetExpansionClient);
 		}
 	}
 
