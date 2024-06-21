@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>6.0.11</version>
+			<version>6.1.6</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -181,7 +181,7 @@
 								commons-codec,commons-io,crypto-utils,jakarta.activation,jakarta.annotation-api,jakarta.ws.rs-api,jakarta.xml.bind-api,commons-compress,commons-lang3,commons-text,
 								httpclient,httpcore,log4j-api,log4j-core,log4j-slf4j2-impl,bcpkix-jdk18on,bcprov-jdk18on,bcutil-jdk18on,ucum,hk2-api,hk2-locator,hk2-utils,osgi-resource-locator,
 								aopalliance-repackaged,jakarta.inject-api,jersey-apache-connector,jersey-client,jersey-common,jersey-entity-filtering,jersey-hk2,jersey-media-jaxb,jersey-media-json-jackson,
-								dsf-bpe-process-api-v1,dsf-fhir-auth,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,
+								dsf-bpe-process-api-v1,dsf-fhir-auth,dsf-fhir-rest-adapter,dsf-fhir-validation,dsf-openehr-model,jcl-over-slf4j,jackson-module-jakarta-xmlbind-annotations,
 								slf4j-api,spring-aop,spring-beans,spring-context,spring-core,spring-expression,spring-jcl,thymeleaf,unbescape,xpp3,xpp3_xpath
 							</includeArtifactIds>
 						</configuration>
