@@ -15,7 +15,7 @@ Add entries to your hosts file
 
 *Start docker-compose commands from sub-folder:* `codex-processes-ap1/codex-processes-ap1-docker-test-setup`
 
-Console 1: Start DIC HAPI FHIR Server or DIC blaze FHIR Server
+Console 1: Start DIC HAPI FHIR Server and DIC blaze FHIR Server
 ```sh
 docker-compose up dic-fhir-store-hapi
 docker-compose up dic-fhir-store-blaze
