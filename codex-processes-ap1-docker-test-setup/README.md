@@ -9,53 +9,53 @@ mvn clean package
 Add entries to your hosts file
 ```
 127.0.0.1	dic
-127.0.0.1	gth
+127.0.0.1	dts
 127.0.0.1	crr
 ```
 
-*Start docker-compose commands from sub-folder:* `codex-processes-ap1/codex-processes-ap1-docker-test-setup`
+*Start docker compose commands from sub-folder:* `codex-processes-ap1/codex-processes-ap1-docker-test-setup`
 
 Console 1: Start DIC HAPI FHIR Server or DIC blaze FHIR Server
 ```sh
-docker-compose up dic-fhir-store-hapi
-docker-compose up dic-fhir-store-blaze
+docker compose up dic-fhir-store-hapi
+docker compose up dic-fhir-store-blaze
 ```
 Access at http://localhost:8080/fhir/
 
 Console 2: Start CRR fhir-bridge server
 ```sh
-docker-compose up crr-fhir-bridge
+docker compose up crr-fhir-bridge
 ```
 Access at http://localhost:8888/fhir-bridge/fhir/
 
 Console 3: Start DIC DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d dic-fhir && docker-compose logs -f dic-fhir
+docker compose up -d dic-fhir && docker compose logs -f dic-fhir
 ```
 Console 3: Disconnect from log output (Ctrl-C) if server started
 Console 3: Start DIC DSF BPE Server
 ```sh
-docker-compose up -d dic-bpe && docker-compose logs -f dic-fhir dic-bpe
+docker compose up -d dic-bpe && docker compose logs -f dic-fhir dic-bpe
 ````
 
 Console 4: Start GTH DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d gth-fhir && docker-compose logs -f gth-fhir
+docker compose up -d dts-fhir && docker compose logs -f dts-fhir
 ```
 Console 4: Disconnect from log output (Ctrl-C) if server started
 Console 4: Start GTH DSF BPE Server
 ```sh
-docker-compose up -d gth-bpe && docker-compose logs -f gth-fhir gth-bpe
+docker compose up -d dts-bpe && docker compose logs -f dts-fhir dts-bpe
 ````
 
 Console 5: Start CRR DSF FHIR Server and wait till started
 ```sh
-docker-compose up -d crr-fhir && docker-compose logs -f crr-fhir
+docker compose up -d crr-fhir && docker compose logs -f crr-fhir
 ```
 Console 5: Dicconnect from log output (Ctrl-C) if server started
 Console 5: Start CRR DSF BPE Server
 ```sh
-docker-compose up -d crr-bpe && docker-compose logs -f crr-fhir crr-bpe
+docker compose up -d crr-bpe && docker compose logs -f crr-fhir crr-bpe
 ````
 
 <!--
@@ -111,5 +111,5 @@ curl http://localhost:8888/fhir-bridge/fhir/Observation
 
 Console X: Stop everything
 ```sh
-docker-compose down -v
+docker compose down -v
 ```

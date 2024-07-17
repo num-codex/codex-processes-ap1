@@ -1,8 +1,8 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger|1.0"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-trigger|1.1"/>
    </meta>
-   <instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger|1.0"/>
+   <instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataTrigger|1.1"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2022-10-18T02:00:00+02:00"/>
@@ -31,7 +31,7 @@
       </type>
       <valueString value="startDataTrigger"/>
    </input>
-   <!-- optional date specifying what data is defined as 'new', if not defined 
+   <!-- optional date specifying what data is defined as 'new', if not defined
 		every resource is new and triggers the send process -->
    <!-- <input>
       <type>
