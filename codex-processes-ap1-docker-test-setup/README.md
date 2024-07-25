@@ -48,12 +48,17 @@ Console 4: Start GTH DSF BPE Server
 docker compose up -d dts-bpe && docker compose logs -f dts-fhir dts-bpe
 ````
 
-Console 5: Start CRR DSF FHIR Server and wait till started
+Console 5: Start CRR HAPI FHIR Server
+```sh
+docker compose up crr-fhir-store-hapi
+```
+
+Console 6: Start CRR DSF FHIR Server and wait till started
 ```sh
 docker compose up -d crr-fhir && docker compose logs -f crr-fhir
 ```
-Console 5: Dicconnect from log output (Ctrl-C) if server started
-Console 5: Start CRR DSF BPE Server
+Console 6: Dicconnect from log output (Ctrl-C) if server started
+Console 6: Start CRR DSF BPE Server
 ```sh
 docker compose up -d crr-bpe && docker compose logs -f crr-fhir crr-bpe
 ````
@@ -66,7 +71,7 @@ Webbrowser at http://localhost:8080/fhir/: Add Demo Data to DIC HAPI FHIR Server
 
 *Start curl commands from root-folder:* `codex-processes-ap1`
 
-Console 6: Execute Demo Transaction-Bundle for HAPI
+Console 7: Execute Demo Transaction-Bundle for HAPI
 ```sh
 curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
 -d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn.json \
@@ -79,7 +84,7 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" 
 http://localhost:8080/fhir
 ```
 
-Console 6: Execute Demo Transaction-Bundle for blaze
+Console 7: Execute Demo Transaction-Bundle for blaze
 ```sh
 curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" \
 -d @codex-process-data-transfer/src/test/resources/fhir/Bundle/dic_fhir_store_demo_psn_create.json \
@@ -92,7 +97,7 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+json" 
 http://localhost:8080/fhir
 ```
 
-Console 6: Start Data Trigger Process at DIC using the following command
+Console 7: Start Data Trigger Process at DIC using the following command
 ```sh
 curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+xml" \
 -d @codex-process-data-transfer/src/test/resources/fhir/Task/TaskStartDataTrigger.xml \
@@ -102,7 +107,7 @@ curl -H "Accept: application/xml+fhir" -H "Content-Type: application/fhir+xml" \
 https://dic/fhir/Task
 ```
 
-Console 6: Check data transfered to CRR fhir-bridge
+Console 7: Check data transfered to CRR fhir-bridge
 ```sh
 curl http://localhost:8888/fhir-bridge/fhir/Patient
 curl http://localhost:8888/fhir-bridge/fhir/Condition

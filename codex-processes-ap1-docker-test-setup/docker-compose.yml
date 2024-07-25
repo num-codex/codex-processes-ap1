@@ -191,7 +191,7 @@ services:
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PUBLIC_KEY: /run/secrets/crr_public_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store-hapi:8080/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
@@ -535,7 +535,7 @@ services:
     build: ./crr/hapi
     restart: "no"
     ports:
-      - 127.0.0.1:8888:8080
+      - 127.0.0.1:8889:8080
     environment:
       TZ: Europe/Berlin
       hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
