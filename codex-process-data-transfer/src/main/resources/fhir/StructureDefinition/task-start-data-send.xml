@@ -178,6 +178,40 @@
         <code value="boolean" />
       </type>
     </element>
+    <element id="Task.input:study-id">
+      <path value="Task.input" />
+      <sliceName value="study-id" />
+      <min value="0" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:study-id.type">
+      <path value="Task.input.type" />
+      <binding>
+        <strength value="required"/>
+        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer|#{version}" />
+      </binding>
+    </element>
+    <element id="Task.input:study-id.type.coding">
+      <path value="Task.input.type.coding"/>
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:study-id.type.coding.system">
+      <path value="Task.input.type.coding.system"/>
+      <min value="1"/>
+      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+    </element>
+    <element id="Task.input:study-id.type.coding.code">
+      <path value="Task.input.type.coding.code"/>
+      <min value="1"/>
+      <fixedCode value="study-id" />
+    </element>
+    <element id="Task.input:study-id.value[x]">
+      <path value="Task.input.value[x]"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
     <element id="Task.output:error">
       <path value="Task.output" />
       <sliceName value="error" />

@@ -51,7 +51,7 @@
 			</identifier>
 		</valueReference>
 	</input>
-	<!-- parameter specifying resources should be send stopping at the defined date, resources that have been modified after the specified date 
+	<!-- parameter specifying resources should be send stopping at the defined date, resources that have been modified after the specified date
 		will not be transmitted, typically this will be the current date time -->
 	<input>
 		<type>
@@ -62,7 +62,7 @@
 		</type>
 		<valueInstant value="2023-12-31T23:59:59+01:00" />
 	</input>
-	<!-- optional parameter specifying resources should be send starting at the defined date, resources older than the specified date will not be 
+	<!-- optional parameter specifying resources should be send starting at the defined date, resources older than the specified date will not be
 		transported -->
 	<input>
 		<type>
@@ -73,8 +73,8 @@
 		</type>
 		<valueDateTime value="2020-01-01T00:00:00+01:00" />
 	</input>
-	<!-- optional parameter enabling a dry run of the data-send process. Specifying the 'dry-run' parameter with value 'true' will result in the 
-		data-send process aborting before storing the encrypted transfer bundle in the local DSF FHIR server and sending a Task to start the data-translate 
+	<!-- optional parameter enabling a dry run of the data-send process. Specifying the 'dry-run' parameter with value 'true' will result in the
+		data-send process aborting before storing the encrypted transfer bundle in the local DSF FHIR server and sending a Task to start the data-translate
 		process to the DTS -->
 	<input>
 		<type>
@@ -84,5 +84,14 @@
 			</coding>
 		</type>
 		<valueBoolean value="false" />
+	</input>
+	<input>
+		<type>
+			<coding>
+				<system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+				<code value="study-id"/>
+			</coding>
+		</type>
+		<valueString value="numNum"/>
 	</input>
 </Task>

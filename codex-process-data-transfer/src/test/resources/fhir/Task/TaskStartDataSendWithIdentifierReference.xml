@@ -86,4 +86,13 @@
       </type>
       <valueBoolean value="true"/>
    </input> -->
+   <input>
+      <type>
+         <coding>
+            <system value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
+            <code value="study-id"/>
+         </coding>
+      </type>
+      <valueString value="numNum"/>
+   </input>
 </Task>
