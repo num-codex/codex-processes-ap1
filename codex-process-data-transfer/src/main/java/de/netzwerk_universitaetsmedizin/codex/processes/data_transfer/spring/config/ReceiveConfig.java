@@ -1,6 +1,13 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +26,54 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.re
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogValidationError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForDts;
 import dev.dsf.bpe.v1.ProcessPluginApi;
+import dev.dsf.bpe.v1.documentation.ProcessDocumentation;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class ReceiveConfig
 {
+	private static final Logger logger = LoggerFactory.getLogger(ReceiveConfig.class);
+	public static final String INVALID_CONFIG_MESSAGE = "Invalid Client Config, incorrect key value pair, key = '{}'";
+	public static final String VALID_CONFIG_MESSAGE = "Client Config found: {}";
+	public static final String CLIENT_SEPARATOR = ",";
+	public static final String KEY_VALUE_SEPARATOR = "=";
+
 	@Autowired
 	private ProcessPluginApi api;
 
 	@Autowired
 	private TransferDataConfig transferDataConfig;
+
+	@ProcessDocumentation(description = "A Test Value", processNames = "wwwnetzwerk-universitaetsmedizinde_receive")
+	@Value("${de.netzwerk.universitaetsmedizin.rdp.client.map:#{null}}")
+	private String clientConfig;
+
+	private Map<String, String> clientConfigMap;
+
+	@PostConstruct
+	private void convertConfigValues()
+	{
+		if (clientConfig == null)
+		{
+			clientConfigMap = Collections.emptyMap();
+			return;
+		}
+
+		clientConfigMap = new HashMap<>();
+		String[] configList = clientConfig.split(CLIENT_SEPARATOR);
+		for (String config : configList)
+		{
+			String[] configEntrySet = config.split(KEY_VALUE_SEPARATOR);
+			if (configEntrySet.length % 2 != 0)
+			{
+				logger.warn(INVALID_CONFIG_MESSAGE, configEntrySet[0]);
+				continue;
+			}
+			clientConfigMap.put(configEntrySet[0].trim(), configEntrySet[1].trim());
+		}
+		logger.info(VALID_CONFIG_MESSAGE, clientConfigMap.keySet());
+		logger.debug(VALID_CONFIG_MESSAGE, clientConfigMap);
+	}
 
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -44,11 +90,11 @@ public class ReceiveConfig
 	}
 
 	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	@Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
 		return new InsertDataIntoCodex(api, transferDataConfig.dataStoreClientFactory(),
-				transferDataConfig.dataLogger());
+				transferDataConfig.dataLogger(), api.getFhirContext(), getClientConfigMap());
 	}
 
 	@Bean
@@ -115,5 +161,12 @@ public class ReceiveConfig
 	public LogError logError()
 	{
 		return new LogError(api, transferDataConfig.errorOutputParameterGenerator(), transferDataConfig.errorLogger());
+	}
+
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+	public Map<String, String> getClientConfigMap()
+	{
+		return clientConfigMap;
 	}
 }

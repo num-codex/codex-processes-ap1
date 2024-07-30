@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   proxy:
     image: nginx:1.21
@@ -473,6 +472,7 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CLIENT_MAP: 'num=http://crr-fhir-store-hapi:8080/fhir, restPrincipe=http://crr-fhir-store-hapi-2:8080/fhir'
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
@@ -481,6 +481,7 @@ services:
       - db
       - crr-fhir
       - mailhog
+      # - crr-fhir-store-hapi
       # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
     image: ehrbase/ehrbase-postgres

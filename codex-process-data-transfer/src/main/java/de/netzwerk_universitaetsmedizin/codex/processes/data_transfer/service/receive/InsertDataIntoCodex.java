@@ -4,14 +4,16 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED;
 
-import java.util.Objects;
+import java.util.*;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
@@ -26,13 +28,18 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 
 	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
+	private final FhirContext fhirContext;
+	private final Map<String, String> clientMap;
 
-	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger)
+	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger,
+			FhirContext fhirContext, Map<String, String> clientConfig)
 	{
 		super(api);
 
 		this.dataClientFactory = dataClientFactory;
 		this.dataLogger = dataLogger;
+		this.fhirContext = fhirContext;
+		this.clientMap = clientConfig;
 	}
 
 	@Override
@@ -53,7 +60,9 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		{
 			try
 			{
-				logger.info("Executing bundle against FHIR store ...");
+				logger.info("Executing bundle against FHIR store ... {}", asString(variables.getStartTask()));
+				logger.info("Client filter Map {}", clientMap);
+				logger.info("Client filter keySet {}", clientMap.keySet());
 				dataLogger.logData("Received bundle", bundle);
 
 				dataClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
@@ -73,5 +82,10 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED,
 					"Unable to insert data into CRR");
 		}
+	}
+
+	private String asString(Resource resource)
+	{
+		return fhirContext.newJsonParser().encodeResourceToString(resource);
 	}
 }
