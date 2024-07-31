@@ -1,15 +1,15 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BUNDLE;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.*;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,6 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Dat
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.RdpCrrConfig;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 import dev.dsf.bpe.v1.variables.Variables;
@@ -30,17 +29,15 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
 	private final FhirContext fhirContext;
-	private final Map<String, RdpCrrConfig.RdpClientConfigValues> clientMap;
 
 	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger,
-			FhirContext fhirContext, Map<String, RdpCrrConfig.RdpClientConfigValues> clientConfig)
+			FhirContext fhirContext)
 	{
 		super(api);
 
 		this.dataClientFactory = dataClientFactory;
 		this.dataLogger = dataLogger;
 		this.fhirContext = fhirContext;
-		this.clientMap = clientConfig;
 	}
 
 	@Override
@@ -61,12 +58,17 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		{
 			try
 			{
-				logger.info("Executing bundle against FHIR store ... {}", asString(variables.getStartTask()));
-				logger.info("Client filter Map {}", clientMap);
-				logger.info("Client filter keySet {}", clientMap.keySet());
+
+				String studyId = getStudyId(variables.getStartTask());
+				if (studyId.isEmpty())
+				{
+					logger.error("Unable to receive, studyId is empty");
+					throw new RuntimeException("study-Id is empty");
+				}
+				logger.info("Executing bundle against FHIR store ... {}", studyId);
 				dataLogger.logData("Received bundle", bundle);
 
-				dataClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
+				dataClientFactory.getDataStoreClient(studyId).getFhirClient().storeBundle(bundle);
 
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 			}
@@ -88,5 +90,18 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	private String asString(Resource resource)
 	{
 		return fhirContext.newJsonParser().encodeResourceToString(resource);
+	}
+
+	private String getStudyId(Task task)
+	{
+		for (Task.ParameterComponent input : task.getInput())
+		{
+			if (input.getType().getCodingFirstRep().getCode().equals("study-id"))
+			{
+				return input.getValue().toString();
+			}
+		}
+
+		return "";
 	}
 }

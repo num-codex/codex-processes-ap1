@@ -1,9 +1,9 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import java.util.Collections;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @PropertySource(ignoreResourceNotFound = true, value = "file:process/rdp-application.properties")
@@ -35,6 +38,7 @@ public class RdpCrrConfig
 	{
 		if (rdpClientMapProperty == null || rdpClientMapProperty.isEmpty())
 		{
+			rdpClientConfigValues = new HashMap<>();
 			return;
 		}
 
@@ -49,7 +53,7 @@ public class RdpCrrConfig
 		catch (JsonProcessingException e)
 		{
 			logger.error(INVALID_CONFIG_MESSAGE);
-			rdpClientConfigValues = Collections.emptyMap();
+			rdpClientConfigValues = new HashMap<>();
 			throw new RuntimeException(INVALID_CONFIG_MESSAGE, e);
 		}
 	}
@@ -66,6 +70,18 @@ public class RdpCrrConfig
 		private String username;
 		private String password;
 		private String bearerToken;
+
+		public RdpClientConfigValues()
+		{
+		}
+
+		public RdpClientConfigValues(String baseUrl, String username, String password, String bearerToken)
+		{
+			this.baseUrl = baseUrl;
+			this.username = username;
+			this.password = password;
+			this.bearerToken = bearerToken;
+		}
 
 		public String getBaseUrl()
 		{

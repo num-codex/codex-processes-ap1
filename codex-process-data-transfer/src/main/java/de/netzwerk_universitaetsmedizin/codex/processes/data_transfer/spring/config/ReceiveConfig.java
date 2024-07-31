@@ -22,9 +22,6 @@ public class ReceiveConfig
 	@Autowired
 	private TransferDataConfig transferDataConfig;
 
-	@Autowired
-	private RdpCrrConfig rdpCrrConfig;
-
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public DownloadDataFromDts downloadDataFromDts()
@@ -44,7 +41,7 @@ public class ReceiveConfig
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
 		return new InsertDataIntoCodex(api, transferDataConfig.dataStoreClientFactory(),
-				transferDataConfig.dataLogger(), api.getFhirContext(), rdpCrrConfig.getRdpClientMap());
+				transferDataConfig.dataLogger(), api.getFhirContext());
 	}
 
 	@Bean

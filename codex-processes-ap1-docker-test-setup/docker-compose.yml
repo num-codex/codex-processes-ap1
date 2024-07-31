@@ -541,6 +541,16 @@ services:
       hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
     networks:
       - crr-bpe-backend
+  crr-fhir-store-hapi-2:
+    build: ./crr/hapi
+    restart: "no"
+    ports:
+      - 127.0.0.1:8890:8080
+    environment:
+      TZ: Europe/Berlin
+      hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
+    networks:
+      - crr-bpe-backend
 
 
 secrets:
