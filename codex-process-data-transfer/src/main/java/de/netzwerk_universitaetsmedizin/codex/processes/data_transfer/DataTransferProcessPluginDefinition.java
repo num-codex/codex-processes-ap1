@@ -5,14 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ProcessPluginDeploymentConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ReceiveConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.SendConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TransferDataSerializerConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TranslateConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.TriggerConfig;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ValidationConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.*;
 import dev.dsf.bpe.v1.ProcessPluginDefinition;
 
 public class DataTransferProcessPluginDefinition implements ProcessPluginDefinition
@@ -48,7 +41,7 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	public List<Class<?>> getSpringConfigurations()
 	{
 		return List.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class,
-				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class,
+				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class, RdpCrrConfig.class,
 				ProcessPluginDeploymentConfig.class);
 	}
 

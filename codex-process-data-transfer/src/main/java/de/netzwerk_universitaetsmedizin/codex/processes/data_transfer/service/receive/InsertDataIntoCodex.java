@@ -18,6 +18,7 @@ import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.Dat
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.RdpCrrConfig;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
 import dev.dsf.bpe.v1.variables.Variables;
@@ -29,10 +30,10 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
 	private final FhirContext fhirContext;
-	private final Map<String, String> clientMap;
+	private final Map<String, RdpCrrConfig.RdpClientConfigValues> clientMap;
 
 	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger,
-			FhirContext fhirContext, Map<String, String> clientConfig)
+			FhirContext fhirContext, Map<String, RdpCrrConfig.RdpClientConfigValues> clientConfig)
 	{
 		super(api);
 

@@ -56,8 +56,6 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 				.get();
 		String endpointAddress = endpoint.getAddress();
 
-		logger.info("HIER =====> {}", asString(variables.getStartTask()));
-
 		Target target = variables.createTarget(crrIdentifierValue, endpointIdentifierValue, endpointAddress);
 		variables.setTarget(target);
 

@@ -57,8 +57,6 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 				.get();
 		String endpointAddress = endpoint.getAddress();
 
-		logger.info("HIER =====> {}", asString(variables.getStartTask()));
-
 		Target target = variables.createTarget(dtsIdentifierValue, endpointIdentifierValue, endpointAddress);
 		variables.setTarget(target);
 

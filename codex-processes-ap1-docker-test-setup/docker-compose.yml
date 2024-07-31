@@ -472,7 +472,6 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CLIENT_MAP: 'numNum=http://crr-fhir-store-hapi:8080/fhir, restPrincipe=http://crr-fhir-store-hapi-2:8080/fhir'
     networks:
       crr-bpe-frontend:
       crr-bpe-backend:
