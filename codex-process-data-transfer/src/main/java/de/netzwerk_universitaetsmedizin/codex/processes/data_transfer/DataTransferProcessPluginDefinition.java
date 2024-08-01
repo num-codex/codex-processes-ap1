@@ -41,8 +41,8 @@ public class DataTransferProcessPluginDefinition implements ProcessPluginDefinit
 	public List<Class<?>> getSpringConfigurations()
 	{
 		return List.of(TransferDataConfig.class, TransferDataSerializerConfig.class, ValidationConfig.class,
-				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class, RdpCrrConfig.class,
-				ProcessPluginDeploymentConfig.class);
+				TriggerConfig.class, SendConfig.class, TranslateConfig.class, ReceiveConfig.class,
+				ReceiveDataStoreConfig.class, ProcessPluginDeploymentConfig.class);
 	}
 
 	@Override

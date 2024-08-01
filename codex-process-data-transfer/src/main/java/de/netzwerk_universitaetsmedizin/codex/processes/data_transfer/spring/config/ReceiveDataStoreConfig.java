@@ -1,6 +1,5 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,62 +19,60 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 @PropertySource(ignoreResourceNotFound = true, value = "file:process/rdp-application.properties")
-public class RdpCrrConfig
+public class ReceiveDataStoreConfig
 {
-	private static final Logger logger = LoggerFactory.getLogger(RdpCrrConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReceiveDataStoreConfig.class);
 	public static final String INVALID_CONFIG_MESSAGE = "Invalid Client Config map";
 	public static final String VALID_CONFIG_MESSAGE = "Client Config found: {}";
 
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Value("${rpdClient:#{null}}")
-	private String rdpClientMapProperty;
-	private Map<String, RdpClientConfigValues> rdpClientConfigValues;
+	@Value("${dataStores:#{null}}")
+	private String dataStoresProperty;
+	private Map<String, DataStoreConnectionValues> dataStoreConnectionConfigs = new HashMap<>();;
 
 	@PostConstruct
 	private void convertClientMap()
 	{
-		if (rdpClientMapProperty == null || rdpClientMapProperty.isEmpty())
+		if (dataStoresProperty == null || dataStoresProperty.isEmpty())
 		{
-			rdpClientConfigValues = new HashMap<>();
 			return;
 		}
 
 		try
 		{
-			rdpClientConfigValues = objectMapper.readValue(rdpClientMapProperty, new TypeReference<>()
+			dataStoreConnectionConfigs = objectMapper.readValue(dataStoresProperty, new TypeReference<>()
 			{
 			});
 
-			logger.info(VALID_CONFIG_MESSAGE, rdpClientConfigValues.keySet());
+			logger.info(VALID_CONFIG_MESSAGE, dataStoreConnectionConfigs.keySet());
 		}
 		catch (JsonProcessingException e)
 		{
 			logger.error(INVALID_CONFIG_MESSAGE);
-			rdpClientConfigValues = new HashMap<>();
 			throw new RuntimeException(INVALID_CONFIG_MESSAGE, e);
 		}
 	}
 
 	@Bean
-	public Map<String, RdpClientConfigValues> getRdpClientMap()
+	public Map<String, DataStoreConnectionValues> getDataStoreConnectionConfigs()
 	{
-		return rdpClientConfigValues;
+		return dataStoreConnectionConfigs;
 	}
 
-	public static class RdpClientConfigValues
+	public static class DataStoreConnectionValues
 	{
 		private String baseUrl;
 		private String username;
 		private String password;
 		private String bearerToken;
 
-		public RdpClientConfigValues()
+		public DataStoreConnectionValues()
 		{
 		}
 
-		public RdpClientConfigValues(String baseUrl, String username, String password, String bearerToken)
+		public DataStoreConnectionValues(String baseUrl, String username, String password, String bearerToken)
 		{
 			this.baseUrl = baseUrl;
 			this.username = username;

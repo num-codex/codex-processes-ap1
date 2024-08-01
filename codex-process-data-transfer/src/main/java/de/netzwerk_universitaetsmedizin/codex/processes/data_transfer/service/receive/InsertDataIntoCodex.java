@@ -2,18 +2,15 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.r
 
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.*;
 
-import java.util.Map;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
@@ -28,16 +25,13 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 
 	private final DataStoreClientFactory dataClientFactory;
 	private final DataLogger dataLogger;
-	private final FhirContext fhirContext;
 
-	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger,
-			FhirContext fhirContext)
+	public InsertDataIntoCodex(ProcessPluginApi api, DataStoreClientFactory dataClientFactory, DataLogger dataLogger)
 	{
 		super(api);
 
 		this.dataClientFactory = dataClientFactory;
 		this.dataLogger = dataLogger;
-		this.fhirContext = fhirContext;
 	}
 
 	@Override
@@ -54,18 +48,18 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 	{
 		Bundle bundle = variables.getResource(BPMN_EXECUTION_VARIABLE_BUNDLE);
 
+		String studyId = getStudyId(variables.getStartTask());
+		if (studyId == null || studyId.isEmpty())
+		{
+			logger.error("Unable to receive, {} is empty", CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID);
+			throw new RuntimeException(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID + " is empty");
+		}
+
 		try
 		{
 			try
 			{
-
-				String studyId = getStudyId(variables.getStartTask());
-				if (studyId.isEmpty())
-				{
-					logger.error("Unable to receive, studyId is empty");
-					throw new RuntimeException("study-Id is empty");
-				}
-				logger.info("Executing bundle against FHIR store ... {}", studyId);
+				logger.info("Executing bundle against FHIR store '{}'", studyId);
 				dataLogger.logData("Received bundle", bundle);
 
 				dataClientFactory.getDataStoreClient(studyId).getFhirClient().storeBundle(bundle);
@@ -87,16 +81,11 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		}
 	}
 
-	private String asString(Resource resource)
-	{
-		return fhirContext.newJsonParser().encodeResourceToString(resource);
-	}
-
 	private String getStudyId(Task task)
 	{
 		for (Task.ParameterComponent input : task.getInput())
 		{
-			if (input.getType().getCodingFirstRep().getCode().equals("study-id"))
+			if (input.getType().getCodingFirstRep().getCode().equals(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID))
 			{
 				return input.getValue().toString();
 			}

@@ -29,14 +29,11 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 
 	private final String crrIdentifierValue;
 
-	private final FhirContext fhirContext;
-
-	public StartReceiveProcess(ProcessPluginApi api, String crrIdentifierValue, FhirContext fhirContext)
+	public StartReceiveProcess(ProcessPluginApi api, String crrIdentifierValue)
 	{
 		super(api);
 
 		this.crrIdentifierValue = crrIdentifierValue;
-		this.fhirContext = fhirContext;
 	}
 
 	@Override
@@ -60,11 +57,6 @@ public class StartReceiveProcess extends AbstractTaskMessageSend
 		variables.setTarget(target);
 
 		super.doExecute(execution, variables);
-	}
-
-	private String asString(Resource resource)
-	{
-		return fhirContext.newJsonParser().encodeResourceToString(resource);
 	}
 
 	@Override

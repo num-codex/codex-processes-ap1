@@ -15,7 +15,6 @@ import dev.dsf.bpe.v1.ProcessPluginApi;
 @Configuration
 public class ReceiveConfig
 {
-
 	@Autowired
 	private ProcessPluginApi api;
 
@@ -37,11 +36,11 @@ public class ReceiveConfig
 	}
 
 	@Bean
-	@Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public InsertDataIntoCodex insertDataIntoCodex()
 	{
 		return new InsertDataIntoCodex(api, transferDataConfig.dataStoreClientFactory(),
-				transferDataConfig.dataLogger(), api.getFhirContext());
+				transferDataConfig.dataLogger());
 	}
 
 	@Bean

@@ -59,7 +59,7 @@ public class TranslateConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StartReceiveProcess startReceiveProcess()
 	{
-		return new StartReceiveProcess(api, transferDataConfig.crrIdentifierValue(), api.getFhirContext());
+		return new StartReceiveProcess(api, transferDataConfig.crrIdentifierValue());
 	}
 
 	@Bean(name = "Translate-setTimeoutError") // prefix to force distinct bean names

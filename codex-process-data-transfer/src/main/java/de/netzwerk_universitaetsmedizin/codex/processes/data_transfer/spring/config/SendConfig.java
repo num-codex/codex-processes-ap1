@@ -132,7 +132,7 @@ public class SendConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public StartTranslateProcess startTranslateProcess()
 	{
-		return new StartTranslateProcess(api, transferDataConfig.dtsIdentifierValue(), api.getFhirContext());
+		return new StartTranslateProcess(api, transferDataConfig.dtsIdentifierValue());
 	}
 
 	@Bean(name = "Send-setTimeoutError") // prefix to force distinct bean names

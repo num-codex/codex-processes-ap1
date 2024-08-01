@@ -21,7 +21,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClientStub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.RdpCrrConfig;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ReceiveDataStoreConfig;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
@@ -94,7 +94,7 @@ public class DataStoreClientFactory
 	private final int socketTimeout;
 	private final int connectionRequestTimeout;
 
-	private final Map<String, RdpCrrConfig.RdpClientConfigValues> clientConfigMap;
+	private final Map<String, ReceiveDataStoreConfig.DataStoreConnectionValues> dataStoreConnectionMap;
 
 	private final String proxyUrl;
 	private final String proxyUsername;
@@ -113,10 +113,10 @@ public class DataStoreClientFactory
 			char[] privateKeyPassword, int connectTimeout, int socketTimeout, int connectionRequestTimeout,
 			String dataStoreServerBase, String dataStoreServerBasicAuthUsername,
 			String dataStoreServerBasicAuthPassword, String dataStoreServerBearerToken,
-			Map<String, RdpCrrConfig.RdpClientConfigValues> clientConfigMap, String proxyUrl, String proxyUsername,
-			String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext, Path searchBundleOverride,
-			Class<DataStoreFhirClient> dataStoreFhirClientClass, boolean useChainedParameterNotLogicalReference,
-			DataLogger dataLogger)
+			Map<String, ReceiveDataStoreConfig.DataStoreConnectionValues> dataStoreConnectionMap, String proxyUrl,
+			String proxyUsername, String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext,
+			Path searchBundleOverride, Class<DataStoreFhirClient> dataStoreFhirClientClass,
+			boolean useChainedParameterNotLogicalReference, DataLogger dataLogger)
 	{
 		this.trustStorePath = trustStorePath;
 		this.certificatePath = certificatePath;
@@ -127,9 +127,11 @@ public class DataStoreClientFactory
 		this.socketTimeout = socketTimeout;
 		this.connectionRequestTimeout = connectionRequestTimeout;
 
-		this.clientConfigMap = clientConfigMap;
-		this.clientConfigMap.put(DEFAULT_DATA_STORE, new RdpCrrConfig.RdpClientConfigValues(dataStoreServerBase,
-				dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword, dataStoreServerBearerToken));
+		this.dataStoreConnectionMap = dataStoreConnectionMap;
+		this.dataStoreConnectionMap.put(DEFAULT_DATA_STORE,
+				new ReceiveDataStoreConfig.DataStoreConnectionValues(dataStoreServerBase,
+						dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword,
+						dataStoreServerBearerToken));
 
 		this.proxyUrl = proxyUrl;
 		this.proxyUsername = proxyUsername;
@@ -146,22 +148,22 @@ public class DataStoreClientFactory
 
 	public String getServerBase()
 	{
-		return clientConfigMap.get(DEFAULT_DATA_STORE).getBaseUrl();
+		return dataStoreConnectionMap.get(DEFAULT_DATA_STORE).getBaseUrl();
 	}
 
 	public void testConnection()
 	{
 		try
 		{
-			for (String client : clientConfigMap.keySet())
+			for (String client : dataStoreConnectionMap.keySet())
 			{
-				final RdpCrrConfig.RdpClientConfigValues value = clientConfigMap.get(client);
+				final ReceiveDataStoreConfig.DataStoreConnectionValues value = dataStoreConnectionMap.get(client);
 				logger.info(
 						"Testing connection to Data Store FHIR server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
 								+ " basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
 						trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
-						value.getUsername(), value.getPassword() != null ? "***" : "null",
-						value.getBearerToken() != null ? "***" : "null", value.getBaseUrl());
+						value.getBaseUrl(), value.getPassword() != null ? "***" : "null",
+						value.getBearerToken() != null ? "***" : "null", value.getUsername());
 
 				getDataStoreClient(client).testConnection();
 			}
@@ -187,7 +189,8 @@ public class DataStoreClientFactory
 
 	private boolean configured(String client)
 	{
-		return clientConfigMap.get(client).getBaseUrl() != null && !clientConfigMap.get(client).getBaseUrl().isBlank();
+		return dataStoreConnectionMap.get(client).getBaseUrl() != null
+				&& !dataStoreConnectionMap.get(client).getBaseUrl().isBlank();
 	}
 
 	protected DataStoreClient createDataStoreClient()
@@ -195,7 +198,7 @@ public class DataStoreClientFactory
 		return createDataStoreClient(DEFAULT_DATA_STORE);
 	}
 
-	protected DataStoreClient createDataStoreClient(String client)
+	protected DataStoreClient createDataStoreClient(String dataStore)
 	{
 		KeyStore trustStore = null;
 		char[] keyStorePassword = null;
@@ -214,12 +217,13 @@ public class DataStoreClientFactory
 			keyStore = readKeyStore(certificatePath, privateKeyPath, privateKeyPassword, keyStorePassword);
 		}
 
-		final RdpCrrConfig.RdpClientConfigValues value = clientConfigMap.get(client);
+		final ReceiveDataStoreConfig.DataStoreConnectionValues dataStoreConfig = dataStoreConnectionMap.get(dataStore);
 
 		return new DataStoreClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
-				connectionRequestTimeout, value.getUsername(), value.getPassword(), value.getBearerToken(),
-				value.getBaseUrl(), proxyUrl, proxyUsername, proxyPassword, hapiClientVerbose, fhirContext,
-				searchBundleOverride, dataStoreFhirClientClass, useChainedParameterNotLogicalReference, dataLogger);
+				connectionRequestTimeout, dataStoreConfig.getUsername(), dataStoreConfig.getPassword(),
+				dataStoreConfig.getBearerToken(), dataStoreConfig.getBaseUrl(), proxyUrl, proxyUsername, proxyPassword,
+				hapiClientVerbose, fhirContext, searchBundleOverride, dataStoreFhirClientClass,
+				useChainedParameterNotLogicalReference, dataLogger);
 	}
 
 	private KeyStore readTrustStore(Path trustPath)

@@ -30,7 +30,7 @@ public class TransferDataConfig
 	private ProcessPluginApi api;
 
 	@Autowired
-	private RdpCrrConfig rdpCrrConfig;
+	private ReceiveDataStoreConfig receiveDataStoreConfig;
 
 	@ProcessDocumentation(description = "PEM encoded file with trusted certificates to validate the server-certificate of the data FHIR server", processNames = {
 			"wwwnetzwerk-universitaetsmedizinde_dataSend",
@@ -321,9 +321,9 @@ public class TransferDataConfig
 			return new DataStoreClientFactory(trustStorePath, certificatePath, privateKeyPath,
 					fhirStorePrivateKeyPassword, fhirStoreConnectTimeout, fhirStoreSocketTimeout,
 					fhirStoreConnectionRequestTimeout, fhirStoreBaseUrl, fhirStoreUsername, fhirStorePassword,
-					fhirStoreBearerToken, rdpCrrConfig.getRdpClientMap(), proxyUrl, proxyUsername, proxyPassword,
-					fhirStoreHapiClientVerbose, api.getFhirContext(), searchBundleOverride,
-					(Class<DataStoreFhirClient>) Class.forName(fhirStoreClientClass),
+					fhirStoreBearerToken, receiveDataStoreConfig.getDataStoreConnectionConfigs(), proxyUrl,
+					proxyUsername, proxyPassword, fhirStoreHapiClientVerbose, api.getFhirContext(),
+					searchBundleOverride, (Class<DataStoreFhirClient>) Class.forName(fhirStoreClientClass),
 					fhirStoreUseChainedParameterNotLogicalReference, dataLogger());
 		}
 		catch (ClassNotFoundException e)

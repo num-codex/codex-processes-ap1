@@ -30,14 +30,11 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 
 	private final String dtsIdentifierValue;
 
-	private final FhirContext fhirContext;
-
-	public StartTranslateProcess(ProcessPluginApi api, String dtsIdentifierValue, FhirContext fhirContext)
+	public StartTranslateProcess(ProcessPluginApi api, String dtsIdentifierValue)
 	{
 		super(api);
 
 		this.dtsIdentifierValue = dtsIdentifierValue;
-		this.fhirContext = fhirContext;
 	}
 
 	@Override
@@ -61,11 +58,6 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 		variables.setTarget(target);
 
 		super.doExecute(execution, variables);
-	}
-
-	private String asString(Resource resource)
-	{
-		return fhirContext.newJsonParser().encodeResourceToString(resource);
 	}
 
 	@Override
