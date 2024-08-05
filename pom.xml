@@ -93,7 +93,7 @@
 				<artifactId>hapi-fhir-validation</artifactId>
 				<version>${hapi.version}</version>
 			</dependency>
-			
+
 			<!-- managing out-dated dependencies from hapi fhir -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -131,7 +131,7 @@
 				<artifactId>crypto-utils</artifactId>
 				<version>3.8.0</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
@@ -156,6 +156,12 @@
 			    <groupId>org.mockito</groupId>
 			    <artifactId>mockito-core</artifactId>
 			    <version>4.8.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>5.12.0</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -197,7 +203,7 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId> 
+					<artifactId>maven-shade-plugin</artifactId>
 					<version>3.5.1</version>
 				</plugin>
 				<plugin>
@@ -268,8 +274,8 @@
 	</build>
 
 	<distributionManagement>
-		<!-- for deployment to GitHub Packages the id must be 'github', if not 
-			the deployment fails with a 401 error; repository also used for snapshots 
+		<!-- for deployment to GitHub Packages the id must be 'github', if not
+			the deployment fails with a 401 error; repository also used for snapshots
 			if no snapshotRepository defined -->
 		<repository>
 			<id>github</id>

@@ -3,6 +3,7 @@ package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.r
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.*;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -11,12 +12,14 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.DataStoreClientFactory;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.ValidationException;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.ContinueStatus;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractServiceDelegate;
+import dev.dsf.bpe.v1.service.TaskHelper;
 import dev.dsf.bpe.v1.variables.Variables;
 
 public class InsertDataIntoCodex extends AbstractServiceDelegate
@@ -52,7 +55,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 		if (studyId == null || studyId.isEmpty())
 		{
 			logger.error("Unable to receive, {} is empty", CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID);
-			throw new RuntimeException(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID + " is empty");
+			throw new IllegalArgumentException(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID + " is empty");
 		}
 
 		try
@@ -83,14 +86,10 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 
 	private String getStudyId(Task task)
 	{
-		for (Task.ParameterComponent input : task.getInput())
-		{
-			if (input.getType().getCodingFirstRep().getCode().equals(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID))
-			{
-				return input.getValue().toString();
-			}
-		}
+		TaskHelper taskHelper = this.api.getTaskHelper();
+		Optional<String> studyId = taskHelper.getFirstInputParameterStringValue(task,
+				CODESYSTEM_NUM_CODEX_DATA_TRANSFER, CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID);
 
-		return "";
+		return studyId.orElse("");
 	}
 }

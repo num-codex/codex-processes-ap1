@@ -30,10 +30,10 @@ public class ReceiveDataStoreConfig
 
 	@Value("${dataStores:#{null}}")
 	private String dataStoresProperty;
-	private Map<String, DataStoreConnectionValues> dataStoreConnectionConfigs = new HashMap<>();;
+	private Map<String, DataStoreConnectionValues> dataStoreConnectionConfigs = new HashMap<>();
 
 	@PostConstruct
-	private void convertClientMap()
+	protected void convertClientMap()
 	{
 		if (dataStoresProperty == null || dataStoresProperty.isEmpty())
 		{
@@ -42,16 +42,17 @@ public class ReceiveDataStoreConfig
 
 		try
 		{
-			dataStoreConnectionConfigs = objectMapper.readValue(dataStoresProperty, new TypeReference<>()
-			{
-			});
+			dataStoreConnectionConfigs = objectMapper.readValue(dataStoresProperty,
+					new TypeReference<HashMap<String, DataStoreConnectionValues>>()
+					{
+					});
 
 			logger.info(VALID_CONFIG_MESSAGE, dataStoreConnectionConfigs.keySet());
 		}
 		catch (JsonProcessingException e)
 		{
 			logger.error(INVALID_CONFIG_MESSAGE);
-			throw new RuntimeException(INVALID_CONFIG_MESSAGE, e);
+			throw new IllegalArgumentException(INVALID_CONFIG_MESSAGE, e);
 		}
 	}
 
