@@ -28,7 +28,7 @@
     <element id="Task.input">
       <path value="Task.input" />
       <min value="4" />
-      <max value="5" />
+      <max value="4" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
@@ -133,39 +133,6 @@
     <element id="Task.input:data.value[x].identifier">
       <path value="Task.input.value[x].identifier" />
       <max value="0" />
-    </element>
-    <element id="Task.input:study-id">
-      <path value="Task.input" />
-      <sliceName value="study-id" />
-      <min value="0" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:study-id.type">
-      <path value="Task.input.type" />
-      <binding>
-        <strength value="required"/>
-        <valueSet value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer" />
-      </binding>
-    </element>
-    <element id="Task.input:study-id.type.coding">
-      <path value="Task.input.type.coding"/>
-      <min value="1" />
-    </element>
-    <element id="Task.input:study-id.type.coding.system">
-      <path value="Task.input.type.coding.system"/>
-      <min value="1"/>
-      <fixedUri value="http://www.netzwerk-universitaetsmedizin.de/fhir/CodeSystem/data-transfer"/>
-    </element>
-    <element id="Task.input:study-id.type.coding.code">
-      <path value="Task.input.type.coding.code"/>
-      <min value="1"/>
-      <fixedCode value="study-id" />
-    </element>
-    <element id="Task.input:study-id.value[x]">
-      <path value="Task.input.value[x]"/>
-      <type>
-        <code value="string"/>
-      </type>
     </element>
     <element id="Task.output:error">
       <path value="Task.output" />

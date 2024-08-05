@@ -1,21 +1,25 @@
 package de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message;
 
-import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.*;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_BINARY_URL;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_PATIENT_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_DTS_NOT_REACHABLE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_PSEUDONYM;
+import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.NUM_PARENT_ORGANIZATION_IDENTIFIER;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.InsertDataIntoCodex;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.variables.PatientReference;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 import dev.dsf.bpe.v1.activity.AbstractTaskMessageSend;
@@ -25,7 +29,6 @@ import dev.dsf.bpe.v1.variables.Variables;
 
 public class StartTranslateProcess extends AbstractTaskMessageSend
 {
-	private static final Logger logger = LoggerFactory.getLogger(StartTranslateProcess.class);
 	private static final Coding DTS_ROLE = new Coding("http://dsf.dev/fhir/CodeSystem/organization-role", "DTS", null);
 
 	private final String dtsIdentifierValue;
@@ -63,7 +66,7 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution, Variables variables)
 	{
-		return Stream.of(pseudonymParameter(execution), dataReferenceParameter(execution), studyIdParameter(variables));
+		return Stream.of(pseudonymParameter(execution), dataReferenceParameter(execution));
 	}
 
 	private ParameterComponent pseudonymParameter(DelegateExecution execution)
@@ -92,22 +95,6 @@ public class StartTranslateProcess extends AbstractTaskMessageSend
 				.setCode(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_DATA_REFERENCE);
 		param.setValue(new Reference().setReference(binaryReference));
 		return param;
-	}
-
-	private ParameterComponent studyIdParameter(Variables variables)
-	{
-		Optional<String> tutorialInput = this.api.getTaskHelper().getFirstInputParameterStringValue(
-				variables.getStartTask(), ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-				ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID);
-
-
-		return tutorialInput
-				.map(value -> api.getTaskHelper().createInput(new StringType(value),
-						ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-						ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID))
-				.orElse(api.getTaskHelper().createInput(new StringType("num"),
-						ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER,
-						ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_VALUE_STUDY_ID));
 	}
 
 	@Override
