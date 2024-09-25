@@ -86,7 +86,6 @@
       </type>
       <valueBoolean value="true"/>
    </input> -->
-   <!--
    <input>
       <type>
          <coding>
@@ -94,6 +93,6 @@
             <code value="study-id"/>
          </coding>
       </type>
-      <valueString value="num"/>
-   </input> -->
+      <valueString value="numNum"/>
+   </input>
 </Task>
