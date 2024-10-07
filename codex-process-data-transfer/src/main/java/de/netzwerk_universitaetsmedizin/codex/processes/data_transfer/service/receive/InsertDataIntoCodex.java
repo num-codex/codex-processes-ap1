@@ -4,6 +4,8 @@ import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.Con
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS;
 import static de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.ConstantsDataTransfer.CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -57,6 +59,7 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 				dataLogger.logData("Received bundle", bundle);
 
 				dataClientFactory.getDataStoreClient().getFhirClient().storeBundle(bundle);
+				logger.info("stored bundle with entries: {}", entryIdsToList(bundle));
 
 				execution.setVariable(BPMN_EXECUTION_VARIABLE_CONTINUE_STATUS, ContinueStatus.SUCCESS);
 			}
@@ -73,5 +76,21 @@ public class InsertDataIntoCodex extends AbstractServiceDelegate
 			throw new BpmnError(CODESYSTEM_NUM_CODEX_DATA_TRANSFER_ERROR_VALUE_INSERT_INTO_CRR_FHIR_REPOSITORY_FAILED,
 					"Unable to insert data into CRR");
 		}
+	}
+
+	private List<String> entryIdsToList(Bundle bundle)
+	{
+		List<String> entryIds = new ArrayList<>();
+
+		for (Bundle.BundleEntryComponent entry : bundle.getEntry())
+		{
+			String fullUrl = entry.getFullUrl();
+			if (fullUrl != null && !fullUrl.isEmpty())
+			{
+				entryIds.add(fullUrl);
+			}
+		}
+
+		return entryIds;
 	}
 }
