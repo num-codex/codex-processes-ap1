@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   proxy:
     image: nginx:1.21
@@ -191,7 +190,7 @@ services:
       DEV_DSF_SERVER_AUTH_TRUST_CLIENT_CERTIFICATE_CAS: /run/secrets/app_client_trust_certificates.pem
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PUBLIC_KEY: /run/secrets/crr_public_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store:8080/fhir
+      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://dic-fhir-store-hapi:8080/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_PACKAGE_CACHEFOLDER: /opt/bpe/cache/Package/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_STRUCTUREDEFINITION_CACHEFOLDER: /opt/bpe/cache/StructureDefinition/
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_VALIDATION_VALUESET_CACHEFOLDER: /opt/bpe/cache/ValueSet/
@@ -471,7 +470,6 @@ services:
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DTS_IDENTIFIER_VALUE: Test_DTS
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_IDENTIFIER_VALUE: Test_CRR
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_CRR_PRIVATE_KEY: /run/secrets/crr_private_key.pem
-      DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATA_BASE_URL: http://crr-fhir-store-hapi:8080/fhir
       DE_NETZWERK_UNIVERSITAETSMEDIZIN_RDP_DATALOGGINGENABLED: 'true'
     networks:
       crr-bpe-frontend:
@@ -481,6 +479,7 @@ services:
       - db
       - crr-fhir
       - mailhog
+      # - crr-fhir-store-hapi
       # - crr-fhir-bridge not defining a dependency here, crr-fhir-bridge* needs to be started manually
   crr-ehrbase-db:
     image: ehrbase/ehrbase-postgres
@@ -489,17 +488,21 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      EHRBASE_USER: ehrbase
-      EHRBASE_PASSWORD: ehrbase
+      EHRBASE_USER: ehrbase_restricted
+      EHRBASE_PASSWORD: ehrbase_restricted
+      EHRBASE_USER_ADMIN: ehrbase
+      EHRBASE_PASSWORD_ADMIN: ehrbase
       TZ: Europe/Berlin
   crr-ehrbase:
-    image: ehrbase/ehrbase
+    image: ehrbase/ehrbase:2.5.0
     networks:
       - crr-ehrbase-network
     environment:
       DB_URL: jdbc:postgresql://crr-ehrbase-db:5432/ehrbase
-      DB_USER: ehrbase
-      DB_PASS: ehrbase
+      DB_USER: ehrbase_restricted
+      DB_PASS: ehrbase_restricted
+      DB_USER_ADMIN: ehrbase
+      DB_PASS_ADMIN: ehrbase
       SECURITY_AUTHTYPE: BASIC
       SECURITY_AUTHUSER: myuser
       SECURITY_AUTHPASSWORD: myPassword432
@@ -512,7 +515,7 @@ services:
     depends_on:
       - crr-ehrbase-db
   crr-fhir-bridge:
-    image: ehrbase/fhir-bridge
+    image: numresearchdataplatform/num-fhir-bridge:1.6.1
     ports:
       - 127.0.0.1:8888:8888
       - 127.0.0.1:5006:5006
@@ -520,10 +523,10 @@ services:
       - crr-ehrbase-network
       - crr-bpe-backend
     environment:
-      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/
+      FHIR_BRIDGE_EHRBASE_BASE_URL: http://crr-ehrbase:8080/ehrbase/rest/openehr/v1/
       FHIR_BRIDGE_FHIR_VALIDATION_OPTIONAL_IDENTIFIER: 'true'
       TZ: Europe/Berlin
-      # SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       - crr-ehrbase
@@ -531,7 +534,17 @@ services:
     build: ./crr/hapi
     restart: "no"
     ports:
-      - 127.0.0.1:8888:8080
+      - 127.0.0.1:8889:8080
+    environment:
+      TZ: Europe/Berlin
+      hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION
+    networks:
+      - crr-bpe-backend
+  crr-fhir-store-hapi-2:
+    build: ./crr/hapi
+    restart: "no"
+    ports:
+      - 127.0.0.1:8890:8080
     environment:
       TZ: Europe/Berlin
       hapi.fhir.allowed_bundle_types: COLLECTION,DOCUMENT,MESSAGE,TRANSACTION

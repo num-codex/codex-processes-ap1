@@ -9,15 +9,7 @@ import org.springframework.context.annotation.Scope;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcess;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithError;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.message.ContinueTranslateProcessWithValidationError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DecryptData;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DeleteValidationErrorForDts;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.DownloadDataFromDts;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.EncryptValidationError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.InsertDataIntoCodex;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogSuccess;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.LogValidationError;
-import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.StoreValidationErrorForDts;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.service.receive.*;
 import dev.dsf.bpe.v1.ProcessPluginApi;
 
 @Configuration

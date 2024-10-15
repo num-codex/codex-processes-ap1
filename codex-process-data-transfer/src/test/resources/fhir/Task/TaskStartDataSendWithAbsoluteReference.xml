@@ -1,8 +1,8 @@
 <Task xmlns="http://hl7.org/fhir">
    <meta>
-      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|1.0"/>
+      <profile value="http://www.netzwerk-universitaetsmedizin.de/fhir/StructureDefinition/task-start-data-send|1.1"/>
    </meta>
-   <instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend|1.0"/>
+   <instantiatesCanonical value="http://www.netzwerk-universitaetsmedizin.de/bpe/Process/dataSend|1.1"/>
    <status value="requested"/>
    <intent value="order"/>
    <authoredOn value="2022-10-18T02:00:00+02:00"/>
@@ -44,8 +44,8 @@
          <reference value="http://dic-fhir-store:8080/fhir/Patient/1"/>
       </valueReference>
    </input>
-   <!-- parameter specifying resources should be send stopping at the 
-		defined date, resources that have been modified after the specified date 
+   <!-- parameter specifying resources should be send stopping at the
+		defined date, resources that have been modified after the specified date
 		will not be transmitted, typically this will be the current date time -->
    <input>
       <type>
@@ -56,8 +56,8 @@
       </type>
       <valueInstant value="2022-10-18T12:00:00+02:00"/>
    </input>
-   <!-- optional parameter specifying resources should be send starting 
-		at the defined date, resources older than the specified date will not be 
+   <!-- optional parameter specifying resources should be send starting
+		at the defined date, resources older than the specified date will not be
 		transported -->
    <!-- <input>
       <type>

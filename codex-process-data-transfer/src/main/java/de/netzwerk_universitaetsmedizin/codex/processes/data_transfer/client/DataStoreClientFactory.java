@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bouncycastle.pkcs.PKCSException;
@@ -20,6 +21,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClient;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.client.fhir.DataStoreFhirClientStub;
 import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.logging.DataLogger;
+import de.netzwerk_universitaetsmedizin.codex.processes.data_transfer.spring.config.ReceiveDataStoreConfig;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
@@ -27,6 +29,7 @@ import de.rwh.utils.crypto.io.PemIo;
 public class DataStoreClientFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(DataStoreClientFactory.class);
+	private static final String DEFAULT_DATA_STORE = "default";
 
 	private static final class DataStoreClientStub implements DataStoreClient
 	{
@@ -91,10 +94,7 @@ public class DataStoreClientFactory
 	private final int socketTimeout;
 	private final int connectionRequestTimeout;
 
-	private final String dataStoreServerBase;
-	private final String dataStoreServerBasicAuthUsername;
-	private final String dataStoreServerBasicAuthPassword;
-	private final String dataStoreServerBearerToken;
+	private final Map<String, ReceiveDataStoreConfig.DataStoreConnectionValues> dataStoreConnectionMap;
 
 	private final String proxyUrl;
 	private final String proxyUsername;
@@ -112,7 +112,8 @@ public class DataStoreClientFactory
 	public DataStoreClientFactory(Path trustStorePath, Path certificatePath, Path privateKeyPath,
 			char[] privateKeyPassword, int connectTimeout, int socketTimeout, int connectionRequestTimeout,
 			String dataStoreServerBase, String dataStoreServerBasicAuthUsername,
-			String dataStoreServerBasicAuthPassword, String dataStoreServerBearerToken, String proxyUrl,
+			String dataStoreServerBasicAuthPassword, String dataStoreServerBearerToken,
+			Map<String, ReceiveDataStoreConfig.DataStoreConnectionValues> dataStoreConnectionMap, String proxyUrl,
 			String proxyUsername, String proxyPassword, boolean hapiClientVerbose, FhirContext fhirContext,
 			Path searchBundleOverride, Class<DataStoreFhirClient> dataStoreFhirClientClass,
 			boolean useChainedParameterNotLogicalReference, DataLogger dataLogger)
@@ -126,10 +127,11 @@ public class DataStoreClientFactory
 		this.socketTimeout = socketTimeout;
 		this.connectionRequestTimeout = connectionRequestTimeout;
 
-		this.dataStoreServerBase = dataStoreServerBase;
-		this.dataStoreServerBasicAuthUsername = dataStoreServerBasicAuthUsername;
-		this.dataStoreServerBasicAuthPassword = dataStoreServerBasicAuthPassword;
-		this.dataStoreServerBearerToken = dataStoreServerBearerToken;
+		this.dataStoreConnectionMap = dataStoreConnectionMap;
+		this.dataStoreConnectionMap.put(DEFAULT_DATA_STORE,
+				new ReceiveDataStoreConfig.DataStoreConnectionValues(dataStoreServerBase,
+						dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword,
+						dataStoreServerBearerToken));
 
 		this.proxyUrl = proxyUrl;
 		this.proxyUsername = proxyUsername;
@@ -146,21 +148,25 @@ public class DataStoreClientFactory
 
 	public String getServerBase()
 	{
-		return dataStoreServerBase;
+		return dataStoreConnectionMap.get(DEFAULT_DATA_STORE).getBaseUrl();
 	}
 
 	public void testConnection()
 	{
 		try
 		{
-			logger.info(
-					"Testing connection to Data Store FHIR server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-							+ " basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
-					trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
-					dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword != null ? "***" : "null",
-					dataStoreServerBearerToken != null ? "***" : "null", dataStoreServerBase);
+			for (String client : dataStoreConnectionMap.keySet())
+			{
+				final ReceiveDataStoreConfig.DataStoreConnectionValues value = dataStoreConnectionMap.get(client);
+				logger.info(
+						"Testing connection to Data Store FHIR server with {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+								+ " basicAuthUsername: {}, basicAuthPassword: {}, bearerToken: {}, serverBase: {}, proxy: values from 'DEV_DSF_PROXY'... config}",
+						trustStorePath, certificatePath, privateKeyPath, privateKeyPassword != null ? "***" : "null",
+						value.getBaseUrl(), value.getPassword() != null ? "***" : "null",
+						value.getBearerToken() != null ? "***" : "null", value.getUsername());
 
-			getDataStoreClient().testConnection();
+				getDataStoreClient(client).testConnection();
+			}
 		}
 		catch (Exception e)
 		{
@@ -170,18 +176,29 @@ public class DataStoreClientFactory
 
 	public DataStoreClient getDataStoreClient()
 	{
-		if (configured())
-			return createDataStoreClient();
+		return getDataStoreClient(DEFAULT_DATA_STORE);
+	}
+
+	public DataStoreClient getDataStoreClient(String client)
+	{
+		if (configured(client))
+			return createDataStoreClient(client);
 		else
 			return new DataStoreClientStub(fhirContext, dataLogger);
 	}
 
-	private boolean configured()
+	private boolean configured(String client)
 	{
-		return dataStoreServerBase != null && !dataStoreServerBase.isBlank();
+		return dataStoreConnectionMap.get(client).getBaseUrl() != null
+				&& !dataStoreConnectionMap.get(client).getBaseUrl().isBlank();
 	}
 
 	protected DataStoreClient createDataStoreClient()
+	{
+		return createDataStoreClient(DEFAULT_DATA_STORE);
+	}
+
+	protected DataStoreClient createDataStoreClient(String dataStore)
 	{
 		KeyStore trustStore = null;
 		char[] keyStorePassword = null;
@@ -200,9 +217,11 @@ public class DataStoreClientFactory
 			keyStore = readKeyStore(certificatePath, privateKeyPath, privateKeyPassword, keyStorePassword);
 		}
 
+		final ReceiveDataStoreConfig.DataStoreConnectionValues dataStoreConfig = dataStoreConnectionMap.get(dataStore);
+
 		return new DataStoreClientImpl(trustStore, keyStore, keyStorePassword, connectTimeout, socketTimeout,
-				connectionRequestTimeout, dataStoreServerBasicAuthUsername, dataStoreServerBasicAuthPassword,
-				dataStoreServerBearerToken, dataStoreServerBase, proxyUrl, proxyUsername, proxyPassword,
+				connectionRequestTimeout, dataStoreConfig.getUsername(), dataStoreConfig.getPassword(),
+				dataStoreConfig.getBearerToken(), dataStoreConfig.getBaseUrl(), proxyUrl, proxyUsername, proxyPassword,
 				hapiClientVerbose, fhirContext, searchBundleOverride, dataStoreFhirClientClass,
 				useChainedParameterNotLogicalReference, dataLogger);
 	}
