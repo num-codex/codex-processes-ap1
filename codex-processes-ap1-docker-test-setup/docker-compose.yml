@@ -73,7 +73,7 @@ services:
 
 
   dic-fhir:
-    image: ghcr.io/datasharingframework/fhir:1.5.0
+    image: ghcr.io/datasharingframework/fhir:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5000:5000
@@ -135,7 +135,7 @@ services:
       - db
       - proxy
   dic-bpe:
-    image: ghcr.io/datasharingframework/bpe:1.5.0
+    image: ghcr.io/datasharingframework/bpe:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5003:5003
@@ -231,7 +231,7 @@ services:
 
 
   dts-fhir:
-    image: ghcr.io/datasharingframework/fhir:1.5.0
+    image: ghcr.io/datasharingframework/fhir:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5001:5001
@@ -292,7 +292,7 @@ services:
       - db
       - proxy
   dts-bpe:
-    image: ghcr.io/datasharingframework/bpe:1.5.0
+    image: ghcr.io/datasharingframework/bpe:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5004:5004
@@ -355,7 +355,7 @@ services:
 
 
   crr-fhir:
-    image: ghcr.io/datasharingframework/fhir:1.5.0
+    image: ghcr.io/datasharingframework/fhir:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5002:5002
@@ -416,7 +416,7 @@ services:
       - db
       - proxy
   crr-bpe:
-    image: ghcr.io/datasharingframework/bpe:1.5.0
+    image: ghcr.io/datasharingframework/bpe:1.6.0
     restart: "no"
     ports:
       - 127.0.0.1:5005:5005
