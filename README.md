@@ -1,3 +1,7 @@
+# Deprecation Notice
+This repository is no longer maintained after the NUM-RDP project endet (30.06.2025).
+We would like to thank everyone who has contributed to this archived version with code contributions, issues or comments.
+
 # RDP Processes
 
 Business processes for the NUM RDP project (AP1) as plugins for the [Data Sharing Framework][1].
